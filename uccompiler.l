@@ -3,7 +3,7 @@
 #include <stdio.h>
 %}
 
-%X COMMENT
+%X COMMENT COMMENT2
 
 CHAR char
 ELSE else
@@ -93,10 +93,14 @@ REALLIT {NUMBER}+\.{NUMBER}*|\.{NUMBER}((E|e)(\+|\-)*{NUMBER})*
 \r {;}
 [ \t] {;}
 
-"/*"|"//" {BEGIN COMMENT;}
-<COMMENT>\n {;}
-<COMMENT>. {;}
+"/*" {BEGIN COMMENT;}
 <COMMENT>"*/" {BEGIN 0;}
+<COMMENT>. {;}
+<COMMENT>\n {;}
+
+"//" {BEGIN COMMENT2;}
+<COMMENT2>"\n" {BEGIN 0;}
+<COMMENT2>. {;}
 
 %%
 int main() {
