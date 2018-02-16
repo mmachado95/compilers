@@ -46,10 +46,10 @@ RESERVED "auto"|"break"|"case"|"char"|"const"|"continue"|"default"|"do"|"double"
 
 NUMBER [0-9]
 LETTER [a-zA-Z]
-ANYCHAR [^\n\']
-ESCAPE \n|\t|\\|\'|\"|([0-7][0-7][0-7])
+ANYCHAR [^'\n\\]
+ESCAPE \\(n|t|\\|\'|\"|([0-7]{1,3}))
 
-ID ({LETTER}|{NUMBER}|_)+
+ID ({LETTER}|_)({LETTER}|{NUMBER}|_)*
 INTLIT {NUMBER}+
 CHRLIT \'{ANYCHAR}\'|\'{ESCAPE}\'
 REALLIT {NUMBER}+\.{NUMBER}*|\.{NUMBER}((E|e)(\+|\-)*{NUMBER})*
