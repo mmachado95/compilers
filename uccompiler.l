@@ -1,6 +1,10 @@
 %{
 #include <string.h>
 #include <stdio.h>
+int line = 1;
+int col = 1;
+int beginning_line;
+int beginning_col;
 %}
 
 %X COMMENT COMMENT2
@@ -51,56 +55,59 @@ CHRLIT \'{ANYCHAR}\'|\'{ESCAPE}\'
 REALLIT {NUMBER}+\.{NUMBER}*|\.{NUMBER}((E|e)(\+|\-)*{NUMBER})*
 
 %%
-{CHAR} {printf("CHAR\n");}
-{ELSE} {printf("ELSE\n");}
-{WHILE} {printf("WHILE\n");}
-{IF} {printf("IF\n");}
-{INT} {printf("INT\n");}
-{SHORT} {printf("SHORT\n");}
-{DOUBLE} {printf("DOUBLE\n");}
-{RETURN} {printf("RETURN\n");}
-{VOID} {printf("VOID\n");}
-{BITWISEAND} {printf("BITWISEAND\n");}
-{BITWISEOR} {printf("BITWISEOR\n");}
-{BITWISEXOR} {printf("BITWISEXOR\n");}
-{AND} {printf("AND\n");}
-{ASSIGN} {printf("ASSIGN\n");}
-{MUL} {printf("MUL\n");}
-{COMMA} {printf("COMMA\n");}
-{DIV} {printf("DIV\n");}
-{EQ} {printf("EQ\n");}
-{GE} {printf("GE\n");}
-{GT} {printf("GT\n");}
-{LBRACE} {printf("LBRACE\n");}
-{LE} {printf("LE\n");}
-{LPAR} {printf("LPAR\n");}
-{LT} {printf("LT\n");}
-{MINUS} {printf("MINUS\n");}
-{MOD} {printf("MOD\n");}
-{NE} {printf("NE\n");}
-{NOT} {printf("NOT\n");}
-{OR} {printf("OR\n");}
-{PLUS} {printf("PLUS\n");}
-{RBRACE} {printf("RBRACE\n");}
-{RPAR} {printf("RPAR\n");}
-{SEMI} {printf("SEMI\n");}
-{RESERVED} {printf("RESERVED\n");}
-{INTLIT} {printf("INTLIT(%s)\n", yytext);}
-{ID} {printf("ID(%s)\n", yytext);}
-{CHRLIT} {printf("CHRLIT(%s)\n", yytext);}
-{REALLIT} {printf("REALLIT(%s)\n", yytext);}
-\n {;}
-\r {;}
-[ \t] {;}
+{CHAR} {printf("CHAR\n"); col += yyleng;}
+{ELSE} {printf("ELSE\n"); col += yyleng;}
+{WHILE} {printf("WHILE\n"); col += yyleng;}
+{IF} {printf("IF\n"); col += yyleng;}
+{INT} {printf("INT\n"); col += yyleng;}
+{SHORT} {printf("SHORT\n"); col += yyleng;}
+{DOUBLE} {printf("DOUBLE\n"); col += yyleng;}
+{RETURN} {printf("RETURN\n"); col += yyleng;}
+{VOID} {printf("VOID\n"); col += yyleng;}
+{BITWISEAND} {printf("BITWISEAND\n"); col += yyleng;}
+{BITWISEOR} {printf("BITWISEOR\n"); col += yyleng;}
+{BITWISEXOR} {printf("BITWISEXOR\n"); col += yyleng;}
+{AND} {printf("AND\n"); col += yyleng;}
+{ASSIGN} {printf("ASSIGN\n"); col += yyleng;}
+{MUL} {printf("MUL\n"); col += yyleng;}
+{COMMA} {printf("COMMA\n"); col += yyleng;}
+{DIV} {printf("DIV\n"); col += yyleng;}
+{EQ} {printf("EQ\n"); col += yyleng;}
+{GE} {printf("GE\n"); col += yyleng;}
+{GT} {printf("GT\n"); col += yyleng;}
+{LBRACE} {printf("LBRACE\n"); col += yyleng;}
+{LE} {printf("LE\n"); col += yyleng;}
+{LPAR} {printf("LPAR\n"); col += yyleng;}
+{LT} {printf("LT\n"); col += yyleng;}
+{MINUS} {printf("MINUS\n"); col += yyleng;}
+{MOD} {printf("MOD\n"); col += yyleng;}
+{NE} {printf("NE\n"); col += yyleng;}
+{NOT} {printf("NOT\n"); col += yyleng;}
+{OR} {printf("OR\n"); col += yyleng;}
+{PLUS} {printf("PLUS\n"); col += yyleng;}
+{RBRACE} {printf("RBRACE\n"); col += yyleng;}
+{RPAR} {printf("RPAR\n"); col += yyleng;}
+{SEMI} {printf("SEMI\n"); col += yyleng;}
+{RESERVED} {printf("RESERVED\n"); col += yyleng;}
+{INTLIT} {printf("INTLIT(%s)\n", yytext); col += yyleng;}
+{ID} {printf("ID(%s)\n", yytext); col += yyleng;}
+{CHRLIT} {printf("CHRLIT(%s)\n", yytext); col += yyleng;}
+{REALLIT} {printf("REALLIT(%s)\n", yytext); col += yyleng;}
 
-"/*" {BEGIN COMMENT;}
+\n {line++; col=1;}
+\r {;}
+[ \t] {col++;}
+. {printf("Line %d, col %d: illegal character (%s)\n", line, col - (int)yyleng, yytext);}
+
+"/*" {BEGIN COMMENT; beginning_col = col; beginning_line = line; col += yyleng;}
+<COMMENT><<EOF>> {printf("Line <%d>, col <%d>: unterminated comment\n", beginning_line, beginning_col);}
 <COMMENT>"*/" {BEGIN 0;}
-<COMMENT>. {;}
-<COMMENT>\n {;}
+<COMMENT>. {col++;}
+<COMMENT>\n {line++; col=1;}
 
 "//" {BEGIN COMMENT2;}
-<COMMENT2>"\n" {BEGIN 0;}
-<COMMENT2>. {;}
+<COMMENT2>"\n" {BEGIN 0; line++;}
+<COMMENT2>. {col++;}
 
 %%
 int main() {
