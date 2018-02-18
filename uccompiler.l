@@ -1,13 +1,16 @@
 %{
 #include <string.h>
 #include <stdio.h>
+#define PRINTF if(errors == 0) printf
 int line = 1;
 int col = 1;
 int beginning_line;
 int beginning_col;
+int errors;
 %}
 
-%X COMMENT COMMENT2
+%X COMMENT
+%X COMMENT2
 
 CHAR char
 ELSE else
@@ -56,52 +59,52 @@ CHRLIT \'{ANYCHAR}\'|\'{ESCAPE}\'
 REALLIT ({NUMBER}+\.{NUMBER}*{EXPOENTE}*)|(\.{NUMBER}+{EXPOENTE}*)|({NUMBER}+{EXPOENTE})
 
 %%
-{CHAR} {printf("CHAR\n"); col += yyleng;}
-{ELSE} {printf("ELSE\n"); col += yyleng;}
-{WHILE} {printf("WHILE\n"); col += yyleng;}
-{IF} {printf("IF\n"); col += yyleng;}
-{INT} {printf("INT\n"); col += yyleng;}
-{SHORT} {printf("SHORT\n"); col += yyleng;}
-{DOUBLE} {printf("DOUBLE\n"); col += yyleng;}
-{RETURN} {printf("RETURN\n"); col += yyleng;}
-{VOID} {printf("VOID\n"); col += yyleng;}
-{BITWISEAND} {printf("BITWISEAND\n"); col += yyleng;}
-{BITWISEOR} {printf("BITWISEOR\n"); col += yyleng;}
-{BITWISEXOR} {printf("BITWISEXOR\n"); col += yyleng;}
-{AND} {printf("AND\n"); col += yyleng;}
-{ASSIGN} {printf("ASSIGN\n"); col += yyleng;}
-{MUL} {printf("MUL\n"); col += yyleng;}
-{COMMA} {printf("COMMA\n"); col += yyleng;}
-{DIV} {printf("DIV\n"); col += yyleng;}
-{EQ} {printf("EQ\n"); col += yyleng;}
-{GE} {printf("GE\n"); col += yyleng;}
-{GT} {printf("GT\n"); col += yyleng;}
-{LBRACE} {printf("LBRACE\n"); col += yyleng;}
-{LE} {printf("LE\n"); col += yyleng;}
-{LPAR} {printf("LPAR\n"); col += yyleng;}
-{LT} {printf("LT\n"); col += yyleng;}
-{MINUS} {printf("MINUS\n"); col += yyleng;}
-{MOD} {printf("MOD\n"); col += yyleng;}
-{NE} {printf("NE\n"); col += yyleng;}
-{NOT} {printf("NOT\n"); col += yyleng;}
-{OR} {printf("OR\n"); col += yyleng;}
-{PLUS} {printf("PLUS\n"); col += yyleng;}
-{RBRACE} {printf("RBRACE\n"); col += yyleng;}
-{RPAR} {printf("RPAR\n"); col += yyleng;}
-{SEMI} {printf("SEMI\n"); col += yyleng;}
-{RESERVED} {printf("RESERVED\n"); col += yyleng;}
-{INTLIT} {printf("INTLIT(%s)\n", yytext); col += yyleng;}
-{ID} {printf("ID(%s)\n", yytext); col += yyleng;}
-{CHRLIT} {printf("CHRLIT(%s)\n", yytext); col += yyleng;}
-{REALLIT} {printf("REALLIT(%s)\n", yytext); col += yyleng;}
+{CHAR} {PRINTF("CHAR\n"); col += yyleng;}
+{ELSE} {PRINTF("ELSE\n"); col += yyleng;}
+{WHILE} {PRINTF("WHILE\n"); col += yyleng;}
+{IF} {PRINTF("IF\n"); col += yyleng;}
+{INT} {PRINTF("INT\n"); col += yyleng;}
+{SHORT} {PRINTF("SHORT\n"); col += yyleng;}
+{DOUBLE} {PRINTF("DOUBLE\n"); col += yyleng;}
+{RETURN} {PRINTF("RETURN\n"); col += yyleng;}
+{VOID} {PRINTF("VOID\n"); col += yyleng;}
+{BITWISEAND} {PRINTF("BITWISEAND\n"); col += yyleng;}
+{BITWISEOR} {PRINTF("BITWISEOR\n"); col += yyleng;}
+{BITWISEXOR} {PRINTF("BITWISEXOR\n"); col += yyleng;}
+{AND} {PRINTF("AND\n"); col += yyleng;}
+{ASSIGN} {PRINTF("ASSIGN\n"); col += yyleng;}
+{MUL} {PRINTF("MUL\n"); col += yyleng;}
+{COMMA} {PRINTF("COMMA\n"); col += yyleng;}
+{DIV} {PRINTF("DIV\n"); col += yyleng;}
+{EQ} {PRINTF("EQ\n"); col += yyleng;}
+{GE} {PRINTF("GE\n"); col += yyleng;}
+{GT} {PRINTF("GT\n"); col += yyleng;}
+{LBRACE} {PRINTF("LBRACE\n"); col += yyleng;}
+{LE} {PRINTF("LE\n"); col += yyleng;}
+{LPAR} {PRINTF("LPAR\n"); col += yyleng;}
+{LT} {PRINTF("LT\n"); col += yyleng;}
+{MINUS} {PRINTF("MINUS\n"); col += yyleng;}
+{MOD} {PRINTF("MOD\n"); col += yyleng;}
+{NE} {PRINTF("NE\n"); col += yyleng;}
+{NOT} {PRINTF("NOT\n"); col += yyleng;}
+{OR} {PRINTF("OR\n"); col += yyleng;}
+{PLUS} {PRINTF("PLUS\n"); col += yyleng;}
+{RBRACE} {PRINTF("RBRACE\n"); col += yyleng;}
+{RPAR} {PRINTF("RPAR\n"); col += yyleng;}
+{SEMI} {PRINTF("SEMI\n"); col += yyleng;}
+{RESERVED} {PRINTF("RESERVED\n"); col += yyleng;}
+{INTLIT} {PRINTF("INTLIT(%s)\n", yytext); col += yyleng;}
+{ID} {PRINTF("ID(%s)\n", yytext); col += yyleng;}
+{CHRLIT} {PRINTF("CHRLIT(%s)\n", yytext); col += yyleng;}
+{REALLIT} {PRINTF("REALLIT(%s)\n", yytext); col += yyleng;}
 
 \n {line++; col=1;}
 \r {;}
 [ \t] {col++;}
-. {printf("Line %d, col %d: illegal character (%s)\n", line, col - (int)yyleng, yytext);}
+. {printf("Line %d, col %d: illegal character (%s)\n", line, col - (int)yyleng + 1, yytext);}
 
 "/*" {BEGIN COMMENT; beginning_col = col; beginning_line = line; col += yyleng;}
-<COMMENT><<EOF>> {printf("Line <%d>, col <%d>: unterminated comment\n", beginning_line, beginning_col);}
+<COMMENT><<EOF>> {printf("Line <%d>, col <%d>: unterminated comment\n", beginning_line, beginning_col); BEGIN 0;}
 <COMMENT>"*/" {BEGIN 0;}
 <COMMENT>. {col++;}
 <COMMENT>\n {line++; col=1;}
@@ -111,7 +114,15 @@ REALLIT ({NUMBER}+\.{NUMBER}*{EXPOENTE}*)|(\.{NUMBER}+{EXPOENTE}*)|({NUMBER}+{EX
 <COMMENT2>. {col++;}
 
 %%
-int main() {
+int main(int argc, char *argv[]) {
+  if (argc > 1) {
+    if (strcmp(argv[1], "-l") == 0) {
+      errors = 0;
+    }
+  }
+  else {
+    errors = 1;
+  }
   yylex();
   return 0;
 }
