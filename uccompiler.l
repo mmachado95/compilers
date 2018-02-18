@@ -107,7 +107,7 @@ CHRLIT_INV \'(\\.|{ANYCHAR})*\'
 
 
 "/*" {BEGIN COMMENT; beginning_col = col; beginning_line = line; col += yyleng;}
-<COMMENT><<EOF>> {printf("Line <%d>, col <%d>: unterminated comment\n", beginning_line, beginning_col); BEGIN 0;}
+<COMMENT><<EOF>> {printf("Line %d, col %d: unterminated comment\n", beginning_line, beginning_col); BEGIN 0;}
 <COMMENT>"*/" {BEGIN 0;}
 <COMMENT>. {col++;}
 <COMMENT>\n {line++; col=1;}
