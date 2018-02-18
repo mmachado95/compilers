@@ -48,11 +48,12 @@ NUMBER [0-9]
 LETTER [a-zA-Z]
 ANYCHAR [^'\n\\]
 ESCAPE \\(n|t|\\|\'|\"|([0-7]{1,3}))
+EXPOENTE (E|e)(\+|\-)*{NUMBER}+
 
 ID ({LETTER}|_)({LETTER}|{NUMBER}|_)*
 INTLIT {NUMBER}+
 CHRLIT \'{ANYCHAR}\'|\'{ESCAPE}\'
-REALLIT {NUMBER}+\.{NUMBER}*|\.{NUMBER}((E|e)(\+|\-)*{NUMBER})*
+REALLIT ({NUMBER}+\.{NUMBER}*{EXPOENTE}*)|(\.{NUMBER}+{EXPOENTE}*)|({NUMBER}+{EXPOENTE})
 
 %%
 {CHAR} {printf("CHAR\n"); col += yyleng;}
