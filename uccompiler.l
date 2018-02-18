@@ -57,6 +57,7 @@ ID ({LETTER}|_)({LETTER}|{NUMBER}|_)*
 INTLIT {NUMBER}+
 CHRLIT \'{ANYCHAR}\'|\'{ESCAPE}\'
 REALLIT ({NUMBER}+\.{NUMBER}*{EXPOENTE}*)|(\.{NUMBER}+{EXPOENTE}*)|({NUMBER}+{EXPOENTE})
+CHRLIT_INV \'(\\.|{ANYCHAR})*\'
 
 %%
 {CHAR} {PRINTF("CHAR\n"); col += yyleng;}
@@ -97,11 +98,13 @@ REALLIT ({NUMBER}+\.{NUMBER}*{EXPOENTE}*)|(\.{NUMBER}+{EXPOENTE}*)|({NUMBER}+{EX
 {ID} {PRINTF("ID(%s)\n", yytext); col += yyleng;}
 {CHRLIT} {PRINTF("CHRLIT(%s)\n", yytext); col += yyleng;}
 {REALLIT} {PRINTF("REALLIT(%s)\n", yytext); col += yyleng;}
+{CHRLIT_INV}	{printf("Line %d, col %d: invalid char constant (%s)\n", line, col, yytext);}
 
 \n {line++; col=1;}
 \r {;}
 [ \t] {col++;}
 . {printf("Line %d, col %d: illegal character (%s)\n", line, col - (int)yyleng + 1, yytext);}
+
 
 "/*" {BEGIN COMMENT; beginning_col = col; beginning_line = line; col += yyleng;}
 <COMMENT><<EOF>> {printf("Line <%d>, col <%d>: unterminated comment\n", beginning_line, beginning_col); BEGIN 0;}
