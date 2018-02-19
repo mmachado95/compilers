@@ -45,7 +45,7 @@ PLUS "+"
 RBRACE "}"
 RPAR ")"
 SEMI ";"
-RESERVED "auto"|"break"|"case"|"char"|"const"|"continue"|"default"|"do"|"double"|"else"|"enum"|"extern"|"float"|"for"|"goto"|"if"|"inline"|"int"|"long"|"register"|"restrict"|"return"|"short"|"signed"|"sizeof"|"static"|"struct"|"switch"|"typedef"|"union"|"unsigned"|"void"|"volatile"|"while"|"_Bool"|"_Complex"|"_Imaginary"|"["|"]"|"++"|"--"
+RESERVED "auto"|"break"|"case"|"const"|"continue"|"default"|"do"|"enum"|"extern"|"float"|"for"|"goto"|"inline"|"long"|"register"|"restrict"|"signed"|"sizeof"|"static"|"struct"|"switch"|"typedef"|"union"|"unsigned"|"volatile"|"_Bool"|"_Complex"|"_Imaginary"|"["|"]"|"++"|"--"
 
 NUMBER [0-9]
 LETTER [a-zA-Z]
@@ -58,6 +58,7 @@ INTLIT {NUMBER}+
 CHRLIT \'{ANYCHAR}\'|\'{ESCAPE}\'
 REALLIT ({NUMBER}+\.{NUMBER}*{EXPOENTE}*)|(\.{NUMBER}+{EXPOENTE}*)|({NUMBER}+{EXPOENTE})
 CHRLIT_INV \'(\\.|{ANYCHAR})*\'
+CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})
 
 %%
 {CHAR} {PRINTF("CHAR\n"); col += yyleng;}
@@ -93,28 +94,30 @@ CHRLIT_INV \'(\\.|{ANYCHAR})*\'
 {RBRACE} {PRINTF("RBRACE\n"); col += yyleng;}
 {RPAR} {PRINTF("RPAR\n"); col += yyleng;}
 {SEMI} {PRINTF("SEMI\n"); col += yyleng;}
-{RESERVED} {PRINTF("RESERVED\n"); col += yyleng;}
+{RESERVED} {PRINTF("RESERVED(%s)\n", yytext); col += yyleng;}
+
 {INTLIT} {PRINTF("INTLIT(%s)\n", yytext); col += yyleng;}
 {ID} {PRINTF("ID(%s)\n", yytext); col += yyleng;}
 {CHRLIT} {PRINTF("CHRLIT(%s)\n", yytext); col += yyleng;}
 {REALLIT} {PRINTF("REALLIT(%s)\n", yytext); col += yyleng;}
-{CHRLIT_INV}	{printf("Line %d, col %d: invalid char constant (%s)\n", line, col, yytext);}
+{CHRLIT_INV}	{printf("Line %d, col %d: invalid char constant (%s)\n", line, col, yytext); col+=yyleng;}
+{CHRLIT_UNT}	{printf("Line %d, col %d: unterminated char constant\n", line, col-(int)yyleng+1); col+=yyleng;}
 
 \n {line++; col=1;}
-\r {;}
-[ \t] {col++;}
-. {printf("Line %d, col %d: illegal character (%s)\n", line, col - (int)yyleng + 1, yytext);}
+\r {col+=yyleng;}
+[ \t] {col+=yyleng;}
+. {printf("Line %d, col %d: illegal character (%s)\n", line, col-(int)yyleng+1, yytext); col+=yyleng;}
 
 
-"/*" {BEGIN COMMENT; beginning_col = col; beginning_line = line; col += yyleng;}
-<COMMENT><<EOF>> {printf("Line %d, col %d: unterminated comment\n", beginning_line, beginning_col); BEGIN 0;}
-<COMMENT>"*/" {BEGIN 0;}
-<COMMENT>. {col++;}
+"/*" {BEGIN COMMENT; beginning_col = col; beginning_line = line; col+=yyleng;}
+<COMMENT><<EOF>> {BEGIN 0; printf("Line %d, col %d: unterminated comment\n", beginning_line, beginning_col); col+=yyleng;}
+<COMMENT>"*/" {BEGIN 0; col+=yyleng;}
+<COMMENT>. {col+=yyleng;}
 <COMMENT>\n {line++; col=1;}
 
 "//" {BEGIN COMMENT2;}
-<COMMENT2>"\n" {BEGIN 0; line++;}
-<COMMENT2>. {col++;}
+<COMMENT2>"\n" {BEGIN 0; line++; col=1;}
+<COMMENT2>. {;}
 
 %%
 int main(int argc, char *argv[]) {
