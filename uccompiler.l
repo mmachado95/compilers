@@ -58,7 +58,7 @@ INTLIT {NUMBER}+
 CHRLIT \'{ANYCHAR}\'|\'{ESCAPE}\'
 REALLIT ({NUMBER}+\.{NUMBER}*{EXPOENTE}*)|(\.{NUMBER}+{EXPOENTE}*)|({NUMBER}+{EXPOENTE})
 CHRLIT_INV \'(\\.|{ANYCHAR})*\'
-CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})
+CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})*(\\)*{ANYCHAR}*
 
 %%
 {CHAR} {PRINTF("CHAR\n"); col += yyleng;}
@@ -101,7 +101,7 @@ CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})
 {CHRLIT} {PRINTF("CHRLIT(%s)\n", yytext); col += yyleng;}
 {REALLIT} {PRINTF("REALLIT(%s)\n", yytext); col += yyleng;}
 {CHRLIT_INV}	{printf("Line %d, col %d: invalid char constant (%s)\n", line, col, yytext); col+=yyleng;}
-{CHRLIT_UNT}	{printf("Line %d, col %d: unterminated char constant\n", line, col-(int)yyleng+1); col+=yyleng;}
+{CHRLIT_UNT}	{printf("Line %d, col %d: unterminated char constant\n", line, col); col+=yyleng;}
 
 \n {line++; col=1;}
 \r {col+=yyleng;}
