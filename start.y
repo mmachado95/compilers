@@ -33,8 +33,14 @@ Program: FunctionsAndDeclarations                     {;}
 FunctionsAndDeclarations: Declaration                 {;}
                         ;
 
-Declaration: TypeSpec Declarator COMMA Declarator SEMI {;}
-           ;
+
+CommaDeclarator: COMMA Declarator CommaDeclarator     {;}
+                |                                     {;}
+                ;
+
+
+Declaration: TypeSpec Declarator CommaDeclarator SEMI {;}
+            ;
 
 TypeSpec: CHAR    {;}
         | INT     {;}
