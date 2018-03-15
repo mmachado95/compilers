@@ -25,3 +25,24 @@
 * {} -> means 0 or more times
 * Para fazer o epsilon posso fazer
 */
+
+Program: FunctionsAndDeclarations                     {;}
+       | /* empty */                                  {;}
+       ;
+
+FunctionsAndDeclarations: Declaration                 {;}
+                        ;
+
+Declaration: TypeSpec Declarator COMMA Declarator SEMI {;}
+           ;
+
+TypeSpec: CHAR    {;}
+        | INT     {;}
+        | VOID    {;}
+        | SHORT   {;}
+        | DOUBLE  {;}
+        ;
+
+/*ASSIGN EXPR is optional*/
+Declarator: ID              {;}
+          ;
