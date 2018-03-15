@@ -29,6 +29,7 @@
 Program: FunctionsAndDeclarations                     {;}
        | /* empty */                                  {;}
        ;
+
 FunctionsAndDeclarations: FunctionDefinition          {;}
                         | FunctionDeclaration         {;}
                         | Declaration                 {;}
@@ -80,65 +81,57 @@ Declarator: ID              {;}
           | ID ASSIGN Expr  {;}
           ;
 
-/*Expr is optional*/
-Statement: SEMI                                       {;}
-         | Expr SEMI                                  {;}
-         ;
 /*Statement needs to be 0 or more times*/
 RepeatableStatement: Statement                        {;}
                    | /* empty */                      {;}
                    ;
-Statement: LBRACE RepeatableStatement RBRACE          {;}
-         ;
-/* ELSE Statement is optional*/
-Statement: IF LPAR Expr RPAR Statement                {;}
-         | IF LPAR Expr RPAR Statement ELSE Statement {;}
-         ;
-Statement: WHILE LPAR Expr RPAR Statement             {;}
-         ;
 /*Expr is optional*/
-Statement: RETURN SEMI                                {;}
-         | RETURN Expr SEMI                           {;}
-         ;
+/* ELSE Statement is optional*/
+Statement: SEMI                                       {;}
+        | Expr SEMI                                  {;}
+        | LBRACE RepeatableStatement RBRACE          {;}
+        | IF LPAR Expr RPAR Statement                {;}
+        | IF LPAR Expr RPAR Statement ELSE Statement {;}
+        | WHILE LPAR Expr RPAR Statement             {;}
+        | RETURN SEMI                                {;}
+        | RETURN Expr SEMI                           {;}
+        ;
 
-Expr: Expr ASSIGN Expr      {;}
-    | Expr COMMA Expr       {;}
-    | Expr PLUS Expr        {;}
-    | Expr MINUS Expr       {;}
-    | Expr MUL Expr         {;}
-    | Expr DIV Expr         {;}
-    | Expr MOD Expr         {;}
+/* CommaExpr optional */
+Expr: Expr ASSIGN Expr            {;}
+    | Expr COMMA Expr             {;}
+    | Expr PLUS Expr              {;}
+    | Expr MINUS Expr             {;}
+    | Expr MUL Expr               {;}
+    | Expr DIV Expr               {;}
+    | Expr MOD Expr               {;}
+    | Expr OR Expr                {;}
+    | Expr AND Expr               {;}
+    | Expr BITWISEAND Expr        {;}
+    | Expr BITWISEOR Expr         {;}
+    | Expr BITWISEXOR Expr        {;}
+    | Expr EQ Expr                {;}
+    | Expr NE Expr                {;}
+    | Expr LE Expr                {;}
+    | Expr GE Expr                {;}
+    | Expr LT Expr                {;}
+    | Expr GT Expr                {;}
+    | PLUS Expr                   {;}
+    | MINUS Expr                  {;}
+    | NOT Expr                    {;}
+    | ID LPAR RPAR                {;}
+    | ID LPAR CommaExpr RPAR      {;}
+    | ID LPAR Expr RPAR           {;}
+    | INTLIT LPAR Expr RPAR       {;}
+    | CHRLIT LPAR Expr RPAR       {;}
+    | REALLIT LPAR Expr RPAR      {;}
     ;
-Expr: Expr OR Expr          {;}
-    | Expr AND Expr         {;}
-    | Expr BITWISEAND Expr  {;}
-    | Expr BITWISEOR Expr   {;}
-    | Expr BITWISEXOR Expr  {;}
-    ;
-Expr: Expr EQ Expr          {;}
-    | Expr NE Expr          {;}
-    | Expr LE Expr          {;}
-    | Expr GE Expr          {;}
-    | Expr LT Expr          {;}
-    | Expr GT Expr          {;}
-    ;
-Expr: PLUS Expr             {;}
-    | MINUS Expr            {;}
-    | NOT Expr              {;}
-    ;
+
 CommaExprAgain: COMMA Expr CommaExprAgain  {;}
               |                            {;}
               ;
 /* Expr{COMMA Expr} */
 CommaExpr: Expr CommaExprAgain      {;}
          ;
-/* CommaExpr optional */
-Expr: ID LPAR RPAR                  {;}
-    | ID LPAR CommaExpr RPAR        {;}
-    ;
-Expr: ID LPAR Expr RPAR             {;}
-    | INTLIT LPAR Expr RPAR         {;}
-    | CHRLIT LPAR Expr RPAR         {;}
-    | REALLIT LPAR Expr RPAR        {;}
-    ;
+
 %%
