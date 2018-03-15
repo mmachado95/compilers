@@ -7,9 +7,9 @@
   void yyerror (const char *s);
 %}
 
-%token CHAR ELSE WHILE IF INT SHORT DOUBLE RETURN VOID BITWISEAND BITWISEOR BITWISEXOR
-%token AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
-%token RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
+%token <id> CHAR ELSE WHILE IF INT SHORT DOUBLE RETURN VOID BITWISEAND BITWISEOR BITWISEXOR
+%token <id> AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
+%token <id> RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
 
 %right '='
 %left COMMA
@@ -23,7 +23,7 @@
 /* Notes about the EBNF grammar
 * [] -> means optional
 * {} -> means 0 or more times
-* Para fazer o epsilon posso fazer 
+* Para fazer o epsilon posso fazer
 */
 
 Program: FunctionsAndDeclarations                     {;}
@@ -47,14 +47,14 @@ DeclarationAndStatements: Statement DeclarationAndStatements  {;}
                         | Declaration                         {;}
                         ;
 
-FunctionDefinition: TypeSpec FunctionDeclarator SEMI {;}
+FunctionDeclaration: TypeSpec FunctionDeclarator SEMI {;}
                   ;
 
 FunctionDeclarator: ID LPAR ParameterList RPAR {;}
                   ;
 
 /* COMMA ParameterDeclaration needs to be 0 or more times*/
-Parameter: COMMA ParameterDeclaration           {;} 
+Parameter: COMMA ParameterDeclaration           {;}
              | /* empty */                      {;}
              ;
 ParameterList: ParameterDeclaration Parameter   {;}
@@ -88,7 +88,7 @@ Statement: SEMI                                       {;}
 RepeatableStatement: Statement                        {;}
                    | /* empty */                      {;}
                    ;
-Statement: LBRACE Statement RBRACE                    {;}
+Statement: LBRACE RepeatableStatement RBRACE          {;}
          ;
 /* ELSE Statement is optional*/
 Statement: IF LPAR Expr RPAR Statement                {;}
@@ -103,14 +103,14 @@ Statement: RETURN SEMI                                {;}
 
 Expr: Expr ASSIGN Expr      {;}
     | Expr COMMA Expr       {;}
-Expr: Expr PLUS Expr        {;}
+    | Expr PLUS Expr        {;}
     | Expr MINUS Expr       {;}
     | Expr MUL Expr         {;}
     | Expr DIV Expr         {;}
     | Expr MOD Expr         {;}
     ;
 Expr: Expr OR Expr          {;}
-    | Expr AND Exper        {;}
+    | Expr AND Expr         {;}
     | Expr BITWISEAND Expr  {;}
     | Expr BITWISEOR Expr   {;}
     | Expr BITWISEXOR Expr  {;}
@@ -126,12 +126,15 @@ Expr: PLUS Expr             {;}
     | MINUS Expr            {;}
     | NOT Expr              {;}
     ;
-/* TODO [Expr{COMMA Expr}]*/
-CommaExpr: COMMA Expr               {;}
-         | /*empty*/                {;}
+CommaExprAgain: COMMA Expr CommaExprAgain  {;}
+              |                            {;}
+              ;
+/* Expr{COMMA Expr} */
+CommaExpr: Expr CommaExprAgain      {;}
          ;
+/* CommaExpr optional */
 Expr: ID LPAR RPAR                  {;}
-    | ID LPAR Expr CommaExpr  RPAR  {;}
+    | ID LPAR CommaExpr RPAR        {;}
     ;
 Expr: ID LPAR Expr RPAR             {;}
     | INTLIT LPAR Expr RPAR         {;}
