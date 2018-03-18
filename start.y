@@ -9,9 +9,9 @@
 
 %token <id> CHAR ELSE WHILE IF INT SHORT DOUBLE RETURN VOID BITWISEAND BITWISEOR BITWISEXOR
 %token <id> AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
-%token <id> RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
+%token <id> RESERVED RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
 
-%right '='
+%right ASSIGN
 %left COMMA
 
 %union{
@@ -26,21 +26,38 @@
 * Para fazer o epsilon posso fazer
 */
 
-Program: FunctionsAndDeclarations                     {;}
-       | /* empty */                                  {;}
+Program: FunctionsAndDeclarations                           {;}
+       | /* empty */                                        {;}
        ;
 
-FunctionsAndDeclarations: Declaration                 {;}
+FunctionsAndDeclarations: FunctionDeclaration               {;}
+                        | Declaration                       {;}
                         ;
 
+FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {;}
+                   ;
 
-CommaDeclarator: COMMA Declarator CommaDeclarator     {;}
-                |                                     {;}
-                ;
+FunctionDeclarator: ID LPAR ParameterList RPAR              {;}
+                  ;
 
+ParameterList: ParameterDeclaration CommaParamDeclaration   {;}
+             ;
 
-Declaration: TypeSpec Declarator CommaDeclarator SEMI {;}
+ParameterDeclaration: TypeSpec ID                           {;}
+                    | TypeSpec
+                    ;
+
+CommaParamDeclaration: COMMA ParameterDeclaration           {;}
+                     | /*empty*/                            {;}
+                     ;
+
+Declaration: TypeSpec Declarator CommaDeclarator SEMI       {;}
             ;
+
+CommaDeclarator: COMMA Declarator CommaDeclarator           {;}
+               |                                            {;}
+               ;
+
 
 TypeSpec: CHAR    {;}
         | INT     {;}
@@ -49,6 +66,6 @@ TypeSpec: CHAR    {;}
         | DOUBLE  {;}
         ;
 
-/*ASSIGN EXPR is optional*/
+/*TODO add ASSIGN EXPR  optional*/
 Declarator: ID              {;}
           ;
