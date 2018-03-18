@@ -34,7 +34,6 @@
 */
 
 Program: FunctionsAndDeclarations                           {;}
-       | /* empty */                                        {;}
        ;
 
 FunctionsAndDeclarations: FunctionDeclaration               {;}
@@ -62,9 +61,8 @@ Declaration: TypeSpec Declarator CommaDeclarator SEMI       {;}
             ;
 
 CommaDeclarator: COMMA Declarator CommaDeclarator           {;}
-               |                                            {;}
+               | /*empty*/                                  {;}
                ;
-
 
 TypeSpec: CHAR    {;}
         | INT     {;}
@@ -73,14 +71,13 @@ TypeSpec: CHAR    {;}
         | DOUBLE  {;}
         ;
 
-/*TODO add ASSIGN EXPR  optional*/
+/*ASSIGN EXPR  optional*/
 Declarator: ID ASSIGN Expr        {;}
           | ID                    {;}
           ;
 
 /*TODO [Expr{COMMA Expr}]*/
 Expr: Expr ASSIGN Expr            {;}
-    | Expr COMMA Expr             {;}
     | Expr PLUS Expr              {;}
     | Expr MINUS Expr             {;}
     | Expr MUL Expr               {;}
@@ -100,10 +97,18 @@ Expr: Expr ASSIGN Expr            {;}
     | PLUS Expr                   {;}
     | MINUS Expr                  {;}
     | NOT Expr                    {;}
-    | ID LPAR RPAR                {;}
+    | ID LPAR ExpressionList RPAR {;}
     | ID                          {;}
     | INTLIT                      {;}
     | CHRLIT                      {;}
     | REALLIT                     {;}
-    | LPAR Expr RPAR              {;}
+    | LPAR CommaExpr RPAR         {;}
     ;
+
+CommaExpr: CommaExpr COMMA CommaExpr {;}
+         | Expr                      {;}
+         ;
+
+ExpressionList: CommaExpr         {;}
+              | /*empty*/         {;}
+              ;
