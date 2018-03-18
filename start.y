@@ -53,7 +53,7 @@ ParameterDeclaration: TypeSpec ID                           {;}
                     | TypeSpec
                     ;
 
-CommaParamDeclaration: COMMA ParameterDeclaration           {;}
+CommaParamDeclaration: COMMA ParameterList                  {;}
                      | /*empty*/                            {;}
                      ;
 
