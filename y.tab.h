@@ -134,7 +134,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 17 "start.y" /* yacc.c:1915  */
+#line 24 "start.y" /* yacc.c:1915  */
 
   int value;
   char* id;

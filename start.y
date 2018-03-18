@@ -13,6 +13,13 @@
 
 %right ASSIGN
 %left COMMA
+%left DIV MUL MOD
+%left PLUS MINUS
+%left AND OR
+%right BITWISEAND BITWISEOR BITWISEXOR
+%left EQ NE
+%left LE GE LT GT
+%right NOT
 
 %union{
   int value;
@@ -67,5 +74,36 @@ TypeSpec: CHAR    {;}
         ;
 
 /*TODO add ASSIGN EXPR  optional*/
-Declarator: ID              {;}
+Declarator: ID ASSIGN Expr        {;}
+          | ID                    {;}
           ;
+
+/*TODO [Expr{COMMA Expr}]*/
+Expr: Expr ASSIGN Expr            {;}
+    | Expr COMMA Expr             {;}
+    | Expr PLUS Expr              {;}
+    | Expr MINUS Expr             {;}
+    | Expr MUL Expr               {;}
+    | Expr DIV Expr               {;}
+    | Expr MOD Expr               {;}
+    | Expr OR Expr                {;}
+    | Expr AND Expr               {;}
+    | Expr BITWISEAND Expr        {;}
+    | Expr BITWISEOR Expr         {;}
+    | Expr BITWISEXOR Expr        {;}
+    | Expr EQ Expr                {;}
+    | Expr NE Expr                {;}
+    | Expr LE Expr                {;}
+    | Expr GE Expr                {;}
+    | Expr LT Expr                {;}
+    | Expr GT Expr                {;}
+    | PLUS Expr                   {;}
+    | MINUS Expr                  {;}
+    | NOT Expr                    {;}
+    | ID LPAR RPAR                {;}
+    | ID                          {;}
+    | INTLIT                      {;}
+    | CHRLIT                      {;}
+    | REALLIT                     {;}
+    | LPAR Expr RPAR              {;}
+    ;
