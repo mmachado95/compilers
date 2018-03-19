@@ -125,13 +125,17 @@ int main(int argc, char *argv[]) {
   if (argc > 1) {
     if (strcmp(argv[1], "-l") == 0) {
       errors = 0;
+      yylex();
+    }
+    if (strcmp(argv[1], "-t") == 0) {
+      errors = 0;
+      yyparse();
     }
   }
   else {
     errors = 1;
+    yyparse();
   }
-  //yylex()
-  yyparse();
   return 0;
 }
 

@@ -7,5 +7,5 @@ lex $1.l
 # o -v ou -t gera um ficheiro output com a tabela de parsing
 yacc -d -v start.y
 cc -Wall -Wno-unused-function -o $1 y.tab.c lex.yy.c
-./$1 -l < $2
+./$1 < $2
 

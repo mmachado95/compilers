@@ -11,15 +11,18 @@
 %token <id> AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
 %token <id> RESERVED RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
 
+%right NOT
+%left MUL DIV MOD
+%left PLUS MINUS
+%left LE GE LT GT
+%left EQ NE
+%left BITWISEAND
+%left BITWISEXOR
+%left BITWISEOR
+%left AND
+%left OR
 %right ASSIGN
 %left COMMA
-%left DIV MUL MOD
-%left PLUS MINUS
-%left AND OR
-%right BITWISEAND BITWISEOR BITWISEXOR
-%left EQ NE
-%left LE GE LT GT
-%right NOT
 
 %union{
   int value;
@@ -30,15 +33,18 @@
 /* Notes about the EBNF grammar
 * [] -> means optional
 * {} -> means 0 or more times
-* Para fazer o epsilon posso fazer
 */
 
-Program: FunctionsAndDeclarations                           {;}
+Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {;}
        ;
 
-FunctionsAndDeclarations: FunctionDeclaration               {;}
-                        | Declaration                       {;}
+FunctionsAndDeclarations: FunctionDeclaration                                             {;}
+                        | Declaration                                                     {;}
                         ;
+
+FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty     {;} 
+                             | /*empty*/                                                  {;}
+                             ;
 
 FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {;}
                    ;
@@ -58,7 +64,8 @@ CommaParamDeclaration: COMMA ParameterList                  {;}
                      ;
 
 Declaration: TypeSpec Declarator CommaDeclarator SEMI       {;}
-            ;
+           | error SEMI                                     {;}
+           ;
 
 CommaDeclarator: COMMA Declarator CommaDeclarator           {;}
                | /*empty*/                                  {;}
@@ -76,7 +83,7 @@ Declarator: ID ASSIGN Expr        {;}
           | ID                    {;}
           ;
 
-/*TODO [Expr{COMMA Expr}]*/
+/*[Expr{COMMA Expr}]*/
 Expr: Expr ASSIGN Expr            {;}
     | Expr PLUS Expr              {;}
     | Expr MINUS Expr             {;}
@@ -103,6 +110,8 @@ Expr: Expr ASSIGN Expr            {;}
     | CHRLIT                      {;}
     | REALLIT                     {;}
     | LPAR CommaExpr RPAR         {;}
+    | ID LPAR error RPAR          {;}
+    | LPAR error RPAR             {;}
     ;
 
 CommaExpr: CommaExpr COMMA CommaExpr {;}
