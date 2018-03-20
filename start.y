@@ -40,13 +40,43 @@
 Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {;}
        ;
 
-FunctionsAndDeclarations: FunctionDeclaration                                             {;}
+FunctionsAndDeclarations: FunctionDefinition                                              {;}
+                        | FunctionDeclaration                                             {;}
                         | Declaration                                                     {;}
                         ;
 
 FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty     {;} 
                              | /*empty*/                                                  {;}
                              ;
+
+FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody {;}
+                  ;
+
+FunctionBody: LBRACE DeclarationsAndStatements RBRACE         {;}
+            | LBRACE RBRACE                                                       {;}
+            ;
+
+DeclarationsAndStatements: Statement DeclarationsAndStatements {;}
+                         | Declaration DeclarationsAndStatements {;}
+                         | Statement {;}
+                         | Declaration {;}
+                         ;
+
+StatementWithError: Statement {;}
+                  | LBRACE error RBRACE {;}
+                  | error SEMI {;}
+                  ;
+
+Statement: CommaExpr SEMI                                         {;}
+         | LBRACE StatementList RBRACE                            {;}
+         | IF LPAR CommaExpr RPAR Statement                       {;}
+         | WHILE LPAR CommaExpr RPAR Statement                    {;}
+         | RETURN CommaExpr SEMI                                  {;}
+         ;
+
+StatementList: StatementWithError StatementList                            {;}
+             | StatementWithError                                          {;}
+             ;
 
 FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {;}
                    ;
