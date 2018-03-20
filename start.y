@@ -12,6 +12,7 @@
 %token <id> RESERVED RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
 
 
+%right THEN ELSE
 %left COMMA
 %right ASSIGN
 %left OR
@@ -67,11 +68,12 @@ StatementWithError: Statement {;}
                   | error SEMI {;}
                   ;
 
-Statement: CommaExpr SEMI                                         {;}
-         | LBRACE StatementList RBRACE                            {;}
-         | IF LPAR CommaExpr RPAR Statement                       {;}
-         | WHILE LPAR CommaExpr RPAR Statement                    {;}
-         | RETURN CommaExpr SEMI                                  {;}
+Statement: CommaExpr SEMI                                               {;}
+         | LBRACE StatementList RBRACE                                  {;}
+         | IF LPAR CommaExpr RPAR Statement %prec THEN                  {;}
+         | IF LPAR CommaExpr RPAR Statement ELSE Statement              {;}
+         | WHILE LPAR CommaExpr RPAR Statement                          {;}
+         | RETURN CommaExpr SEMI                                        {;}
          ;
 
 StatementList: StatementWithError StatementList                            {;}
