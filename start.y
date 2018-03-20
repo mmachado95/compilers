@@ -11,18 +11,20 @@
 %token <id> AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
 %token <id> RESERVED RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
 
-%right NOT
-%left MUL DIV MOD
-%left PLUS MINUS
-%left LE GE LT GT
-%left EQ NE
-%left BITWISEAND
-%left BITWISEXOR
-%left BITWISEOR
-%left AND
-%left OR
-%right ASSIGN
+
 %left COMMA
+%right ASSIGN
+%left OR
+%left AND
+%left BITWISEOR
+%left BITWISEXOR
+%left BITWISEAND
+%left EQ NE
+%left LT GT LE GE
+%left PLUS MINUS
+%left MUL DIV MOD
+%right NOT
+
 
 %union{
   int value;
