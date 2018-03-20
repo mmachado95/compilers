@@ -120,11 +120,11 @@ Expr: Expr ASSIGN Expr            {;}
     | MINUS Expr                  {;}
     | NOT Expr                    {;}
     | ID LPAR RPAR                {;}
-    | ID LPAR CommaExpr RPAR      {;}
-    | ID LPAR Expr RPAR           {;}
-    | INTLIT LPAR Expr RPAR       {;}
-    | CHRLIT LPAR Expr RPAR       {;}
-    | REALLIT LPAR Expr RPAR      {;}
+    | ID                          {;}
+    | INTLIT                      {;}
+    | CHRLIT                      {;}
+    | REALLIT                     {;}
+    | LPAR Expr RPAR              {;}
     ;
 
 CommaExprAgain: COMMA Expr CommaExprAgain  {;}

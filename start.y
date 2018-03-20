@@ -9,10 +9,22 @@
 
 %token <id> CHAR ELSE WHILE IF INT SHORT DOUBLE RETURN VOID BITWISEAND BITWISEOR BITWISEXOR
 %token <id> AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
-%token <id> RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
+%token <id> RESERVED RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
 
-%right '='
+
 %left COMMA
+%right ASSIGN
+%left OR
+%left AND
+%left BITWISEOR
+%left BITWISEXOR
+%left BITWISEAND
+%left EQ NE
+%left LT GT LE GE
+%left PLUS MINUS
+%left MUL DIV MOD
+%right NOT
+
 
 %union{
   int value;
@@ -23,24 +35,43 @@
 /* Notes about the EBNF grammar
 * [] -> means optional
 * {} -> means 0 or more times
-* Para fazer o epsilon posso fazer
 */
 
-Program: FunctionsAndDeclarations                     {;}
-       | /* empty */                                  {;}
+Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {;}
        ;
 
-FunctionsAndDeclarations: Declaration                 {;}
+FunctionsAndDeclarations: FunctionDeclaration                                             {;}
+                        | Declaration                                                     {;}
                         ;
 
+FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty     {;} 
+                             | /*empty*/                                                  {;}
+                             ;
 
-CommaDeclarator: COMMA Declarator CommaDeclarator     {;}
-                |                                     {;}
-                ;
+FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {;}
+                   ;
 
+FunctionDeclarator: ID LPAR ParameterList RPAR              {;}
+                  ;
 
-Declaration: TypeSpec Declarator CommaDeclarator SEMI {;}
-            ;
+ParameterList: ParameterDeclaration CommaParamDeclaration   {;}
+             ;
+
+ParameterDeclaration: TypeSpec ID                           {;}
+                    | TypeSpec
+                    ;
+
+CommaParamDeclaration: COMMA ParameterList                  {;}
+                     | /*empty*/                            {;}
+                     ;
+
+Declaration: TypeSpec Declarator CommaDeclarator SEMI       {;}
+           | error SEMI                                     {;}
+           ;
+
+CommaDeclarator: COMMA Declarator CommaDeclarator           {;}
+               | /*empty*/                                  {;}
+               ;
 
 TypeSpec: CHAR    {;}
         | INT     {;}
@@ -49,6 +80,46 @@ TypeSpec: CHAR    {;}
         | DOUBLE  {;}
         ;
 
-/*ASSIGN EXPR is optional*/
-Declarator: ID              {;}
+/*ASSIGN EXPR  optional*/
+Declarator: ID ASSIGN Expr        {;}
+          | ID                    {;}
           ;
+
+/*[Expr{COMMA Expr}]*/
+Expr: Expr ASSIGN Expr            {;}
+    | Expr PLUS Expr              {;}
+    | Expr MINUS Expr             {;}
+    | Expr MUL Expr               {;}
+    | Expr DIV Expr               {;}
+    | Expr MOD Expr               {;}
+    | Expr OR Expr                {;}
+    | Expr AND Expr               {;}
+    | Expr BITWISEAND Expr        {;}
+    | Expr BITWISEOR Expr         {;}
+    | Expr BITWISEXOR Expr        {;}
+    | Expr EQ Expr                {;}
+    | Expr NE Expr                {;}
+    | Expr LE Expr                {;}
+    | Expr GE Expr                {;}
+    | Expr LT Expr                {;}
+    | Expr GT Expr                {;}
+    | PLUS Expr                   {;}
+    | MINUS Expr                  {;}
+    | NOT Expr                    {;}
+    | ID LPAR ExpressionList RPAR {;}
+    | ID                          {;}
+    | INTLIT                      {;}
+    | CHRLIT                      {;}
+    | REALLIT                     {;}
+    | LPAR CommaExpr RPAR         {;}
+    | ID LPAR error RPAR          {;}
+    | LPAR error RPAR             {;}
+    ;
+
+CommaExpr: CommaExpr COMMA CommaExpr {;}
+         | Expr                      {;}
+         ;
+
+ExpressionList: CommaExpr         {;}
+              | /*empty*/         {;}
+              ;

@@ -34,7 +34,7 @@
 # define YY_YY_Y_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 1
+# define YYDEBUG 0
 #endif
 #if YYDEBUG
 extern int yydebug;
@@ -45,25 +45,101 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    VAR = 258,
-    NUMBER = 259
+    CHAR = 258,
+    ELSE = 259,
+    WHILE = 260,
+    IF = 261,
+    INT = 262,
+    SHORT = 263,
+    DOUBLE = 264,
+    RETURN = 265,
+    VOID = 266,
+    BITWISEAND = 267,
+    BITWISEOR = 268,
+    BITWISEXOR = 269,
+    AND = 270,
+    ASSIGN = 271,
+    MUL = 272,
+    COMMA = 273,
+    DIV = 274,
+    EQ = 275,
+    GE = 276,
+    GT = 277,
+    LBRACE = 278,
+    LE = 279,
+    LPAR = 280,
+    LT = 281,
+    MINUS = 282,
+    MOD = 283,
+    NE = 284,
+    NOT = 285,
+    OR = 286,
+    PLUS = 287,
+    RESERVED = 288,
+    RBRACE = 289,
+    RPAR = 290,
+    SEMI = 291,
+    ID = 292,
+    INTLIT = 293,
+    CHRLIT = 294,
+    REALLIT = 295,
+    CHRLIT_INV = 296,
+    CHRLIT_UNT = 297
   };
 #endif
 /* Tokens.  */
-#define VAR 258
-#define NUMBER 259
+#define CHAR 258
+#define ELSE 259
+#define WHILE 260
+#define IF 261
+#define INT 262
+#define SHORT 263
+#define DOUBLE 264
+#define RETURN 265
+#define VOID 266
+#define BITWISEAND 267
+#define BITWISEOR 268
+#define BITWISEXOR 269
+#define AND 270
+#define ASSIGN 271
+#define MUL 272
+#define COMMA 273
+#define DIV 274
+#define EQ 275
+#define GE 276
+#define GT 277
+#define LBRACE 278
+#define LE 279
+#define LPAR 280
+#define LT 281
+#define MINUS 282
+#define MOD 283
+#define NE 284
+#define NOT 285
+#define OR 286
+#define PLUS 287
+#define RESERVED 288
+#define RBRACE 289
+#define RPAR 290
+#define SEMI 291
+#define ID 292
+#define INTLIT 293
+#define CHRLIT 294
+#define REALLIT 295
+#define CHRLIT_INV 296
+#define CHRLIT_UNT 297
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 24 "ficha4.exemplo.y" /* yacc.c:1915  */
+#line 27 "start.y" /* yacc.c:1915  */
 
   int value;
   char* id;
 
-#line 67 "y.tab.h" /* yacc.c:1915  */
+#line 143 "y.tab.h" /* yacc.c:1915  */
 };
 
 typedef union YYSTYPE YYSTYPE;

@@ -1,12 +1,13 @@
 %{
-#include <string.h>
-#include <stdio.h>
-#define PRINTF if(errors == 0) printf
-int line = 1;
-int col = 1;
-int beginning_line;
-int beginning_col;
-int errors;
+  #include <string.h>
+  #include <stdio.h>
+  #include "y.tab.h"
+  #define PRINTF if(errors == 0) printf
+  int line = 1;
+  int col = 1;
+  int beginning_line;
+  int beginning_col;
+  int errors;
 %}
 
 %X COMMENT
@@ -81,7 +82,7 @@ CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})*(\\)*{ANYCHAR}*
 {EQ} {PRINTF("EQ\n"); col += yyleng; return EQ;}
 {GE} {PRINTF("GE\n"); col += yyleng; return GE;}
 {GT} {PRINTF("GT\n"); col += yyleng; return GT;}
-{LBRACE} {PRINTF("LBRACE\n"); col += yyleng; return LBRACE}
+{LBRACE} {PRINTF("LBRACE\n"); col += yyleng; return LBRACE;}
 {LE} {PRINTF("LE\n"); col += yyleng; return LE;}
 {LPAR} {PRINTF("LPAR\n"); col += yyleng; return LPAR;}
 {LT} {PRINTF("LT\n"); col += yyleng; return LT;}
@@ -124,14 +125,24 @@ int main(int argc, char *argv[]) {
   if (argc > 1) {
     if (strcmp(argv[1], "-l") == 0) {
       errors = 0;
+      yylex();
+    }
+    if (strcmp(argv[1], "-t") == 0) {
+      errors = 0;
+      yyparse();
     }
   }
   else {
     errors = 1;
+    yyparse();
   }
-  yylex();
   return 0;
 }
+
 int yywrap() {
   return 1;
+}
+
+void yyerror (char *s) {
+  printf("Line %d, col %d: %s: %s\n", line, col, s, yytext);
 }
