@@ -11,8 +11,6 @@
 %token <id> AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
 %token <id> RESERVED RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
 
-
-%right THEN ELSE
 %left COMMA
 %right ASSIGN
 %left OR
@@ -26,6 +24,8 @@
 %left MUL DIV MOD
 %right NOT
 
+%nonassoc THEN
+%nonassoc ELSE
 
 %union{
   int value;
@@ -50,30 +50,32 @@ FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarations
                              | /*empty*/                                                  {;}
                              ;
 
-FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody {;}
+FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody  {;}
                   ;
 
 FunctionBody: LBRACE DeclarationsAndStatements RBRACE         {;}
-            | LBRACE RBRACE                                                       {;}
+            | LBRACE RBRACE                                   {;}
             ;
 
-DeclarationsAndStatements: Statement DeclarationsAndStatements {;}
-                         | Declaration DeclarationsAndStatements {;}
-                         | Statement {;}
-                         | Declaration {;}
+DeclarationsAndStatements: Statement DeclarationsAndStatements                {;}
+                         | Declaration DeclarationsAndStatements              {;}
+                         | Statement                                          {;}
+                         | Declaration                                        {;}
                          ;
 
-StatementWithError: Statement {;}
-                  | LBRACE error RBRACE {;}
-                  | error SEMI {;}
+StatementWithError: Statement             {;}
+                  | error SEMI            {;}
+                  | LBRACE error RBRACE   {;}
                   ;
 
 Statement: CommaExpr SEMI                                               {;}
+         | SEMI                                                         {;}
          | LBRACE StatementList RBRACE                                  {;}
          | IF LPAR CommaExpr RPAR Statement %prec THEN                  {;}
          | IF LPAR CommaExpr RPAR Statement ELSE Statement              {;}
          | WHILE LPAR CommaExpr RPAR Statement                          {;}
          | RETURN CommaExpr SEMI                                        {;}
+         | RETURN SEMI                                                  {;}
          ;
 
 StatementList: StatementWithError StatementList                            {;}

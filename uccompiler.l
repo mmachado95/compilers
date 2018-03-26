@@ -101,13 +101,13 @@ CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})*(\\)*{ANYCHAR}*
 {ID} {PRINTF("ID(%s)\n", yytext); col += yyleng; return ID;}
 {CHRLIT} {PRINTF("CHRLIT(%s)\n", yytext); col += yyleng; return CHRLIT;}
 {REALLIT} {PRINTF("REALLIT(%s)\n", yytext); col += yyleng; return REALLIT;}
-{CHRLIT_INV}	{printf("Line %d, col %d: invalid char constant (%s)\n", line, col, yytext); col+=yyleng; return CHRLIT_INV;}
-{CHRLIT_UNT}	{printf("Line %d, col %d: unterminated char constant\n", line, col); col+=yyleng; return CHRLIT_UNT;}
+{CHRLIT_INV} {printf("Line %d, col %d: invalid char constant (%s)\n", line, col, yytext); col+=yyleng; return CHRLIT_INV;}
+{CHRLIT_UNT} {printf("Line %d, col %d: unterminated char constant\n", line, col); col+=yyleng; return CHRLIT_UNT;}
 
 \n {line++; col=1;}
 \r {col+=yyleng;}
 [ \t] {col+=yyleng;}
-. {printf("Line %d, col %d: illegal character (%s)\n", line, col-(int)yyleng+1, yytext); col+=yyleng;}
+. {printf("Line %d, col %d: illegal character (%s)\n", line, col, yytext); col+=yyleng;}
 
 
 "/*" {BEGIN COMMENT; beginning_col = col; beginning_line = line; col+=yyleng;}
