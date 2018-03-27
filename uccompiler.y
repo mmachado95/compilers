@@ -57,8 +57,8 @@ FunctionBody: LBRACE DeclarationsAndStatements RBRACE         {;}
             | LBRACE RBRACE                                   {;}
             ;
 
-DeclarationsAndStatements: Statement DeclarationsAndStatements                {;}
-                         | Declaration DeclarationsAndStatements              {;}
+DeclarationsAndStatements: DeclarationsAndStatements Statement                {;}
+                         | DeclarationsAndStatements Declaration              {;}
                          | Statement                                          {;}
                          | Declaration                                        {;}
                          ;
@@ -70,6 +70,7 @@ StatementWithError: Statement             {;}
 Statement: CommaExpr SEMI                                               {;}
          | SEMI                                                         {;}
          | LBRACE StatementList RBRACE                                  {;}
+         | LBRACE RBRACE                                                {;}
          | LBRACE error RBRACE                                          {;}
          | IF LPAR CommaExpr RPAR Statement %prec THEN                  {;}
          | IF LPAR CommaExpr RPAR Statement ELSE Statement              {;}
