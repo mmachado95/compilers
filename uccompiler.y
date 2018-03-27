@@ -65,12 +65,12 @@ DeclarationsAndStatements: Statement DeclarationsAndStatements                {;
 
 StatementWithError: Statement             {;}
                   | error SEMI            {;}
-                  | LBRACE error RBRACE   {;}
                   ;
 
 Statement: CommaExpr SEMI                                               {;}
          | SEMI                                                         {;}
          | LBRACE StatementList RBRACE                                  {;}
+         | LBRACE error RBRACE                                          {;}
          | IF LPAR CommaExpr RPAR Statement %prec THEN                  {;}
          | IF LPAR CommaExpr RPAR Statement ELSE Statement              {;}
          | WHILE LPAR CommaExpr RPAR Statement                          {;}
@@ -78,8 +78,8 @@ Statement: CommaExpr SEMI                                               {;}
          | RETURN SEMI                                                  {;}
          ;
 
-StatementList: StatementWithError StatementList                            {;}
-             | StatementWithError                                          {;}
+StatementList: StatementList StatementWithError                          {;}
+             | StatementWithError                                        {;}
              ;
 
 FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {;}
