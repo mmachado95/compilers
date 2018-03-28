@@ -9,10 +9,23 @@
 
 %token <id> CHAR ELSE WHILE IF INT SHORT DOUBLE RETURN VOID BITWISEAND BITWISEOR BITWISEXOR
 %token <id> AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
-%token <id> RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
+%token <id> RESERVED RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
 
-%right '='
 %left COMMA
+%right ASSIGN
+%left OR
+%left AND
+%left BITWISEOR
+%left BITWISEXOR
+%left BITWISEAND
+%left EQ NE
+%left LT GT LE GE
+%left PLUS MINUS
+%left MUL DIV MOD
+%right NOT
+
+%nonassoc THEN
+%nonassoc ELSE
 
 %union{
   int value;
@@ -23,51 +36,77 @@
 /* Notes about the EBNF grammar
 * [] -> means optional
 * {} -> means 0 or more times
-* Para fazer o epsilon posso fazer
 */
 
-Program: FunctionsAndDeclarations                     {;}
-       | /* empty */                                  {;}
+Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {;}
        ;
 
-FunctionsAndDeclarations: FunctionDefinition          {;}
-                        | FunctionDeclaration         {;}
-                        | Declaration                 {;}
+FunctionsAndDeclarations: FunctionDefinition                                              {;}
+                        | FunctionDeclaration                                             {;}
+                        | Declaration                                                     {;}
                         ;
+
+FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty     {;}
+                             | /*empty*/                                                  {;}
+                             ;
 
 FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody  {;}
                   ;
 
-/* DeclarationAndStatements optional*/
-FunctionBody: LBRACE RBRACE                             {;}
-            | LBRACE DeclarationAndStatements RBRACE    {;}
+FunctionBody: LBRACE DeclarationsAndStatements RBRACE         {;}
+            | LBRACE RBRACE                                   {;}
             ;
 
-DeclarationAndStatements: Statement DeclarationAndStatements  {;}
-                        | Statement                           {;}
-                        | Declaration                         {;}
-                        ;
+DeclarationsAndStatements: DeclarationsAndStatements Statement          {;}
+                         | DeclarationsAndStatements Declaration        {;}
+                         | Statement                                    {;}
+                         | Declaration                                  {;}
+                         ;
 
-FunctionDeclaration: TypeSpec FunctionDeclarator SEMI {;}
+StatementWithError: Statement             {;}
+                  | error SEMI            {;}
                   ;
 
-FunctionDeclarator: ID LPAR ParameterList RPAR {;}
+Statement: CommaExpr SEMI                                               {;}
+         | SEMI                                                         {;}
+         | LBRACE StatementList RBRACE                                  {;}
+         | LBRACE RBRACE                                                {;}
+         | LBRACE error RBRACE                                          {;}
+         | IF LPAR CommaExpr RPAR StatementWithError %prec THEN         {;}
+         | IF LPAR CommaExpr RPAR StatementWithError ELSE Statement     {;}
+         | WHILE LPAR CommaExpr RPAR StatementWithError                 {;}
+         | RETURN CommaExpr SEMI                                        {;}
+         | RETURN SEMI                                                  {;}
+         ;
+
+StatementList: StatementList StatementWithError                         {;}
+             | StatementWithError                                       {;}
+             ;
+
+FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {;}
+                   ;
+
+FunctionDeclarator: ID LPAR ParameterList RPAR              {;}
                   ;
 
-/* COMMA ParameterDeclaration needs to be 0 or more times*/
-Parameter: COMMA ParameterDeclaration           {;}
-             | /* empty */                      {;}
-             ;
-ParameterList: ParameterDeclaration Parameter   {;}
+ParameterList: ParameterDeclaration CommaParamDeclaration   {;}
              ;
 
-/*ID optional*/
-ParameterDeclaration: TypeSpec    {;}
-                    | TypeSpec ID {;}
+ParameterDeclaration: TypeSpec ID                           {;}
+                    | TypeSpec
                     ;
 
-Declaration: TypeSpec Declarator COMMA Declarator SEMI {;}
+CommaParamDeclaration: COMMA ParameterList                  {;}
+                     | /*empty*/                            {;}
+                     ;
+
+Declaration: TypeSpec Declarator CommaDeclarator SEMI       {;}
+           | error SEMI                                     {;}
            ;
+
+CommaDeclarator: COMMA Declarator CommaDeclarator           {;}
+               | /*empty*/                                  {;}
+               ;
 
 TypeSpec: CHAR    {;}
         | INT     {;}
@@ -76,30 +115,13 @@ TypeSpec: CHAR    {;}
         | DOUBLE  {;}
         ;
 
-/*ASSIGN EXPR is optional*/
-Declarator: ID              {;}
-          | ID ASSIGN Expr  {;}
+/*ASSIGN EXPR  optional*/
+Declarator: ID ASSIGN Expr        {;}
+          | ID                    {;}
           ;
 
-/*Statement needs to be 0 or more times*/
-RepeatableStatement: Statement                        {;}
-                   | /* empty */                      {;}
-                   ;
-/*Expr is optional*/
-/* ELSE Statement is optional*/
-Statement: SEMI                                       {;}
-        | Expr SEMI                                  {;}
-        | LBRACE RepeatableStatement RBRACE          {;}
-        | IF LPAR Expr RPAR Statement                {;}
-        | IF LPAR Expr RPAR Statement ELSE Statement {;}
-        | WHILE LPAR Expr RPAR Statement             {;}
-        | RETURN SEMI                                {;}
-        | RETURN Expr SEMI                           {;}
-        ;
-
-/* CommaExpr optional */
+/*[Expr{COMMA Expr}]*/
 Expr: Expr ASSIGN Expr            {;}
-    | Expr COMMA Expr             {;}
     | Expr PLUS Expr              {;}
     | Expr MINUS Expr             {;}
     | Expr MUL Expr               {;}
@@ -119,19 +141,20 @@ Expr: Expr ASSIGN Expr            {;}
     | PLUS Expr                   {;}
     | MINUS Expr                  {;}
     | NOT Expr                    {;}
-    | ID LPAR RPAR                {;}
+    | ID LPAR ExpressionList RPAR {;}
     | ID                          {;}
     | INTLIT                      {;}
     | CHRLIT                      {;}
     | REALLIT                     {;}
-    | LPAR Expr RPAR              {;}
+    | LPAR CommaExpr RPAR         {;}
+    | ID LPAR error RPAR          {;}
+    | LPAR error RPAR             {;}
     ;
 
-CommaExprAgain: COMMA Expr CommaExprAgain  {;}
-              |                            {;}
-              ;
-/* Expr{COMMA Expr} */
-CommaExpr: Expr CommaExprAgain      {;}
+CommaExpr: CommaExpr COMMA CommaExpr {;}
+         | Expr                      {;}
          ;
 
-%%
+ExpressionList: CommaExpr         {;}
+              | /*empty*/         {;}
+              ;
