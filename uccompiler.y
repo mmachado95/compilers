@@ -2,6 +2,7 @@
   #include <stdlib.h>
   #include <stdio.h>
   #include <string.h>
+  #include "ast.h"
 
   int yylex(void);
   void yyerror (const char *s);
@@ -30,7 +31,11 @@
 %union{
   int value;
   char* id;
+  struct node *node;
 }
+
+%type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty
+
 
 %%
 /* Notes about the EBNF grammar
@@ -38,7 +43,7 @@
 * {} -> means 0 or more times
 */
 
-Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {;}
+Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {ast = insert_to_ast("Program", 2, $1, $2);}
        ;
 
 FunctionsAndDeclarations: FunctionDefinition                                              {;}
