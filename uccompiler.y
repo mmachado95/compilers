@@ -2,6 +2,7 @@
   #include <stdlib.h>
   #include <stdio.h>
   #include <string.h>
+  #include "ast.h"
 
   int yylex(void);
   void yyerror (const char *s);
@@ -30,7 +31,11 @@
 %union{
   int value;
   char* id;
+  struct node *node;
 }
+
+%type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty
+
 
 %%
 /* Notes about the EBNF grammar
@@ -38,7 +43,7 @@
 * {} -> means 0 or more times
 */
 
-Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {;}
+Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {ast = insert_to_ast("Program", 2, $1, $2);}
        ;
 
 FunctionsAndDeclarations: FunctionDefinition                                              {;}
@@ -57,10 +62,10 @@ FunctionBody: LBRACE DeclarationsAndStatements RBRACE         {;}
             | LBRACE RBRACE                                   {;}
             ;
 
-DeclarationsAndStatements: DeclarationsAndStatements Statement          {;}
-                         | DeclarationsAndStatements Declaration        {;}
-                         | Statement                                    {;}
-                         | Declaration                                  {;}
+DeclarationsAndStatements: DeclarationsAndStatements Statement                {;}
+                         | DeclarationsAndStatements Declaration              {;}
+                         | Statement                                          {;}
+                         | Declaration                                        {;}
                          ;
 
 StatementWithError: Statement             {;}
@@ -72,15 +77,15 @@ Statement: CommaExpr SEMI                                               {;}
          | LBRACE StatementList RBRACE                                  {;}
          | LBRACE RBRACE                                                {;}
          | LBRACE error RBRACE                                          {;}
-         | IF LPAR CommaExpr RPAR StatementWithError %prec THEN         {;}
-         | IF LPAR CommaExpr RPAR StatementWithError ELSE Statement     {;}
-         | WHILE LPAR CommaExpr RPAR StatementWithError                 {;}
+         | IF LPAR CommaExpr RPAR Statement %prec THEN                  {;}
+         | IF LPAR CommaExpr RPAR Statement ELSE Statement              {;}
+         | WHILE LPAR CommaExpr RPAR Statement                          {;}
          | RETURN CommaExpr SEMI                                        {;}
          | RETURN SEMI                                                  {;}
          ;
 
-StatementList: StatementList StatementWithError                         {;}
-             | StatementWithError                                       {;}
+StatementList: StatementList StatementWithError                          {;}
+             | StatementWithError                                        {;}
              ;
 
 FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {;}
