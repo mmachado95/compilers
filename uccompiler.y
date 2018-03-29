@@ -43,7 +43,7 @@
 * {} -> means 0 or more times
 */
 
-Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {ast = insert_to_ast("Program", 2, $1, $2);}
+Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {ast = insert_node("Program", NULL, 2, $1, $2);}
        ;
 
 FunctionsAndDeclarations: FunctionDefinition                                              {;}
