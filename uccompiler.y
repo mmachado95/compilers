@@ -34,7 +34,8 @@
   struct node *node;
 }
 
-%type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty
+%type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty FunctionDefinition FunctionDeclaration
+             Declaration
 
 
 %%
@@ -46,9 +47,9 @@
 Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {ast = insert_node("Program", NULL, 2, $1, $2);}
        ;
 
-FunctionsAndDeclarations: FunctionDefinition                                              {;}
-                        | FunctionDeclaration                                             {;}
-                        | Declaration                                                     {;}
+FunctionsAndDeclarations: FunctionDefinition                                              {$$ = $1;}
+                        | FunctionDeclaration                                             {$$ = $1;}
+                        | Declaration                                                     {$$ = $1;}
                         ;
 
 FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty     {;}

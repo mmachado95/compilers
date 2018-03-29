@@ -43,15 +43,22 @@ node_t* insert_node(char *type, char *value, int n_args, ...) {
       }
 
       else {
-        node_t *aux = new_node;
-        while (aux->brother != NULL) {
-          aux = aux->brother;
-        }
-        aux->brother = n;
+        add_brother(new_node, n);
       }
     }
   }
 
   va_end(args);
   return new_node;
+}
+
+node_t *add_brother(node_t *original, node_t *brother) {
+  node_t *aux = original;
+
+  while (aux->brother != NULL) {
+    aux = aux->brother;
+  }
+
+  aux->brother = brother;
+  return original;
 }
