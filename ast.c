@@ -16,13 +16,15 @@ node_t* create_node(char *type, char *value) {
     n->value = strdup(value);
   }
 
-  n->child = NULL;
-
+  n->children = NULL;
+  n->brother = NULL;
   return n;
 }
 
 // insert node in ast
 node_t* insert_node(char *type, char *value, int n_args, ...) {
+  int i;
+
   // list of extra args passed to function
   va_list args;
   // number of extra args
@@ -31,19 +33,19 @@ node_t* insert_node(char *type, char *value, int n_args, ...) {
   // create node
   node_t *new_node = create_node(type, value);
 
+  node_t *aux;
   // iterate extra args
-  for (int i = 0; i < n_args; i++) {
+  for (i = 0; i < n_args; i++) {
     node_t *n = va_arg(args, node_t *);
 
     if (n != NULL) {
-      printf("INSERTING NEW CHILD\n");
-
-      if (new_node->child == NULL) {
-        new_node->child = n;
+      if (new_node->children == NULL) {
+        new_node->children = n;
+        aux = n;
       }
-
       else {
-        add_brother(new_node, n);
+        add_brother(aux, n);
+        aux = n;
       }
     }
   }
@@ -52,6 +54,7 @@ node_t* insert_node(char *type, char *value, int n_args, ...) {
   return new_node;
 }
 
+// adds brother to node
 node_t *add_brother(node_t *original, node_t *brother) {
   node_t *aux = original;
 

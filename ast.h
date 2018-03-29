@@ -4,7 +4,7 @@
 typedef struct node {
   char *type;
   char *value;
-  struct node *child;
+  struct node *children;
   struct node *brother;
 } node_t;
 
