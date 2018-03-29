@@ -34,8 +34,9 @@
   struct node *node;
 }
 
-%type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty FunctionDefinition FunctionDeclaration
-             Declaration
+%type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty FunctionDefinition
+            FunctionDeclaration Declaration FunctionDeclarator TypeSpec FunctionBody Declarator
+            Expr ParameterList
 
 
 %%
@@ -47,16 +48,17 @@
 Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {ast = insert_node("Program", NULL, 2, $1, $2);}
        ;
 
-FunctionsAndDeclarations: FunctionDefinition                                              {$$ = $1;}
-                        | FunctionDeclaration                                             {$$ = $1;}
-                        | Declaration                                                     {$$ = $1;}
+FunctionsAndDeclarations: FunctionDefinition                                              {;}
+                        | FunctionDeclaration                                             {;}
+                        | Declaration                                                     {;}
                         ;
 
-FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty     {;}
-                             | /*empty*/                                                  {;}
+FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty     {$$ = add_sibling($1, $2);}
+                             | /*empty*/                                                  {$$ = NULL;}
                              ;
 
-FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody  {;}
+FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody                              /*{$$ = insert_node("FunctionDefinition", NULL, 3, $1, $2, $3);}*/
+                                                                                          {$$ = insert_node("FunctionDefinition", NULL, 1, $1);}
                   ;
 
 FunctionBody: LBRACE DeclarationsAndStatements RBRACE         {;}
@@ -89,10 +91,10 @@ StatementList: StatementList StatementWithError                          {;}
              | StatementWithError                                        {;}
              ;
 
-FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {;}
+FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {$$ = insert_node("FunctionDeclaration", NULL, 3, $1, $2, $3);}
                    ;
 
-FunctionDeclarator: ID LPAR ParameterList RPAR              {;}
+FunctionDeclarator: ID LPAR ParameterList RPAR              {$$ = insert_node("FunctionDeclarator", NULL, 2, $1, $3);}
                   ;
 
 ParameterList: ParameterDeclaration CommaParamDeclaration   {;}
@@ -115,15 +117,15 @@ CommaDeclarator: COMMA Declarator CommaDeclarator           {;}
                ;
 
 TypeSpec: CHAR    {;}
-        | INT     {;}
+        | INT     {$$ = insert_node("Int", NULL, 0);}
         | VOID    {;}
         | SHORT   {;}
         | DOUBLE  {;}
         ;
 
 /*ASSIGN EXPR  optional*/
-Declarator: ID ASSIGN Expr        {;}
-          | ID                    {;}
+Declarator: ID ASSIGN Expr        {printf("ALLO\n"); $$ = insert_node("Declarator", NULL, 3, $1, $2, $3);}
+          | ID                    {printf("Oi\n"); $$ = insert_node("Id", $1, 0);}
           ;
 
 /*[Expr{COMMA Expr}]*/

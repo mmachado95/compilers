@@ -2,6 +2,7 @@
   #include <string.h>
   #include <stdio.h>
   #include "y.tab.h"
+  #include "ast.h"
   #define PRINTF if(errors == 0) printf
   int line = 1;
   int col = 1;
@@ -130,6 +131,8 @@ int main(int argc, char *argv[]) {
     if (strcmp(argv[1], "-t") == 0) {
       errors = 0;
       yyparse();
+      printf("\n\nOI\n\n");
+      print_ast(ast);
     }
   }
   else {

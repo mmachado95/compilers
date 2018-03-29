@@ -16,8 +16,8 @@ node_t* create_node(char *type, char *value) {
     n->value = strdup(value);
   }
 
-  n->children = NULL;
-  n->brother = NULL;
+  n->child = NULL;
+  n->sibling = NULL;
   return n;
 }
 
@@ -30,22 +30,31 @@ node_t* insert_node(char *type, char *value, int n_args, ...) {
   // number of extra args
   va_start(args, n_args);
 
+  if (value != NULL) {
+    printf("\n\n\n\n");
+    printf("%s\n", value );
+    value = strdup(value);
+    printf("%s\n", value );
+    printf("\n\n\n\n");
+
+  }
+
   // create node
   node_t *new_node = create_node(type, value);
 
-  node_t *aux;
+
   // iterate extra args
   for (i = 0; i < n_args; i++) {
     node_t *n = va_arg(args, node_t *);
-
     if (n != NULL) {
-      if (new_node->children == NULL) {
-        new_node->children = n;
-        aux = n;
+      if (new_node->child == NULL) {
+        new_node->child = n;
       }
       else {
-        add_brother(aux, n);
-        aux = n;
+        printf("Adding child to node %s!! Sibling %s\n\n\n", new_node->type, new_node->child->type);
+        printf("value: %s\n", n->type);
+        add_sibling(new_node, n);
+        new_node = n;
       }
     }
   }
@@ -54,14 +63,24 @@ node_t* insert_node(char *type, char *value, int n_args, ...) {
   return new_node;
 }
 
-// adds brother to node
-node_t *add_brother(node_t *original, node_t *brother) {
+// adds sibling to node
+node_t *add_sibling(node_t *original, node_t *sibling) {
   node_t *aux = original;
 
-  while (aux->brother != NULL) {
-    aux = aux->brother;
+  while (aux->sibling != NULL) {
+    aux = aux->sibling;
   }
 
-  aux->brother = brother;
+  aux->sibling = sibling;
   return original;
+}
+
+void print_ast(node_t *n) {
+  printf("%s\n", n->type);
+  if (n->child != NULL) {
+    print_ast(n->child);
+  }
+  if (n->sibling != NULL) {
+    print_ast(n->sibling);
+  }
 }
