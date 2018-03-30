@@ -98,10 +98,10 @@ CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})*(\\)*{ANYCHAR}*
 {SEMI} {PRINTF("SEMI\n"); col += yyleng; return SEMI;}
 {RESERVED} {PRINTF("RESERVED(%s)\n", yytext); col += yyleng; return RESERVED;}
 
-{INTLIT} {PRINTF("INTLIT(%s)\n", yytext); col += yyleng; return INTLIT;}
-{ID} {PRINTF("ID(%s)\n", yytext); col += yyleng; return ID;}
-{CHRLIT} {PRINTF("CHRLIT(%s)\n", yytext); col += yyleng; return CHRLIT;}
-{REALLIT} {PRINTF("REALLIT(%s)\n", yytext); col += yyleng; return REALLIT;}
+{INTLIT} {PRINTF("INTLIT(%s)\n", yytext); col += yyleng; yylval.value = strdup(yytext); return INTLIT;}
+{ID} {PRINTF("ID(%s)\n", yytext); col += yyleng; yylval.value = strdup(yytext); return ID;}
+{CHRLIT} {PRINTF("CHRLIT(%s)\n", yytext); col += yyleng; yylval.value = strdup(yytext); return CHRLIT;}
+{REALLIT} {PRINTF("REALLIT(%s)\n", yytext); col += yyleng; yylval.value = strdup(yytext); return REALLIT;}
 {CHRLIT_INV} {printf("Line %d, col %d: invalid char constant (%s)\n", line, col, yytext); col+=yyleng; return CHRLIT_INV;}
 {CHRLIT_UNT} {printf("Line %d, col %d: unterminated char constant\n", line, col); col+=yyleng; return CHRLIT_UNT;}
 
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
       errors = 0;
       yyparse();
       printf("\n\nOI\n\n");
-      print_ast(ast);
+      print_ast(ast, 0);
     }
   }
   else {

@@ -30,31 +30,23 @@ node_t* insert_node(char *type, char *value, int n_args, ...) {
   // number of extra args
   va_start(args, n_args);
 
-  if (value != NULL) {
-    printf("\n\n\n\n");
-    printf("%s\n", value );
-    value = strdup(value);
-    printf("%s\n", value );
-    printf("\n\n\n\n");
-
-  }
-
   // create node
   node_t *new_node = create_node(type, value);
-
-
+  printf("%s\n", new_node->type);
+  node_t *aux;
+  
   // iterate extra args
   for (i = 0; i < n_args; i++) {
     node_t *n = va_arg(args, node_t *);
     if (n != NULL) {
       if (new_node->child == NULL) {
         new_node->child = n;
+        aux = n;
       }
       else {
         printf("Adding child to node %s!! Sibling %s\n\n\n", new_node->type, new_node->child->type);
-        printf("value: %s\n", n->type);
-        add_sibling(new_node, n);
-        new_node = n;
+        add_sibling(aux, n);
+        aux = n;
       }
     }
   }
@@ -75,12 +67,18 @@ node_t *add_sibling(node_t *original, node_t *sibling) {
   return original;
 }
 
-void print_ast(node_t *n) {
-  printf("%s\n", n->type);
-  if (n->child != NULL) {
-    print_ast(n->child);
+void print_ast(node_t *n, int depth){
+  for(int i = 0; i < depth; i++)
+    printf("..");
+
+  if(n->value != NULL){
+    printf("%s(%s)\n", n->type,n->value);
+  } else{
+    printf("%s\n", n->type);
   }
-  if (n->sibling != NULL) {
-    print_ast(n->sibling);
-  }
+
+  if(n->child != NULL)
+    print_ast(n->child, depth + 1);
+  if(n->sibling != NULL)
+    print_ast(n->sibling, depth);
 }

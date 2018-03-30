@@ -8,9 +8,17 @@
   void yyerror (const char *s);
 %}
 
-%token <id> CHAR ELSE WHILE IF INT SHORT DOUBLE RETURN VOID BITWISEAND BITWISEOR BITWISEXOR
-%token <id> AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
-%token <id> RESERVED RBRACE RPAR SEMI ID INTLIT CHRLIT REALLIT CHRLIT_INV CHRLIT_UNT
+%union{
+  char* value;
+  struct node *node;
+}
+
+%token CHAR ELSE WHILE IF INT SHORT DOUBLE RETURN VOID BITWISEAND BITWISEOR BITWISEXOR
+%token AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
+%token RESERVED RBRACE RPAR SEMI REALLIT CHRLIT_INV CHRLIT_UNT
+
+%token <value> ID INTLIT CHRLIT
+
 
 %left COMMA
 %right ASSIGN
@@ -28,15 +36,10 @@
 %nonassoc THEN
 %nonassoc ELSE
 
-%union{
-  int value;
-  char* id;
-  struct node *node;
-}
 
 %type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty FunctionDefinition
             FunctionDeclaration Declaration FunctionDeclarator TypeSpec FunctionBody Declarator
-            Expr ParameterList
+            Expr ParameterList ParameterDeclaration
 
 
 %%
@@ -48,17 +51,16 @@
 Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {ast = insert_node("Program", NULL, 2, $1, $2);}
        ;
 
-FunctionsAndDeclarations: FunctionDefinition                                              {;}
-                        | FunctionDeclaration                                             {;}
-                        | Declaration                                                     {;}
+FunctionsAndDeclarations: FunctionDefinition                                              {$$=$1;}
+                        | FunctionDeclaration                                             {$$=$1;}
+                        | Declaration                                                     {$$=$1;}
                         ;
 
 FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty     {$$ = add_sibling($1, $2);}
                              | /*empty*/                                                  {$$ = NULL;}
                              ;
 
-FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody                              /*{$$ = insert_node("FunctionDefinition", NULL, 3, $1, $2, $3);}*/
-                                                                                          {$$ = insert_node("FunctionDefinition", NULL, 1, $1);}
+FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody                              {$$ = insert_node("FuncDefinition", NULL, 3, $1, $2, $3);}
                   ;
 
 FunctionBody: LBRACE DeclarationsAndStatements RBRACE         {;}
@@ -91,17 +93,17 @@ StatementList: StatementList StatementWithError                          {;}
              | StatementWithError                                        {;}
              ;
 
-FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {$$ = insert_node("FunctionDeclaration", NULL, 3, $1, $2, $3);}
+FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {$$ = insert_node("FuncDeclaration", NULL, 2, $1, $2);}
                    ;
 
-FunctionDeclarator: ID LPAR ParameterList RPAR              {$$ = insert_node("FunctionDeclarator", NULL, 2, $1, $3);}
+FunctionDeclarator: ID LPAR ParameterList RPAR              {printf("---%s----\n", $1);$$ = add_sibling(insert_node("Id", $1, 0), $3);}
                   ;
 
 ParameterList: ParameterDeclaration CommaParamDeclaration   {;}
              ;
 
-ParameterDeclaration: TypeSpec ID                           {;}
-                    | TypeSpec
+ParameterDeclaration: TypeSpec ID                           {$$ = insert_node("ParamDeclaration", NULL, 2, $1, $2);}
+                    | TypeSpec                              {$$ = insert_node("ParamDeclaration", NULL, 1, $1);}
                     ;
 
 CommaParamDeclaration: COMMA ParameterList                  {;}
@@ -116,16 +118,16 @@ CommaDeclarator: COMMA Declarator CommaDeclarator           {;}
                | /*empty*/                                  {;}
                ;
 
-TypeSpec: CHAR    {;}
+TypeSpec: CHAR    {$$ = insert_node("Char", NULL, 0);}
         | INT     {$$ = insert_node("Int", NULL, 0);}
-        | VOID    {;}
-        | SHORT   {;}
-        | DOUBLE  {;}
+        | VOID    {$$ = insert_node("Void", NULL, 0);}
+        | SHORT   {$$ = insert_node("Short", NULL, 0);}
+        | DOUBLE  {$$ = insert_node("Double", NULL, 0);}
         ;
 
 /*ASSIGN EXPR  optional*/
-Declarator: ID ASSIGN Expr        {printf("ALLO\n"); $$ = insert_node("Declarator", NULL, 3, $1, $2, $3);}
-          | ID                    {printf("Oi\n"); $$ = insert_node("Id", $1, 0);}
+Declarator: ID ASSIGN Expr        {printf("ALLO\n"); $$ = insert_node("Declarator", $1, 2, $1, $3);}
+          | ID                    {printf("Ola colega\n"); $$ = insert_node("Id", $1, 0);}
           ;
 
 /*[Expr{COMMA Expr}]*/
