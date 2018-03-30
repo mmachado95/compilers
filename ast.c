@@ -80,6 +80,7 @@ void print_ast(node_t *n, int depth){
 
   if(n->child != NULL)
     print_ast(n->child, depth + 1);
-  if(n->sibling != NULL)
+  if(n->sibling != NULL) {
     print_ast(n->sibling, depth);
+  }
 }
