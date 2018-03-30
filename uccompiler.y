@@ -131,40 +131,41 @@ Declarator: ID ASSIGN Expr        {printf("ALLO\n"); $$ = insert_node("Declarato
           ;
 
 /*[Expr{COMMA Expr}]*/
-Expr: Expr ASSIGN Expr            {;}
-    | Expr PLUS Expr              {;}
-    | Expr MINUS Expr             {;}
-    | Expr MUL Expr               {;}
-    | Expr DIV Expr               {;}
-    | Expr MOD Expr               {;}
-    | Expr OR Expr                {;}
-    | Expr AND Expr               {;}
-    | Expr BITWISEAND Expr        {;}
-    | Expr BITWISEOR Expr         {;}
-    | Expr BITWISEXOR Expr        {;}
-    | Expr EQ Expr                {;}
-    | Expr NE Expr                {;}
-    | Expr LE Expr                {;}
-    | Expr GE Expr                {;}
-    | Expr LT Expr                {;}
-    | Expr GT Expr                {;}
-    | PLUS Expr                   {;}
-    | MINUS Expr                  {;}
-    | NOT Expr                    {;}
-    | ID LPAR ExpressionList RPAR {;}
-    | ID                          {;}
-    | INTLIT                      {;}
-    | CHRLIT                      {;}
-    | REALLIT                     {;}
-    | LPAR CommaExpr RPAR         {;}
-    | ID LPAR error RPAR          {;}
-    | LPAR error RPAR             {;}
+Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
+    | Expr PLUS Expr              {$$ = insert_node("Add", NULL, 2, $1, $3);}
+    | Expr MINUS Expr             {$$ = insert_node("Sub", NULL, 2, $1, $3);}
+    | Expr MUL Expr               {$$ = insert_node("Mul", NULL, 2, $1, $3);}
+    | Expr DIV Expr               {$$ = insert_node("Div", NULL, 2, $1, $3);}
+    | Expr MOD Expr               {$$ = insert_node("Mod", NULL, 2, $1, $3);}
+    | Expr OR Expr                {$$ = insert_node("Ord", NULL, 2, $1, $3);}
+    | Expr AND Expr               {$$ = insert_node("And", NULL, 2, $1, $3);}
+    | Expr BITWISEAND Expr        {$$ = insert_node("BitWiseAnd", NULL, 2, $1, $3);}
+    | Expr BITWISEOR Expr         {$$ = insert_node("BitWiseOr", NULL, 2, $1, $3);}
+    | Expr BITWISEXOR Expr        {$$ = insert_node("BitWiseXor", NULL, 2, $1, $3);}
+    | Expr EQ Expr                {$$ = insert_node("Eq", NULL, 2, $1, $3);}
+    | Expr NE Expr                {$$ = insert_node("Ne", NULL, 2, $1, $3);}
+    | Expr LE Expr                {$$ = insert_node("Le", NULL, 2, $1, $3);}
+    | Expr GE Expr                {$$ = insert_node("Ge", NULL, 2, $1, $3);}
+    | Expr LT Expr                {$$ = insert_node("Lt", NULL, 2, $1, $3);}
+    | Expr GT Expr                {$$ = insert_node("Gt", NULL, 2, $1, $3);}
+    | PLUS Expr                   {$$ = insert_node("Plus", NULL, 1, $2);}
+    | MINUS Expr                  {$$ = insert_node("Minus", NULL, 1, $2);}
+    | NOT Expr                    {$$ = insert_node("Not", NULL, 1, $2);}
+    | ID LPAR ExpressionList RPAR {note_t *aux = insert_node("Id", $1, 0); $$ = insert_node("Call", NULL, 1, aux, $3);}
+    | ID                          {$$ = insert_node("Id", $1, 0);}
+    | INTLIT                      {$$ = insert_node("INTLIT", $1, 0);}
+    | CHRLIT                      {$$ = insert_node("CHRLIT", $1, 0);}
+    | REALLIT                     {$$ = insert_node("REALLIT", $1, 0);}
+    | LPAR CommaExpr RPAR         {$$ = $2;}
+    | ID LPAR error RPAR          {$$ = insert_node("Error", NULL);}
+    | LPAR error RPAR             {$$ = insert_node("Error", NULL);}
     ;
 
-CommaExpr: CommaExpr COMMA CommaExpr {;}
-         | Expr                      {;}
+/*Not sure, need to test this*/
+CommaExpr: CommaExpr COMMA CommaExpr {add_sibling($1, $3); $$=$1}
+         | Expr                      {$$=$1;}
          ;
 
-ExpressionList: CommaExpr         {;}
-              | /*empty*/         {;}
+ExpressionList: CommaExpr         {$$=$1;}
+              | /*empty*/         {$$ = insert_node("Null", NULL);}
               ;
