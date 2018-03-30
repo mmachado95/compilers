@@ -15,9 +15,9 @@
 
 %token CHAR ELSE WHILE IF INT SHORT DOUBLE RETURN VOID BITWISEAND BITWISEOR BITWISEXOR
 %token AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
-%token RESERVED RBRACE RPAR SEMI REALLIT CHRLIT_INV CHRLIT_UNT
+%token RESERVED RBRACE RPAR SEMI CHRLIT_INV CHRLIT_UNT
 
-%token <value> ID INTLIT CHRLIT
+%token <value> ID INTLIT CHRLIT REALLIT
 
 
 %left COMMA
@@ -39,7 +39,7 @@
 
 %type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty FunctionDefinition
             FunctionDeclaration Declaration FunctionDeclarator TypeSpec FunctionBody Declarator
-            Expr ParameterList ParameterDeclaration
+            Expr ParameterList ParameterDeclaration CommaExpr ExpressionList
 
 
 %%
@@ -151,21 +151,21 @@ Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
     | PLUS Expr                   {$$ = insert_node("Plus", NULL, 1, $2);}
     | MINUS Expr                  {$$ = insert_node("Minus", NULL, 1, $2);}
     | NOT Expr                    {$$ = insert_node("Not", NULL, 1, $2);}
-    | ID LPAR ExpressionList RPAR {note_t *aux = insert_node("Id", $1, 0); $$ = insert_node("Call", NULL, 1, aux, $3);}
+    | ID LPAR ExpressionList RPAR {node_t *aux = insert_node("Id", $1, 0); $$ = insert_node("Call", NULL, 1, aux, $3);}
     | ID                          {$$ = insert_node("Id", $1, 0);}
     | INTLIT                      {$$ = insert_node("INTLIT", $1, 0);}
     | CHRLIT                      {$$ = insert_node("CHRLIT", $1, 0);}
     | REALLIT                     {$$ = insert_node("REALLIT", $1, 0);}
     | LPAR CommaExpr RPAR         {$$ = $2;}
-    | ID LPAR error RPAR          {$$ = insert_node("Error", NULL);}
-    | LPAR error RPAR             {$$ = insert_node("Error", NULL);}
+    | ID LPAR error RPAR          {$$ = insert_node("Error", NULL, 0);}
+    | LPAR error RPAR             {$$ = insert_node("Error", NULL, 0);}
     ;
 
 /*Not sure, need to test this*/
-CommaExpr: CommaExpr COMMA CommaExpr {add_sibling($1, $3); $$=$1}
+CommaExpr: CommaExpr COMMA CommaExpr {add_sibling($1, $3); $$=$1;}
          | Expr                      {$$=$1;}
          ;
 
 ExpressionList: CommaExpr         {$$=$1;}
-              | /*empty*/         {$$ = insert_node("Null", NULL);}
+              | /*empty*/         {$$ = insert_node("Null", NULL, 0);}
               ;
