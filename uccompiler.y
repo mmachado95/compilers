@@ -13,11 +13,11 @@
   struct node *node;
 }
 
-%token CHAR ELSE WHILE IF INT SHORT DOUBLE RETURN VOID BITWISEAND BITWISEOR BITWISEXOR
+%token CHAR ELSE IF INT SHORT DOUBLE RETURN VOID BITWISEAND BITWISEOR BITWISEXOR
 %token AND ASSIGN MUL COMMA DIV EQ GE GT LBRACE LE LPAR LT MINUS MOD NE NOT OR PLUS
 %token RESERVED RBRACE RPAR SEMI CHRLIT_INV CHRLIT_UNT
 
-%token <value> ID INTLIT CHRLIT REALLIT
+%token <value> ID INTLIT CHRLIT REALLIT WHILE
 
 
 %left COMMA
@@ -39,7 +39,8 @@
 
 %type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty FunctionDefinition
             FunctionDeclaration Declaration FunctionDeclarator TypeSpec FunctionBody Declarator
-            Expr ParameterList ParameterDeclaration CommaExpr ExpressionList
+            Expr ParameterList ParameterDeclaration CommaExpr ExpressionList DeclarationsAndStatements
+            Statement
 
 
 %%
@@ -63,14 +64,14 @@ FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarations
 FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody                              {$$ = insert_node("FuncDefinition", NULL, 3, $1, $2, $3);}
                   ;
 
-FunctionBody: LBRACE DeclarationsAndStatements RBRACE         {;}
-            | LBRACE RBRACE                                   {;}
+FunctionBody: LBRACE DeclarationsAndStatements RBRACE                                     {$$ = insert_node("FunctionBody", NULL, 1, $2);}
+            | LBRACE RBRACE                                                               {$$ = insert_node("FunctionBody", NULL, 0);}
             ;
 
-DeclarationsAndStatements: DeclarationsAndStatements Statement                {;}
-                         | DeclarationsAndStatements Declaration              {;}
-                         | Statement                                          {;}
-                         | Declaration                                        {;}
+DeclarationsAndStatements: DeclarationsAndStatements Statement                            {$$ = add_sibling($1, $2);}
+                         | DeclarationsAndStatements Declaration                          {$$ = add_sibling($1, $2);}
+                         | Statement                                                      {$$=$1;}
+                         | Declaration                                                    {$$=$1;}
                          ;
 
 StatementWithError: Statement             {;}
@@ -84,9 +85,9 @@ Statement: CommaExpr SEMI                                               {;}
          | LBRACE error RBRACE                                          {;}
          | IF LPAR CommaExpr RPAR Statement %prec THEN                  {;}
          | IF LPAR CommaExpr RPAR Statement ELSE Statement              {;}
-         | WHILE LPAR CommaExpr RPAR Statement                          {;}
-         | RETURN CommaExpr SEMI                                        {;}
-         | RETURN SEMI                                                  {;}
+         | WHILE LPAR CommaExpr RPAR Statement                          {add_sibling(insert_node("While", NULL, 0), $3); $$=$5;}
+         | RETURN CommaExpr SEMI                                        {add_sibling(insert_node("Return", NULL, 0), $2);}
+         | RETURN SEMI                                                  {insert_node("Return", NULL, 0);}
          ;
 
 StatementList: StatementList StatementWithError                          {;}
@@ -96,10 +97,10 @@ StatementList: StatementList StatementWithError                          {;}
 FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {$$ = insert_node("FuncDeclaration", NULL, 2, $1, $2);}
                    ;
 
-FunctionDeclarator: ID LPAR ParameterList RPAR              {printf("---%s----\n", $1);$$ = add_sibling(insert_node("Id", $1, 0), $3);}
+FunctionDeclarator: ID LPAR ParameterList RPAR              {$$ = add_sibling(insert_node("Id", $1, 0), $3);}
                   ;
 
-ParameterList: ParameterDeclaration CommaParamDeclaration   {;}
+ParameterList: ParameterDeclaration CommaParamDeclaration   {$$ = insert_node("ParamList", NULL, 1, $1);}
              ;
 
 ParameterDeclaration: TypeSpec ID                           {$$ = insert_node("ParamDeclaration", NULL, 2, $1, $2);}
@@ -110,7 +111,7 @@ CommaParamDeclaration: COMMA ParameterList                  {;}
                      | /*empty*/                            {;}
                      ;
 
-Declaration: TypeSpec Declarator CommaDeclarator SEMI       {;}
+Declaration: TypeSpec Declarator CommaDeclarator SEMI       {$$ = insert_node("Declaration", NULL, 3, $1, $2);}
            | error SEMI                                     {;}
            ;
 
@@ -126,8 +127,8 @@ TypeSpec: CHAR    {$$ = insert_node("Char", NULL, 0);}
         ;
 
 /*ASSIGN EXPR  optional*/
-Declarator: ID ASSIGN Expr        {printf("ALLO\n"); $$ = insert_node("Declarator", $1, 2, $1, $3);}
-          | ID                    {printf("Ola colega\n"); $$ = insert_node("Id", $1, 0);}
+Declarator: ID ASSIGN Expr        {$$ = add_sibling(insert_node("Id", $1, 0), $3);}
+          | ID                    {$$ = insert_node("Id", $1, 0);}
           ;
 
 /*[Expr{COMMA Expr}]*/
