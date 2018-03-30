@@ -32,7 +32,7 @@ node_t* insert_node(char *type, char *value, int n_args, ...) {
 
   // create node
   node_t *new_node = create_node(type, value);
-  printf("%s\n", new_node->type);
+  printf("New node -> %s %s\n", new_node->type, new_node->value);
   node_t *aux;
 
   // iterate extra args

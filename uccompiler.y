@@ -86,7 +86,7 @@ Statement: CommaExpr SEMI                                               {$$=$1;}
          | IF LPAR CommaExpr RPAR Statement %prec THEN                  {printf("\n\nNOT IMPLEMENTED YET 8\n\n");}
          | IF LPAR CommaExpr RPAR Statement ELSE Statement              {printf("\n\nNOT IMPLEMENTED YET 9\n\n");}
          | WHILE LPAR CommaExpr RPAR Statement                          {insert_node("While", NULL, 2, $3, $5);}
-         | RETURN CommaExpr SEMI                                        {add_sibling(insert_node("Return", NULL, 0), $2);}
+         | RETURN CommaExpr SEMI                                        {insert_node("Return", NULL, 1, $2);}
          | RETURN SEMI                                                  {insert_node("Return", NULL, 0);}
          ;
 
@@ -111,7 +111,7 @@ CommaParamDeclaration: COMMA ParameterList                  {printf("\n\nNOT IMP
                      | /*empty*/                            {$$ = NULL;}
                      ;
 
-Declaration: TypeSpec Declarator CommaDeclarator SEMI       {$$ = insert_node("Declaration", NULL, 3, $1, $2);}
+Declaration: TypeSpec Declarator CommaDeclarator SEMI       {$$ = insert_node("Declaration", NULL, 3, $1, $2, $3);}
            | error SEMI                                     {printf("\n\nNOT IMPLEMENTED YET 12\n\n");}
            ;
 
