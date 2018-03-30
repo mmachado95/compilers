@@ -131,7 +131,6 @@ int main(int argc, char *argv[]) {
     if (strcmp(argv[1], "-t") == 0) {
       errors = 0;
       yyparse();
-      printf("\n\nOI\n\n");
       print_ast(ast, 0);
     }
   }

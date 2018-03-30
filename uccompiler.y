@@ -85,12 +85,12 @@ Statement: CommaExpr SEMI                                               {$$=$1;}
          | LBRACE error RBRACE                                          {printf("\n\nNOT IMPLEMENTED YET 7\n\n");}
          | IF LPAR CommaExpr RPAR Statement %prec THEN                  {printf("\n\nNOT IMPLEMENTED YET 8\n\n");}
          | IF LPAR CommaExpr RPAR Statement ELSE Statement              {printf("\n\nNOT IMPLEMENTED YET 9\n\n");}
-         | WHILE LPAR CommaExpr RPAR Statement                          {printf("NOW2\n\n");insert_node("While", NULL, 2, $3, $5);}
-         | RETURN CommaExpr SEMI                                        {insert_node("Return", NULL, 1, $2);}
-         | RETURN SEMI                                                  {insert_node("Return", NULL, 0);}
+         | WHILE LPAR CommaExpr RPAR Statement                          {$$ = insert_node("While", NULL, 2, $3, $5);}
+         | RETURN CommaExpr SEMI                                        {$$ = insert_node("Return", NULL, 1, $2);}
+         | RETURN SEMI                                                  {$$ = insert_node("Return", NULL, 0);}
          ;
 
-StatementList: StatementList StatementWithError                          {insert_node("Statlist", NULL, 2, $1, $2);}
+StatementList: StatementList StatementWithError                          {insert_node("Statlist", NULL, 0); $$=$2;}
              | StatementWithError                                        {$$=$1;}
              ;
 

@@ -32,7 +32,7 @@ node_t* insert_node(char *type, char *value, int n_args, ...) {
 
   // create node
   node_t *new_node = create_node(type, value);
-  printf("New node -> %s %s\n", new_node->type, new_node->value);
+  //printf("New node -> %s %s\n", new_node->type, new_node->value);
   node_t *aux;
 
   // iterate extra args
@@ -40,7 +40,7 @@ node_t* insert_node(char *type, char *value, int n_args, ...) {
     node_t *n = va_arg(args, node_t *);
 
     if (n != NULL) {
-      printf("Adding child to node %s -> %s!!\n", new_node->type, n->type);
+      //printf("Adding child to node %s -> %s!!\n", new_node->type, n->type);
       if (new_node->child == NULL) {
         new_node->child = n;
         aux = n;
@@ -65,6 +65,9 @@ node_t *add_sibling(node_t *original, node_t *sibling) {
   }
 
   aux->sibling = sibling;
+  //printf("Adding sibling to node %s!!\n", original->type);
+  //printf("-> %s!!\n", sibling->type);
+
   return original;
 }
 
