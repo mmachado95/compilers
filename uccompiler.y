@@ -40,7 +40,7 @@
 %type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty FunctionDefinition
             FunctionDeclaration Declaration FunctionDeclarator TypeSpec FunctionBody Declarator
             Expr ParameterList ParameterDeclaration CommaExpr ExpressionList DeclarationsAndStatements
-            Statement
+            Statement CommaParamDeclaration CommaDeclarator StatementWithError StatementList
 
 
 %%
@@ -74,24 +74,24 @@ DeclarationsAndStatements: DeclarationsAndStatements Statement                  
                          | Declaration                                                    {$$=$1;}
                          ;
 
-StatementWithError: Statement             {;}
-                  | error SEMI            {;}
+StatementWithError: Statement                                                             {$$=$1;}
+                  | error SEMI                                                            {printf("\n\nNOT IMPLEMENTED YET 2\n\n");}
                   ;
 
-Statement: CommaExpr SEMI                                               {;}
-         | SEMI                                                         {;}
-         | LBRACE StatementList RBRACE                                  {;}
-         | LBRACE RBRACE                                                {;}
-         | LBRACE error RBRACE                                          {;}
-         | IF LPAR CommaExpr RPAR Statement %prec THEN                  {;}
-         | IF LPAR CommaExpr RPAR Statement ELSE Statement              {;}
-         | WHILE LPAR CommaExpr RPAR Statement                          {add_sibling(insert_node("While", NULL, 0), $3); $$=$5;}
+Statement: CommaExpr SEMI                                               {$$=$1;}
+         | SEMI                                                         {printf("\n\nNOT IMPLEMENTED YET 4\n\n");}
+         | LBRACE StatementList RBRACE                                  {$$=$2;}
+         | LBRACE RBRACE                                                {printf("\n\nNOT IMPLEMENTED YET 6\n\n");}
+         | LBRACE error RBRACE                                          {printf("\n\nNOT IMPLEMENTED YET 7\n\n");}
+         | IF LPAR CommaExpr RPAR Statement %prec THEN                  {printf("\n\nNOT IMPLEMENTED YET 8\n\n");}
+         | IF LPAR CommaExpr RPAR Statement ELSE Statement              {printf("\n\nNOT IMPLEMENTED YET 9\n\n");}
+         | WHILE LPAR CommaExpr RPAR Statement                          {insert_node("While", NULL, 2, $3, $5);}
          | RETURN CommaExpr SEMI                                        {add_sibling(insert_node("Return", NULL, 0), $2);}
          | RETURN SEMI                                                  {insert_node("Return", NULL, 0);}
          ;
 
-StatementList: StatementList StatementWithError                          {;}
-             | StatementWithError                                        {;}
+StatementList: StatementList StatementWithError                          {add_sibling(insert_node("Statlist", NULL, 0), $2);}
+             | StatementWithError                                        {$$=$1;}
              ;
 
 FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {$$ = insert_node("FuncDeclaration", NULL, 2, $1, $2);}
@@ -100,23 +100,23 @@ FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {$$ = insert_node("F
 FunctionDeclarator: ID LPAR ParameterList RPAR              {$$ = add_sibling(insert_node("Id", $1, 0), $3);}
                   ;
 
-ParameterList: ParameterDeclaration CommaParamDeclaration   {$$ = insert_node("ParamList", NULL, 1, $1);}
+ParameterList: ParameterDeclaration CommaParamDeclaration   {$$ = insert_node("ParamList", NULL, 2, $1, $2);}
              ;
 
 ParameterDeclaration: TypeSpec ID                           {$$ = insert_node("ParamDeclaration", NULL, 2, $1, $2);}
                     | TypeSpec                              {$$ = insert_node("ParamDeclaration", NULL, 1, $1);}
                     ;
 
-CommaParamDeclaration: COMMA ParameterList                  {;}
-                     | /*empty*/                            {;}
+CommaParamDeclaration: COMMA ParameterList                  {printf("\n\nNOT IMPLEMENTED YET 10\n\n");}
+                     | /*empty*/                            {$$ = NULL;}
                      ;
 
 Declaration: TypeSpec Declarator CommaDeclarator SEMI       {$$ = insert_node("Declaration", NULL, 3, $1, $2);}
-           | error SEMI                                     {;}
+           | error SEMI                                     {printf("\n\nNOT IMPLEMENTED YET 12\n\n");}
            ;
 
-CommaDeclarator: COMMA Declarator CommaDeclarator           {;}
-               | /*empty*/                                  {;}
+CommaDeclarator: COMMA Declarator CommaDeclarator           {printf("\n\nNOT IMPLEMENTED YET 13\n\n");}
+               | /*empty*/                                  {$$ = NULL;}
                ;
 
 TypeSpec: CHAR    {$$ = insert_node("Char", NULL, 0);}
@@ -152,7 +152,7 @@ Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
     | PLUS Expr                   {$$ = insert_node("Plus", NULL, 1, $2);}
     | MINUS Expr                  {$$ = insert_node("Minus", NULL, 1, $2);}
     | NOT Expr                    {$$ = insert_node("Not", NULL, 1, $2);}
-    | ID LPAR ExpressionList RPAR {node_t *aux = insert_node("Id", $1, 0); $$ = insert_node("Call", NULL, 1, aux, $3);}
+    | ID LPAR ExpressionList RPAR {$$ = insert_node("Call", NULL, 2, insert_node("Id", $1, 0), $3);}
     | ID                          {$$ = insert_node("Id", $1, 0);}
     | INTLIT                      {$$ = insert_node("INTLIT", $1, 0);}
     | CHRLIT                      {$$ = insert_node("CHRLIT", $1, 0);}
