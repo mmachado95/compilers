@@ -100,14 +100,14 @@ FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {$$ = insert_node("F
 FunctionDeclarator: ID LPAR ParameterList RPAR              {$$ = add_sibling(insert_node("Id", $1, 0), $3);}
                   ;
 
-ParameterList: ParameterDeclaration CommaParamDeclaration   {$$ = add_sibling(insert_node("ParamList", NULL, 1, $1), $2);}
+ParameterList: ParameterDeclaration CommaParamDeclaration   {$$ = insert_node("ParamList", NULL, 2, $1, $2);}
              ;
 
 ParameterDeclaration: TypeSpec ID                           {$$ = insert_node("ParamDeclaration", NULL, 2, $1, insert_node("Id", $2, 0));}
                     | TypeSpec                              {$$ = insert_node("ParamDeclaration", NULL, 1, $1);}
                     ;
 
-CommaParamDeclaration: COMMA ParameterList                  {$$=$2;}
+CommaParamDeclaration: COMMA ParameterDeclaration           {$$=$2;}
                      | /*empty*/                            {$$ = NULL;}
                      ;
 
