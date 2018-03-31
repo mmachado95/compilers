@@ -64,8 +64,8 @@ FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarations
 FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody                              {$$ = insert_node("FuncDefinition", NULL, 3, $1, $2, $3);}
                   ;
 
-FunctionBody: LBRACE DeclarationsAndStatements RBRACE                                     {$$ = insert_node("FunctionBody", NULL, 1, $2);}
-            | LBRACE RBRACE                                                               {$$ = insert_node("FunctionBody", NULL, 0);}
+FunctionBody: LBRACE DeclarationsAndStatements RBRACE                                     {$$ = insert_node("FuncBody", NULL, 1, $2);}
+            | LBRACE RBRACE                                                               {$$ = insert_node("FuncBody", NULL, 0);}
             ;
 
 DeclarationsAndStatements: DeclarationsAndStatements Statement                            {$$ = add_sibling($1, $2);}
@@ -164,16 +164,16 @@ Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
     | NOT Expr                    {$$ = insert_node("Not", NULL, 1, $2);}
     | ID LPAR ExpressionList RPAR {$$ = insert_node("Call", NULL, 2, insert_node("Id", $1, 0), $3);}
     | ID                          {$$ = insert_node("Id", $1, 0);}
-    | INTLIT                      {$$ = insert_node("INTLIT", $1, 0);}
-    | CHRLIT                      {$$ = insert_node("CHRLIT", $1, 0);}
-    | REALLIT                     {$$ = insert_node("REALLIT", $1, 0);}
+    | INTLIT                      {$$ = insert_node("IntLit", $1, 0);}
+    | CHRLIT                      {$$ = insert_node("ChrLit", $1, 0);}
+    | REALLIT                     {$$ = insert_node("RealLit", $1, 0);}
     | LPAR CommaExpr RPAR         {$$ = $2;}
     | ID LPAR error RPAR          {$$ = insert_node("Error", NULL, 0);}
     | LPAR error RPAR             {$$ = insert_node("Error", NULL, 0);}
     ;
 
 /*Not sure, need to test this*/
-CommaExpr: CommaExpr COMMA CommaExpr {$$ = insert_node("Comma", NULL, 2, $1, $3);}
+CommaExpr: CommaExpr COMMA CommaExpr {$$ = add_sibling($1, $3);}
          | Expr                      {$$=$1;}
          ;
 
