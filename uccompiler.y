@@ -44,11 +44,6 @@
 
 
 %%
-/* Notes about the EBNF grammar
-* [] -> means optional
-* {} -> means 0 or more times
-*/
-
 Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {ast = insert_node("Program", NULL, 2, $1, $2);}
        ;
 
@@ -130,19 +125,17 @@ TypeSpec: CHAR    {$$ = insert_node("Char", NULL, 0);}
         | DOUBLE  {$$ = insert_node("Double", NULL, 0);}
         ;
 
-/*ASSIGN EXPR  optional*/
 Declarator: ID ASSIGN Expr        {$$ = insert_node("Declaration", NULL, 2, insert_node("Id", $1, 0), $3);}
           | ID                    {$$ = insert_node("Declaration", NULL, 1, insert_node("Id", $1, 0));}
           ;
 
-/*[Expr{COMMA Expr}]*/
 Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
     | Expr PLUS Expr              {$$ = insert_node("Add", NULL, 2, $1, $3);}
     | Expr MINUS Expr             {$$ = insert_node("Sub", NULL, 2, $1, $3);}
     | Expr MUL Expr               {$$ = insert_node("Mul", NULL, 2, $1, $3);}
     | Expr DIV Expr               {$$ = insert_node("Div", NULL, 2, $1, $3);}
     | Expr MOD Expr               {$$ = insert_node("Mod", NULL, 2, $1, $3);}
-    | Expr OR Expr                {$$ = insert_node("Ord", NULL, 2, $1, $3);}
+    | Expr OR Expr                {$$ = insert_node("Or", NULL, 2, $1, $3);}
     | Expr AND Expr               {$$ = insert_node("And", NULL, 2, $1, $3);}
     | Expr BITWISEAND Expr        {$$ = insert_node("BitWiseAnd", NULL, 2, $1, $3);}
     | Expr BITWISEOR Expr         {$$ = insert_node("BitWiseOr", NULL, 2, $1, $3);}
@@ -166,9 +159,8 @@ Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
     | LPAR error RPAR             {$$ = insert_node("Error", NULL, 0);}
     ;
 
-/*Not sure, need to test this*/
-CommaExpr: CommaExpr COMMA CommaExpr {$$ = add_sibling($1, $3);}
-         | Expr                      {$$=$1;}
+CommaExpr: CommaExpr COMMA CommaExpr   {$$ = add_sibling($1, $3);}
+         | Expr                        {$$=$1;}
          ;
 
 ExpressionList: CommaExpr         {$$=$1;}
