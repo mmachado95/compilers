@@ -71,6 +71,16 @@ node_t *add_sibling(node_t *original, node_t *sibling) {
   return original;
 }
 
+void insert_node_special(node_t *first, node_t *second) {
+  node_t *n = second;
+  while(n != NULL){
+    node_t *t = insert_node(first->type, NULL, 0);
+    t = add_sibling(t, n->child);
+    n->child = t;
+    n = n->sibling;
+  }
+}
+
 void print_ast(node_t *n, int depth){
   for(int i = 0; i < depth; i++)
     printf("..");

@@ -13,4 +13,5 @@ node_t *ast;
 node_t *create_node(char *type, char *value);
 node_t *insert_node(char *type, char *value, int n_args, ...);
 node_t *add_sibling(node_t *original, node_t *sibling);
+void insert_node_special(node_t *first, node_t *second);
 void print_ast();

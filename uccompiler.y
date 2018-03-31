@@ -113,13 +113,7 @@ CommaParamDeclaration: COMMA ParameterDeclaration CommaParamDeclaration         
 
 Declaration: TypeSpec Declarator CommaDeclarator SEMI       {
                                                               $2 = add_sibling($2, $3);
-                                                              node_t *n = $2;
-                                                              while(n != NULL){
-                                                                node_t *t = insert_node($1->type, NULL, 0);
-                                                                t = add_sibling(t, n->child);
-                                                                n->child = t;
-                                                                n = n->sibling;
-                                                              }
+                                                              insert_node_special($1, $2);
                                                               $$ = $2;
                                                             }
            | error SEMI                                     {$$ = insert_node("Error", NULL, 0);}

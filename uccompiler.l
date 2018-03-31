@@ -3,12 +3,12 @@
   #include <stdio.h>
   #include "y.tab.h"
   #include "ast.h"
-  #define PRINTF if(errors == 0) printf
+  #define PRINTF if(print_tokens == 1) printf
   int line = 1;
   int col = 1;
   int beginning_line;
   int beginning_col;
-  int errors;
+  int print_tokens;
 %}
 
 %X COMMENT
@@ -125,17 +125,18 @@ CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})*(\\)*{ANYCHAR}*
 int main(int argc, char *argv[]) {
   if (argc > 1) {
     if (strcmp(argv[1], "-l") == 0) {
-      errors = 0;
+      print_tokens = 1;
+      yyparse();
       yylex();
     }
     if (strcmp(argv[1], "-t") == 0) {
-      errors = 0;
+      print_tokens = 0;
       yyparse();
       print_ast(ast, 0);
     }
   }
   else {
-    errors = 1;
+    print_tokens = 0;
     yyparse();
   }
   return 0;
