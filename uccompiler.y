@@ -127,8 +127,8 @@ TypeSpec: CHAR    {$$ = insert_node("Char", NULL, 0);}
         ;
 
 /*ASSIGN EXPR  optional*/
-Declarator: ID ASSIGN Expr        {$$ = add_sibling(insert_node("Id", $1, 0), $3);}
-          | ID                    {$$ = insert_node("Id", $1, 0);}
+Declarator: ID ASSIGN Expr        {$$ = insert_node("Declaration", NULL, 2, insert_node("Id", $1, 0), $3);}
+          | ID                    {$$ = insert_node("Declaration", NULL, 1, insert_node("Id", $1, 0));}
           ;
 
 /*[Expr{COMMA Expr}]*/
@@ -163,7 +163,7 @@ Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
     ;
 
 /*Not sure, need to test this*/
-CommaExpr: CommaExpr COMMA CommaExpr {add_sibling($1, $3); $$=$1;}
+CommaExpr: CommaExpr COMMA CommaExpr {$$ = insert_node("Comma", NULL, 2, $1, $3);}
          | Expr                      {$$=$1;}
          ;
 
