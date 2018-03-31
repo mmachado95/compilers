@@ -68,10 +68,10 @@ FunctionBody: LBRACE DeclarationsAndStatements RBRACE                           
             | LBRACE RBRACE                                                               {$$ = insert_node("FunctionBody", NULL, 0);}
             ;
 
-DeclarationsAndStatements: DeclarationsAndStatements Statement                            {printf("oi1\n");$$ = add_sibling($1, $2);}
-                         | DeclarationsAndStatements Declaration                          {printf("oi2\n");$$ = add_sibling($1, $2);}
-                         | Statement                                                      {printf("oi3\n");$$=$1;}
-                         | Declaration                                                    {printf("oi4\n");$$=$1;}
+DeclarationsAndStatements: DeclarationsAndStatements Statement                            {$$ = add_sibling($1, $2);}
+                         | DeclarationsAndStatements Declaration                          {$$ = add_sibling($1, $2);}
+                         | Statement                                                      {$$=$1;}
+                         | Declaration                                                    {$$=$1;}
                          ;
 
 StatementWithError: Statement                                                             {$$=$1;}
@@ -116,7 +116,7 @@ Declaration: TypeSpec Declarator CommaDeclarator SEMI       {
                                                               node_t *n = $2;
                                                               while(n != NULL){
                                                                 node_t *t = insert_node($1->type, NULL, 0);
-                                                                t = add_sibling(t, t->child);
+                                                                t = add_sibling(t, n->child);
                                                                 n->child = t;
                                                                 n = n->sibling;
                                                               }
