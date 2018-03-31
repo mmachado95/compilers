@@ -107,8 +107,8 @@ ParameterDeclaration: TypeSpec ID                           {$$ = insert_node("P
                     | TypeSpec                              {$$ = insert_node("ParamDeclaration", NULL, 1, $1);}
                     ;
 
-CommaParamDeclaration: COMMA ParameterDeclaration           {$$=$2;}
-                     | /*empty*/                            {$$ = NULL;}
+CommaParamDeclaration: COMMA ParameterDeclaration CommaParamDeclaration           {$$ = add_sibling($2, $3);}
+                     | /*empty*/                                                  {$$ = NULL;}
                      ;
 
 Declaration: TypeSpec Declarator CommaDeclarator SEMI       {$$ = insert_node("Declaration", NULL, 3, $1, $2, $3);}
