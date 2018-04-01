@@ -32,7 +32,6 @@
 %left BITWISEXOR
 %left BITWISEAND
 %right NOT
-%left LPAR RPAR
 
 %nonassoc THEN
 %nonassoc ELSE
