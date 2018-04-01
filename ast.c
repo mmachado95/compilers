@@ -72,7 +72,7 @@ node_t *add_sibling(node_t *original, node_t *sibling) {
 }
 
 node_t *make_node_correct(node_t *node_to_correct) {
-  if (strcmp(node_to_correct->type, "Error") == 0 || node_to_correct == NULL) {
+  if (node_to_correct == NULL) {
     node_to_correct = insert_node("Null", NULL, 0);
   }
   return node_to_correct;

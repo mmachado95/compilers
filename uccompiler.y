@@ -24,14 +24,15 @@
 %right ASSIGN
 %left OR
 %left AND
-%left BITWISEOR
-%left BITWISEXOR
-%left BITWISEAND
 %left EQ NE
 %left LT GT LE GE
 %left PLUS MINUS
 %left MUL DIV MOD
+%left BITWISEOR
+%left BITWISEXOR
+%left BITWISEAND
 %right NOT
+%left LPAR RPAR
 
 %nonassoc THEN
 %nonassoc ELSE
@@ -70,14 +71,14 @@ DeclarationsAndStatements: DeclarationsAndStatements Statement                  
                          ;
 
 StatementWithError: Statement                                                             {$$=$1;}
-                  | error SEMI                                                            {$$ = insert_node("Error", NULL, 0);}
+                  | error SEMI                                                            {$$ = insert_node("Null", NULL, 0);}
                   ;
 
 Statement: CommaExpr SEMI                                               {$$=$1;}
          | SEMI                                                         {$$ = insert_node("Null", NULL, 0);}
          | LBRACE StatementList RBRACE                                  {if($2 != NULL && $2->sibling != NULL) {$$=insert_node("StatList", NULL, 1, $2);} else {$$=$2;}}
          | LBRACE RBRACE                                                {$$ = insert_node("Null", NULL, 0);}
-         | LBRACE error RBRACE                                          {$$ = insert_node("Error", NULL, 0);}
+         | LBRACE error RBRACE                                          {$$ = insert_node("Null", NULL, 0);}
          | IF LPAR CommaExpr RPAR Statement %prec THEN                  { $3 = make_node_correct($3); $5 = make_node_correct($5);
                                                                           $$ = insert_node("If", NULL, 3, $3, $5, insert_node("Null", NULL, 0));
                                                                         }
@@ -117,7 +118,7 @@ Declaration: TypeSpec Declarator CommaDeclarator SEMI       {
                                                               insert_node_special($1, $2);
                                                               $$ = $2;
                                                             }
-           | error SEMI                                     {$$ = insert_node("Error", NULL, 0);}
+           | error SEMI                                     {$$ = insert_node("Null", NULL, 0);}
            ;
 
 CommaDeclarator: COMMA Declarator CommaDeclarator           {$$ = add_sibling($2, $3);}
@@ -152,8 +153,8 @@ Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
     | Expr GE Expr                {$$ = insert_node("Ge", NULL, 2, $1, $3);}
     | Expr LT Expr                {$$ = insert_node("Lt", NULL, 2, $1, $3);}
     | Expr GT Expr                {$$ = insert_node("Gt", NULL, 2, $1, $3);}
-    | PLUS Expr                   {$$ = insert_node("Plus", NULL, 1, $2);}
-    | MINUS Expr                  {$$ = insert_node("Minus", NULL, 1, $2);}
+    | PLUS Expr %prec NOT                   {$$ = insert_node("Plus", NULL, 1, $2);}
+    | MINUS Expr %prec NOT                  {$$ = insert_node("Minus", NULL, 1, $2);}
     | NOT Expr                    {$$ = insert_node("Not", NULL, 1, $2);}
     | ID LPAR CommaExprTwo RPAR   {$$ = insert_node("Call", NULL, 2, insert_node("Id", $1, 0), $3);}
     | ID LPAR RPAR                {$$ = insert_node("Call", NULL, 1, insert_node("Id", $1, 0));}
@@ -162,8 +163,8 @@ Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
     | CHRLIT                      {$$ = insert_node("ChrLit", $1, 0);}
     | REALLIT                     {$$ = insert_node("RealLit", $1, 0);}
     | LPAR CommaExpr RPAR         {$$ = $2;}
-    | ID LPAR error RPAR          {$$ = insert_node("Error", NULL, 0);}
-    | LPAR error RPAR             {$$ = insert_node("Error", NULL, 0);}
+    | ID LPAR error RPAR          {$$ = insert_node("Null", NULL, 0);}
+    | LPAR error RPAR             {$$ = insert_node("Null", NULL, 0);}
     ;
 
 CommaExpr: CommaExpr COMMA CommaExpr   {$$ = insert_node("Comma", NULL, 2, $1, $3);}
