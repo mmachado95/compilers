@@ -75,7 +75,7 @@ StatementWithError: Statement                                                   
 
 Statement: CommaExpr SEMI                                               {$$=$1;}
          | SEMI                                                         {$$ = insert_node("Null", NULL, 0);}
-         | LBRACE StatementList RBRACE                                  {$$=$2;}
+         | LBRACE StatementList RBRACE                                  {if($2 != NULL && $2->sibling != NULL) {$$=insert_node("StatList", NULL, 1, $2);} else {$$=$2;}}
          | LBRACE RBRACE                                                {$$ = insert_node("Null", NULL, 0);}
          | LBRACE error RBRACE                                          {$$ = insert_node("Error", NULL, 0);}
          | IF LPAR CommaExpr RPAR Statement %prec THEN                  {$$ = insert_node("If", NULL, 3, $3, $5, insert_node("Null", NULL, 0));}
@@ -85,7 +85,7 @@ Statement: CommaExpr SEMI                                               {$$=$1;}
          | RETURN SEMI                                                  {$$ = insert_node("Return", NULL, 1, insert_node("Null", NULL, 0));}
          ;
 
-StatementList: StatementList StatementWithError                          {insert_node("Statlist", NULL, 0); $$=$2;}
+StatementList: StatementList StatementWithError                          {if($1 != NULL && strcmp($1->type, "Null")==0) {$$=$2;} else if($2 != NULL && strcmp($2->type, "Null")==0) {$$=$1;} else {$1 = add_sibling($1, $2);} $$=$1;}
              | StatementWithError                                        {$$=$1;}
              ;
 
