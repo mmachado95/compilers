@@ -39,7 +39,7 @@
 
 %type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty FunctionDefinition
             FunctionDeclaration Declaration FunctionDeclarator TypeSpec FunctionBody Declarator
-            Expr ParameterList ParameterDeclaration CommaExpr ExpressionList DeclarationsAndStatements
+            Expr ParameterList ParameterDeclaration CommaExpr CommaExprTwo DeclarationsAndStatements
             Statement CommaParamDeclaration CommaDeclarator StatementWithError StatementList
 
 
@@ -78,11 +78,11 @@ Statement: CommaExpr SEMI                                               {$$=$1;}
          | LBRACE StatementList RBRACE                                  {$$=$2;}
          | LBRACE RBRACE                                                {$$ = insert_node("Null", NULL, 0);}
          | LBRACE error RBRACE                                          {$$ = insert_node("Error", NULL, 0);}
-         | IF LPAR CommaExpr RPAR Statement %prec THEN                  {$$ = insert_node("If", NULL, 2, $3, $5);} /* TODO*/
+         | IF LPAR CommaExpr RPAR Statement %prec THEN                  {$$ = insert_node("If", NULL, 3, $3, $5, insert_node("Null", NULL, 0));}
          | IF LPAR CommaExpr RPAR Statement ELSE Statement              {$$ = insert_node("If", NULL, 3, $3, $5, $7);}
          | WHILE LPAR CommaExpr RPAR Statement                          {$$ = insert_node("While", NULL, 2, $3, $5);}
          | RETURN CommaExpr SEMI                                        {$$ = insert_node("Return", NULL, 1, $2);}
-         | RETURN SEMI                                                  {$$ = insert_node("Return", NULL, 0);}
+         | RETURN SEMI                                                  {$$ = insert_node("Return", NULL, 1, insert_node("Null", NULL, 0));}
          ;
 
 StatementList: StatementList StatementWithError                          {insert_node("Statlist", NULL, 0); $$=$2;}
@@ -149,7 +149,8 @@ Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
     | PLUS Expr                   {$$ = insert_node("Plus", NULL, 1, $2);}
     | MINUS Expr                  {$$ = insert_node("Minus", NULL, 1, $2);}
     | NOT Expr                    {$$ = insert_node("Not", NULL, 1, $2);}
-    | ID LPAR ExpressionList RPAR {$$ = insert_node("Call", NULL, 2, insert_node("Id", $1, 0), $3);}
+    | ID LPAR CommaExprTwo RPAR   {$$ = insert_node("Call", NULL, 2, insert_node("Id", $1, 0), $3);}
+    | ID LPAR RPAR                {$$ = insert_node("Call", NULL, 1, insert_node("Id", $1, 0));}
     | ID                          {$$ = insert_node("Id", $1, 0);}
     | INTLIT                      {$$ = insert_node("IntLit", $1, 0);}
     | CHRLIT                      {$$ = insert_node("ChrLit", $1, 0);}
@@ -159,10 +160,10 @@ Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
     | LPAR error RPAR             {$$ = insert_node("Error", NULL, 0);}
     ;
 
-CommaExpr: CommaExpr COMMA CommaExpr   {$$ = add_sibling($1, $3);}
+CommaExpr: CommaExpr COMMA CommaExpr   {$$ = insert_node("Comma", NULL, 2, $1, $3);}
          | Expr                        {$$=$1;}
          ;
 
-ExpressionList: CommaExpr         {$$=$1;}
-              | /*empty*/         {$$ = insert_node("Null", NULL, 0);}
-              ;
+CommaExprTwo: CommaExprTwo COMMA CommaExprTwo   {$$ = add_sibling($1, $3);}
+         | Expr                                 {$$=$1;}
+         ;
