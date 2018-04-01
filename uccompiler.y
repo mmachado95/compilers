@@ -74,10 +74,10 @@ StatementWithError: Statement                                                   
                   ;
 
 Statement: CommaExpr SEMI                                               {$$=$1;}
-         | SEMI                                                         {$$ = NULL;}
+         | SEMI                                                         {$$ = insert_node("Null", NULL, 0);}
          | LBRACE StatementList RBRACE                                  {$$=$2;}
-         | LBRACE RBRACE                                                {$$ = insert_node("Error", NULL, 0);}
-         | LBRACE error RBRACE                                          {$$ = NULL;}
+         | LBRACE RBRACE                                                {$$ = insert_node("Null", NULL, 0);}
+         | LBRACE error RBRACE                                          {$$ = insert_node("Error", NULL, 0);}
          | IF LPAR CommaExpr RPAR Statement %prec THEN                  {$$ = insert_node("If", NULL, 2, $3, $5);} /* TODO*/
          | IF LPAR CommaExpr RPAR Statement ELSE Statement              {$$ = insert_node("If", NULL, 3, $3, $5, $7);}
          | WHILE LPAR CommaExpr RPAR Statement                          {$$ = insert_node("While", NULL, 2, $3, $5);}
