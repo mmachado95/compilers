@@ -99,10 +99,10 @@ Statement: CommaExpr SEMI                                               {$$=$1;}
          ;
 
 StatementList: StatementList StatementWithError                          {
-                                                                            if(strcmp($1->type, "Null") != 0 && strcmp($2->type, "Null") == 0) {
+                                                                            if($1 != NULL && $2 == NULL) {
                                                                               $$=$1;
                                                                             }
-                                                                            else if(strcmp($1->type, "Null") == 0 && strcmp($2->type, "Null") != 0) {
+                                                                            else if($1 == NULL && $2 != NULL) {
                                                                               $$=$2;
                                                                             }
                                                                             else {
