@@ -19,6 +19,7 @@
 
 %token <value> ID INTLIT CHRLIT REALLIT WHILE
 
+%nonassoc THEN
 
 %left COMMA
 %right ASSIGN
@@ -33,7 +34,6 @@
 %left BITWISEAND
 %right NOT
 
-%nonassoc THEN
 %nonassoc ELSE
 
 
@@ -74,7 +74,7 @@ StatementWithError: Statement                                                   
                   ;
 
 Statement: CommaExpr SEMI                                               {$$=$1;}
-         | SEMI                                                         {$$ = insert_node("Null", NULL, 0);}
+         | SEMI                                                         {$$ = NULL;}
          | LBRACE StatementList RBRACE                                  {
                                                                           if($2 != NULL && $2->sibling != NULL) {
                                                                             $$=insert_node("StatList", NULL, 1, $2);
