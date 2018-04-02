@@ -72,10 +72,7 @@ StatementWithError: Statement                                                   
 
 Statement: CommaExpr SEMI                                               {$$=$1;}
          | SEMI                                                         {$$ = NULL;}
-         | LBRACE StatementList RBRACE                                  { if($2 == NULL) {
-                                                                            $$ = NULL;
-                                                                          }
-                                                                          else if($2 != NULL && $2->sibling != NULL) {
+         | LBRACE StatementList RBRACE                                  { if($2 != NULL && $2->sibling != NULL) {
                                                                             $$ = insert_node("StatList", NULL, 1, $2);
                                                                           }
                                                                           else {
