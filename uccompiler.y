@@ -23,13 +23,13 @@
 %right ASSIGN
 %left OR
 %left AND
+%left BITWISEOR
+%left BITWISEXOR
+%left BITWISEAND
 %left EQ NE
 %left LT GT LE GE
 %left PLUS MINUS
 %left MUL DIV MOD
-%left BITWISEOR
-%left BITWISEXOR
-%left BITWISEAND
 %right NOT
 %nonassoc THEN
 %nonassoc ELSE
