@@ -57,14 +57,59 @@ FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarations
 FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody                              {$$ = insert_node("FuncDefinition", NULL, 3, $1, $2, $3);}
                   ;
 
-FunctionBody: LBRACE DeclarationsAndStatements RBRACE                                     {$$ = insert_node("FuncBody", NULL, 1, $2);}
-            | LBRACE RBRACE                                                               {$$ = insert_node("FuncBody", NULL, 0);}
+FunctionBody: LBRACE RBRACE                                                               {$$ = insert_node("FuncBody", NULL, 0);}
+            | LBRACE DeclarationsAndStatements RBRACE                                     {
+                                                                                            if($2 == NULL)
+                                                                                              $$ = insert_node("FuncBody", NULL, 0);
+                                                                                            else
+                                                                                              $$ = insert_node("FuncBody", NULL, 1, $2);
+                                                                                          }
             ;
 
-DeclarationsAndStatements: DeclarationsAndStatements Statement                            {$$ = add_sibling($1, $2);}
-                         | DeclarationsAndStatements Declaration                          {$$ = add_sibling($1, $2);}
-                         | Statement                                                      {$$=$1;}
-                         | Declaration                                                    {$$=$1;}
+DeclarationsAndStatements: DeclarationsAndStatements Statement                            {
+                                                                                            if($1 != NULL && $2 != NULL) {
+                                                                                              $$ = add_sibling($1, $2);
+                                                                                            }
+                                                                                            else if($1 != NULL && $2 == NULL) {
+                                                                                              $$ = $1;
+                                                                                            }
+                                                                                            else if($1 == NULL && $2 != NULL) {
+                                                                                              $$ = $2;
+                                                                                            }
+                                                                                            else {
+                                                                                              $$ = NULL;
+                                                                                            }
+                                                                                          }
+                         | DeclarationsAndStatements Declaration                          {
+                                                                                             if($1 != NULL && $2 != NULL) {
+                                                                                               $$ = add_sibling($1, $2);
+                                                                                             }
+                                                                                             else if($1 != NULL && $2 == NULL) {
+                                                                                               $$ = $1;
+                                                                                             }
+                                                                                             else if($1 == NULL && $2 != NULL) {
+                                                                                               $$ = $2;
+                                                                                             }
+                                                                                             else {
+                                                                                               $$ = NULL;
+                                                                                             }
+                                                                                           }
+                         | Statement                                                      {
+                                                                                             if($1 == NULL) {
+                                                                                               $$ = NULL;
+                                                                                             }
+                                                                                             else {
+                                                                                               $$ = $1;
+                                                                                             }
+                                                                                          }
+                         | Declaration                                                    {
+                                                                                            if($1 == NULL) {
+                                                                                              $$ = NULL;
+                                                                                            }
+                                                                                            else {
+                                                                                              $$ = $1;
+                                                                                            }
+                                                                                          }
                          ;
 
 StatementWithError: Statement                                                             {$$=$1;}
@@ -73,15 +118,17 @@ StatementWithError: Statement                                                   
 
 Statement: CommaExpr SEMI                                               {$$=$1;}
          | SEMI                                                         {$$ = NULL;}
-         | LBRACE StatementList RBRACE                                  {
-                                                                          if($2 != NULL && $2->sibling != NULL) {
-                                                                            $$=insert_node("StatList", NULL, 1, $2);
+         | LBRACE StatementList RBRACE                                  { if($2 == NULL) {
+                                                                            $$ = NULL;
+                                                                          }
+                                                                          else if($2 != NULL && $2->sibling != NULL) {
+                                                                            $$ = insert_node("StatList", NULL, 1, $2);
                                                                           }
                                                                           else {
-                                                                            $$=$2;
+                                                                            $$ = $2;
                                                                           }
                                                                         }
-         | LBRACE RBRACE                                                {$$ = insert_node("Null", NULL, 0);}
+         | LBRACE RBRACE                                                {$$ = NULL;}
          | LBRACE error RBRACE                                          {$$ = insert_node("Null", NULL, 0);}
          | IF LPAR CommaExpr RPAR Statement %prec THEN                  { $3 = make_node_correct($3); $5 = make_node_correct($5);
                                                                           $$ = insert_node("If", NULL, 3, $3, $5, insert_node("Null", NULL, 0));
@@ -97,7 +144,10 @@ Statement: CommaExpr SEMI                                               {$$=$1;}
          ;
 
 StatementList: StatementList StatementWithError                          {
-                                                                            if($1 != NULL && $2 == NULL) {
+                                                                            if($1 == NULL && $2 == NULL) {
+                                                                              $$=NULL;
+                                                                            }
+                                                                            else if($1 != NULL && $2 == NULL) {
                                                                               $$=$1;
                                                                             }
                                                                             else if($1 == NULL && $2 != NULL) {
