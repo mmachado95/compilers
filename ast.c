@@ -58,6 +58,17 @@ node_t* insert_node(char *type, char *value, int n_args, ...) {
 
 // adds sibling to node
 node_t *add_sibling(node_t *original, node_t *sibling) {
+
+  if (original == NULL) {
+    return sibling;
+  }
+  if (sibling == NULL) {
+    return original;
+  }
+  if (original && sibling == NULL) {
+    return NULL;
+  }
+  
   node_t *aux = original;
 
   while (aux->sibling != NULL) {
