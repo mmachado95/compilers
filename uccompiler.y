@@ -35,24 +35,23 @@
 %nonassoc ELSE
 
 
-%type <node> Program FunctionsAndDeclarations FunctionsAndDeclarationsEmpty FunctionDefinition
+%type <node> Program FunctionsAndDeclarations FunctionDefinition
             FunctionDeclaration Declaration FunctionDeclarator TypeSpec FunctionBody Declarator
             Expr ParameterList ParameterDeclaration CommaExpr CommaExprTwo DeclarationsAndStatements
             Statement CommaParamDeclaration CommaDeclarator StatementWithError StatementList
 
 
 %%
-Program: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty                           {ast = insert_node("Program", NULL, 2, $1, $2);}
+Program: FunctionsAndDeclarations                                                         {ast = insert_node("Program", NULL, 1, $1);}
        ;
 
-FunctionsAndDeclarations: FunctionDefinition                                              {$$=$1;}
-                        | FunctionDeclaration                                             {$$=$1;}
-                        | Declaration                                                     {$$=$1;}
+FunctionsAndDeclarations: FunctionsAndDeclarations FunctionDefinition                     {$$ = add_sibling($1, $2);}
+                        | FunctionsAndDeclarations FunctionDeclaration                    {$$ = add_sibling($1, $2);}
+                        | FunctionsAndDeclarations Declaration                            {$$ = add_sibling($1, $2);}
+                        | FunctionDefinition                                              {$$ = $1;}
+                        | FunctionDeclaration                                             {$$ = $1;}
+                        | Declaration                                                     {$$ = $1;}
                         ;
-
-FunctionsAndDeclarationsEmpty: FunctionsAndDeclarations FunctionsAndDeclarationsEmpty     {$$ = add_sibling($1, $2);}
-                             | /*empty*/                                                  {$$ = NULL;}
-                             ;
 
 FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody                              {$$ = insert_node("FuncDefinition", NULL, 3, $1, $2, $3);}
                   ;
@@ -66,7 +65,7 @@ FunctionBody: LBRACE RBRACE                                                     
                                                                                           }
             ;
 
-DeclarationsAndStatements: DeclarationsAndStatements Statement                            {
+DeclarationsAndStatements: Statement DeclarationsAndStatements                            {
                                                                                             if($1 != NULL && $2 != NULL) {
                                                                                               $$ = add_sibling($1, $2);
                                                                                             }
@@ -80,7 +79,7 @@ DeclarationsAndStatements: DeclarationsAndStatements Statement                  
                                                                                               $$ = NULL;
                                                                                             }
                                                                                           }
-                         | DeclarationsAndStatements Declaration                          {
+                         | Declaration DeclarationsAndStatements                           {
                                                                                              if($1 != NULL && $2 != NULL) {
                                                                                                $$ = add_sibling($1, $2);
                                                                                              }
@@ -94,26 +93,12 @@ DeclarationsAndStatements: DeclarationsAndStatements Statement                  
                                                                                                $$ = NULL;
                                                                                              }
                                                                                            }
-                         | Statement                                                      {
-                                                                                             if($1 == NULL) {
-                                                                                               $$ = NULL;
-                                                                                             }
-                                                                                             else {
-                                                                                               $$ = $1;
-                                                                                             }
-                                                                                          }
-                         | Declaration                                                    {
-                                                                                            if($1 == NULL) {
-                                                                                              $$ = NULL;
-                                                                                            }
-                                                                                            else {
-                                                                                              $$ = $1;
-                                                                                            }
-                                                                                          }
+                         | Statement                                                      {$$ = $1;}
+                         | Declaration                                                    {$$ = $1;}
                          ;
 
 StatementWithError: Statement                                                             {$$=$1;}
-                  | error SEMI                                                            {$$ = insert_node("Null", NULL, 0);}
+                  | error SEMI                                                            {$$ = NULL;}
                   ;
 
 Statement: CommaExpr SEMI                                               {$$=$1;}
@@ -129,7 +114,7 @@ Statement: CommaExpr SEMI                                               {$$=$1;}
                                                                           }
                                                                         }
          | LBRACE RBRACE                                                {$$ = NULL;}
-         | LBRACE error RBRACE                                          {$$ = insert_node("Null", NULL, 0);}
+         | LBRACE error RBRACE                                          {$$ = NULL;}
          | IF LPAR CommaExpr RPAR Statement %prec THEN                  { $3 = make_node_correct($3); $5 = make_node_correct($5);
                                                                           $$ = insert_node("If", NULL, 3, $3, $5, insert_node("Null", NULL, 0));
                                                                         }
@@ -182,7 +167,7 @@ Declaration: TypeSpec Declarator CommaDeclarator SEMI       {
                                                               insert_node_special($1, $2);
                                                               $$ = $2;
                                                             }
-           | error SEMI                                     {$$ = insert_node("Null", NULL, 0);}
+           | error SEMI                                     {$$ = NULL;}
            ;
 
 CommaDeclarator: COMMA Declarator CommaDeclarator           {$$ = add_sibling($2, $3);}
@@ -227,8 +212,8 @@ Expr: Expr ASSIGN Expr            {$$ = insert_node("Store", NULL, 2, $1, $3);}
     | CHRLIT                      {$$ = insert_node("ChrLit", $1, 0);}
     | REALLIT                     {$$ = insert_node("RealLit", $1, 0);}
     | LPAR CommaExpr RPAR         {$$ = $2;}
-    | ID LPAR error RPAR          {$$ = insert_node("Null", NULL, 0);}
-    | LPAR error RPAR             {$$ = insert_node("Null", NULL, 0);}
+    | ID LPAR error RPAR          {$$ = NULL;}
+    | LPAR error RPAR             {$$ = NULL;}
     ;
 
 CommaExpr: CommaExpr COMMA CommaExpr   {$$ = insert_node("Comma", NULL, 2, $1, $3);}
