@@ -9,6 +9,7 @@
   int beginning_line;
   int beginning_col;
   int print_tokens;
+  int errors = 0;
 %}
 
 %X COMMENT
@@ -132,7 +133,8 @@ int main(int argc, char *argv[]) {
     if (strcmp(argv[1], "-t") == 0) {
       print_tokens = 0;
       yyparse();
-      print_ast(ast, 0);
+      if(errors == 0)
+        print_ast(ast, 0);
     }
   }
   else {
@@ -147,6 +149,7 @@ int yywrap() {
 }
 
 void yyerror (char *s) {
+  errors = 1;
   int aux_col = col - strlen(yytext);
   printf("Line %d, col %d: %s: %s\n", line, aux_col, s, yytext);
 }
