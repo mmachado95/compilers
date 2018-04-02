@@ -89,21 +89,19 @@ void insert_node_special(node_t *first, node_t *second) {
 }
 
 void print_ast(node_t *n, int depth){
-  if (n != NULL) {
-    for(int i = 0; i < depth; i++)
-      printf("..");
+  for(int i = 0; i < depth; i++)
+    printf("..");
 
-    if(n->value != NULL){
-      printf("%s(%s)\n", n->type,n->value);
-    } else{
-      printf("%s\n", n->type);
-    }
+  if(n->value != NULL){
+    printf("%s(%s)\n", n->type,n->value);
+  } else{
+    printf("%s\n", n->type);
+  }
 
-    if(n->child != NULL) {
-      print_ast(n->child, depth + 1);
-    }
-    if(n->sibling != NULL) {
-      print_ast(n->sibling, depth);
-    }
+  if(n->child != NULL) {
+    print_ast(n->child, depth + 1);
+  }
+  if(n->sibling != NULL) {
+    print_ast(n->sibling, depth);
   }
 }

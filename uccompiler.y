@@ -19,8 +19,6 @@
 
 %token <value> ID INTLIT CHRLIT REALLIT WHILE
 
-%nonassoc THEN
-
 %left COMMA
 %right ASSIGN
 %left OR
@@ -33,7 +31,7 @@
 %left BITWISEXOR
 %left BITWISEAND
 %right NOT
-
+%nonassoc THEN
 %nonassoc ELSE
 
 
