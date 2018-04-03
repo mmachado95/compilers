@@ -81,13 +81,13 @@ Statement: CommaExpr SEMI                                               {$$=$1;}
                                                                         }
          | LBRACE RBRACE                                                {$$ = NULL;}
          | LBRACE error RBRACE                                          {$$ = NULL;}
-         | IF LPAR CommaExpr RPAR Statement %prec THEN                  { $3 = make_node_correct($3); $5 = make_node_correct($5);
+         | IF LPAR CommaExpr RPAR StatementWithError %prec THEN         { $3 = make_node_correct($3); $5 = make_node_correct($5);
                                                                           $$ = insert_node("If", NULL, 3, $3, $5, insert_node("Null", NULL, 0));
                                                                         }
-         | IF LPAR CommaExpr RPAR Statement ELSE Statement              { $3 = make_node_correct($3); $5 = make_node_correct($5); $7 = make_node_correct($7);
-                                                                          $$ = insert_node("If", NULL, 3, $3, $5, $7);
-                                                                        }
-         | WHILE LPAR CommaExpr RPAR Statement                          { $3 = make_node_correct($3); $5 = make_node_correct($5);
+         | IF LPAR CommaExpr RPAR StatementWithError ELSE StatementWithError  { $3 = make_node_correct($3); $5 = make_node_correct($5); $7 = make_node_correct($7);
+                                                                                $$ = insert_node("If", NULL, 3, $3, $5, $7);
+                                                                              }
+         | WHILE LPAR CommaExpr RPAR StatementWithError                 { $3 = make_node_correct($3); $5 = make_node_correct($5);
                                                                           $$ = insert_node("While", NULL, 2, $3, $5);}
          | RETURN CommaExpr SEMI                                        { $2 = make_node_correct($2);
                                                                           $$ = insert_node("Return", NULL, 1, $2);}
