@@ -133,8 +133,11 @@ int main(int argc, char *argv[]) {
     if (strcmp(argv[1], "-t") == 0) {
       print_tokens = 0;
       yyparse();
-      if(errors == 0)
+
+      if(errors == 0) {
         print_ast(ast, 0);
+        destroy_ast(ast);
+      }
     }
   }
   else {
