@@ -2,12 +2,14 @@
   #include <string.h>
   #include <stdio.h>
   #include "y.tab.h"
-  #define PRINTF if(errors == 0) printf
+  #include "ast.h"
+  #define PRINTF if(print_tokens == 1) printf
   int line = 1;
   int col = 1;
   int beginning_line;
   int beginning_col;
-  int errors;
+  int print_tokens;
+  int errors = 0;
 %}
 
 %X COMMENT
@@ -97,10 +99,10 @@ CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})*(\\)*{ANYCHAR}*
 {SEMI} {PRINTF("SEMI\n"); col += yyleng; return SEMI;}
 {RESERVED} {PRINTF("RESERVED(%s)\n", yytext); col += yyleng; return RESERVED;}
 
-{INTLIT} {PRINTF("INTLIT(%s)\n", yytext); col += yyleng; return INTLIT;}
-{ID} {PRINTF("ID(%s)\n", yytext); col += yyleng; return ID;}
-{CHRLIT} {PRINTF("CHRLIT(%s)\n", yytext); col += yyleng; return CHRLIT;}
-{REALLIT} {PRINTF("REALLIT(%s)\n", yytext); col += yyleng; return REALLIT;}
+{INTLIT} {PRINTF("INTLIT(%s)\n", yytext); col += yyleng; yylval.value = strdup(yytext); return INTLIT;}
+{ID} {PRINTF("ID(%s)\n", yytext); col += yyleng; yylval.value = strdup(yytext); return ID;}
+{CHRLIT} {PRINTF("CHRLIT(%s)\n", yytext); col += yyleng; yylval.value = strdup(yytext); return CHRLIT;}
+{REALLIT} {PRINTF("REALLIT(%s)\n", yytext); col += yyleng; yylval.value = strdup(yytext); return REALLIT;}
 {CHRLIT_INV} {printf("Line %d, col %d: invalid char constant (%s)\n", line, col, yytext); col+=yyleng; return CHRLIT_INV;}
 {CHRLIT_UNT} {printf("Line %d, col %d: unterminated char constant\n", line, col); col+=yyleng; return CHRLIT_UNT;}
 
@@ -124,16 +126,22 @@ CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})*(\\)*{ANYCHAR}*
 int main(int argc, char *argv[]) {
   if (argc > 1) {
     if (strcmp(argv[1], "-l") == 0) {
-      errors = 0;
+      print_tokens = 1;
+      yyparse();
       yylex();
     }
     if (strcmp(argv[1], "-t") == 0) {
-      errors = 0;
+      print_tokens = 0;
       yyparse();
+
+      if(errors == 0) {
+        print_ast(ast, 0);
+        destroy_ast(ast);
+      }
     }
   }
   else {
-    errors = 1;
+    print_tokens = 0;
     yyparse();
   }
   return 0;
@@ -144,6 +152,7 @@ int yywrap() {
 }
 
 void yyerror (char *s) {
+  errors = 1;
   int aux_col = col - strlen(yytext);
   printf("Line %d, col %d: %s: %s\n", line, aux_col, s, yytext);
 }
