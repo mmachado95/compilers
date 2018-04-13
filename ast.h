@@ -16,3 +16,4 @@ node_t *add_sibling(node_t *original, node_t *sibling);
 node_t *make_node_correct(node_t *node_to_correct);
 void insert_node_special(node_t *first, node_t *second);
 void print_ast();
+void destroy_ast(node_t *current);

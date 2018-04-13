@@ -116,3 +116,19 @@ void print_ast(node_t *n, int depth){
     print_ast(n->sibling, depth);
   }
 }
+
+void destroy_ast(node_t *current) {
+  if (current == NULL) {
+    return;
+  }
+  if (current->type != NULL) {
+    free(current->type);
+  }
+  if (current->value != NULL) {
+    free(current->value);
+  }
+
+  destroy_ast(current->child);
+  destroy_ast(current->sibling);
+  free(current);
+}
