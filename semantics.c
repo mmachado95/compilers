@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "semantics.h"
 
 void check_program(node_t *ast) {
@@ -13,7 +10,7 @@ void check_program(node_t *ast) {
     check_program(ast->child);
   }
   if (strcmp(ast->type, "Declaration") == 0) {
-    //check_declaration(ast);
+    check_declaration(ast);
   }
   if (strcmp(ast->type, "FuncDeclaration") == 0) {
     //check_func_declaration(ast);
@@ -80,3 +77,46 @@ void check_program(node_t *ast) {
     //check_terminal(ast);
   }
 }
+
+void check_declaration(node_t *declaration) {
+  node_t *aux = declaration->child;
+
+  if (get_element(current, declaration->value) != NULL) {
+    return;
+  }
+  insert_element(current, aux->type, aux->value, NULL);
+}
+
+/*void check_func_declaration(node_t *func_declaration) {*/
+  /*type *param_list_types = NULL;*/
+  /*// save type of function*/
+  /*char *func_type = func_declaration->child->type;*/
+
+  /*// go to FunctionDeclarator*/
+  /*node_t *aux = func_declaration->child->sibling;*/
+
+  /*// check if table for function already exists*/
+  /*if (get_table(aux->value) == NULL) {*/
+    /*// create table for function*/
+    /*current = create_table(aux->value);*/
+
+    /*// go to paramdeclaration*/
+    /*aux = aux->sibling->child;*/
+
+    /*// get types of params*/
+    /*param_list_types = NULL;*/
+    /*get_param_list_type)bbus(aux); */
+    /*printf("%d\n", (int)param_list_types);*/
+
+    /*printf("=================\n");*/
+    /*printf("%s\n", param_list_types->name);*/
+    /*while(param_list_types != NULL) {*/
+      /*printf("%s\n", param_list_types->name);*/
+      /*param_list_types = param_list_types->next;*/
+    /*}*/
+    /*printf("=================\n");*/
+  /*}*/
+
+  /*free_param_list_types();*/
+  /*current = tables;*/
+/*}*/

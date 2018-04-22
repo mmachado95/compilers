@@ -1,7 +1,13 @@
+#ifndef SEMANTICS_HEADER
+#define SEMANTICS_HEADER
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ast.h"
+#include "symbol_table.h"
 
+// =========== MAIN FUNCTIONS =============
 void check_program(node_t *program);
 void check_declaration(node_t *declaration);
 void check_func_declaration(node_t *func_declaration);
@@ -19,3 +25,5 @@ void check_bitwise_operator(node_t *operator_);
 void check_assign_operator(node_t *operator_);
 void check_call(node_t *operator_);
 void check_terminal(node_t *terminals);
+
+#endif

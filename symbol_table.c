@@ -35,9 +35,12 @@ table *create_table(char *name) {
 
       aux = aux->next;
     } 
+
+    // add to end of list
+    aux->next = new_table;
+  } else {
+    tables = new_table;
   }
-  // add to end of list
-  aux->next = new_table;
 
   return new_table;
 }
@@ -57,16 +60,25 @@ table *get_table(char *name) {
   return NULL;
 }
 
-//Insere um novo identificador na cauda de uma lista ligada de simbolo
-symbol *insert_element(table *to_insert, char *name, char *type) {
+// insert new symbol at table end
+symbol *insert_element(table *to_insert, char *name, char *type, param_type *params_types) {
+  // create the symbol
   symbol *new_symbol=(symbol *) malloc(sizeof(symbol));
   new_symbol->name = strdup(name);
   new_symbol->type = strdup(type);
+  // assume it's not a function
+  new_symbol->params_types = NULL;
   new_symbol->next = NULL;
 
+  // if it's a function add the type of the params
+  if (params_types != NULL) {
+    new_symbol->params_types = params_types;
+  }
+
+  // create pointer to the first symbol in table
   symbol *aux = to_insert->symbol;
 
-  // check if table already has symbols
+  // iterate symbols of table
   if (aux != NULL) {
     while(aux->next != NULL) {
       aux = aux->next;

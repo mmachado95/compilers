@@ -1,3 +1,6 @@
+#ifndef AST_HEADER
+#define AST_HEADER
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -17,3 +20,5 @@ node_t *make_node_correct(node_t *node_to_correct);
 void insert_node_special(node_t *first, node_t *second);
 void print_ast();
 void destroy_ast(node_t *current);
+
+#endif

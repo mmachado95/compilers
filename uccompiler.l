@@ -1,9 +1,9 @@
 %{
-  #include <string.h>
-  #include <stdio.h>
   #include "y.tab.h"
-  #include "ast.h"
   #define PRINTF if(print_tokens == 1) printf
+  #include "ast.h"
+  #include "symbol_table.h"
+  #include "semantics.h"
   int line = 1;
   int col = 1;
   int beginning_line;
