@@ -151,14 +151,10 @@ void show_tables() {
           param_aux = param_aux->next;
         }
         printf(")\n");
-      } else {
-        printf("%s\n", aux2->name);
       }
 
-      param_type *aux3 = aux2->param;
-      while(aux3 != NULL) {
-        printf("%s\n", aux3->name);
-        aux3 = aux3->next;
+      else {
+        printf("%s\n", aux2->name);
       }
 
       aux2 = aux2->next;
