@@ -10,10 +10,10 @@ void check_program(node_t *ast) {
     check_program(ast->child);
   }
   if (strcmp(ast->type, "Declaration") == 0) {
-    check_declaration(ast);
+    //check_declaration(ast);
   }
   if (strcmp(ast->type, "FuncDeclaration") == 0) {
-    //check_func_declaration(ast);
+    check_func_declaration(ast);
   }
   if (strcmp(ast->type, "FuncDefinition") == 0) {
     //check_func_definition(ast);
@@ -87,36 +87,40 @@ void check_declaration(node_t *declaration) {
   insert_element(current, aux->type, aux->value, NULL);
 }
 
-/*void check_func_declaration(node_t *func_declaration) {*/
-  /*type *param_list_types = NULL;*/
-  /*// save type of function*/
-  /*char *func_type = func_declaration->child->type;*/
+void check_func_declaration(node_t *func_declaration) {
+  // save type of function
+  char *func_type = func_declaration->child->type;
 
-  /*// go to FunctionDeclarator*/
-  /*node_t *aux = func_declaration->child->sibling;*/
+  // go to FunctionDeclarator
+  node_t *aux = func_declaration->child->sibling;
 
-  /*// check if table for function already exists*/
-  /*if (get_table(aux->value) == NULL) {*/
-    /*// create table for function*/
-    /*current = create_table(aux->value);*/
+  // if table for function doesn't exist already
+  if (get_table(aux->value) == NULL) {
+    char *func_name = aux->value;
+    // create table for function
+    current = create_table(func_name);
 
-    /*// go to paramdeclaration*/
-    /*aux = aux->sibling->child;*/
+    // insert element in global table
+    symbol *func_declaration = insert_element(tables, func_name, func_type, NULL);
 
-    /*// get types of params*/
-    /*param_list_types = NULL;*/
-    /*get_param_list_type)bbus(aux); */
-    /*printf("%d\n", (int)param_list_types);*/
+    // go to the first paramdeclaration
+    aux = aux->sibling->child;
 
-    /*printf("=================\n");*/
-    /*printf("%s\n", param_list_types->name);*/
-    /*while(param_list_types != NULL) {*/
-      /*printf("%s\n", param_list_types->name);*/
-      /*param_list_types = param_list_types->next;*/
-    /*}*/
-    /*printf("=================\n");*/
-  /*}*/
+    // get types of params
+    while(aux != NULL) {
+      param_type *param_aux = func_declaration->param;
 
-  /*free_param_list_types();*/
-  /*current = tables;*/
-/*}*/
+      insert_type(aux->child->type, func_declaration);
+
+      // if the next node is an id, skip it
+      if(aux->sibling != NULL && strcmp("Id", aux->sibling->type) == 0) {
+        aux = aux->sibling;
+      }
+
+      aux = aux->sibling;
+    }
+
+  }
+
+  current = tables;
+}

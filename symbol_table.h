@@ -8,7 +8,7 @@
 typedef struct pt_ {
   // name of param type
   char *name;
-  struct t_ *next;
+  struct pt_ *next;
 } param_type;
 
 typedef struct sym {
@@ -17,7 +17,7 @@ typedef struct sym {
   // type of variable, function etc
   char *type;
   // if symbol is a function we need to know the types of the params
-  param_type *params_types;
+  param_type *param;
   struct sym *next;
 } symbol;
 
@@ -33,7 +33,8 @@ table *create_table(char *name);
 table *get_table(char *name);
 symbol *insert_element(table *table, char *name, char *type, param_type *params_types);
 symbol *get_element(table *table, char *name);
-void show_table();
+void insert_type(char *name, symbol *to_insert_type);
+void show_tables();
 
 
 table *tables;

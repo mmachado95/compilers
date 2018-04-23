@@ -66,14 +66,8 @@ symbol *insert_element(table *to_insert, char *name, char *type, param_type *par
   symbol *new_symbol=(symbol *) malloc(sizeof(symbol));
   new_symbol->name = strdup(name);
   new_symbol->type = strdup(type);
-  // assume it's not a function
-  new_symbol->params_types = NULL;
+  new_symbol->param = params_types;
   new_symbol->next = NULL;
-
-  // if it's a function add the type of the params
-  if (params_types != NULL) {
-    new_symbol->params_types = params_types;
-  }
 
   // create pointer to the first symbol in table
   symbol *aux = to_insert->symbol;
@@ -85,7 +79,7 @@ symbol *insert_element(table *to_insert, char *name, char *type, param_type *par
     }
     aux->next = new_symbol;
   } else {
-    aux->next = new_symbol;
+    to_insert->symbol = new_symbol;
   }
 
   return new_symbol; 
@@ -104,4 +98,60 @@ symbol *get_element(table *table, char *name) {
   }
 
   return NULL;
+}
+
+void insert_type(char *name, symbol *to_insert_type) {
+  param_type *type_aux = to_insert_type->param;
+
+  param_type *type = (param_type *) malloc(sizeof(param_type));
+  type->name = strdup(name);
+  type->next = NULL;
+
+  if (type_aux != NULL) {
+    while(type_aux->next != NULL) {
+      type_aux = type_aux->next;
+    }
+
+    type_aux->next = type;
+  } else {
+    to_insert_type->param = type;
+  }
+}
+
+void show_tables() {
+  table *aux = tables;
+
+  while(aux != NULL) {
+    symbol *aux2 = aux->symbol;
+    if(strcmp("Global", aux->name) != 0) {
+      printf("===== Function %s Symbol Table =====\n", aux->name);
+    } else {
+      printf("===== %s Symbol Table =====\n", aux->name);
+    }
+
+    while(aux2 != NULL) {
+      if(aux2->type != NULL) {
+        printf("%s\t%s(", aux2->name, aux2->type);
+
+        param_type *param_aux = aux2->param;
+        while(param_aux != NULL) {
+          printf("%s,", param_aux->name);
+          param_aux = param_aux->next;
+        }
+        printf(")\n");
+      } else {
+        printf("%s\n", aux2->name);
+      }
+
+      param_type *aux3 = aux2->param;
+      while(aux3 != NULL) {
+        printf("%s\n", aux3->name);
+        aux3 = aux3->next;
+      }
+
+      aux2 = aux2->next;
+    }
+
+    aux=aux->next;
+  }
 }
