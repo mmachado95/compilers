@@ -80,11 +80,22 @@ void check_program(node_t *ast) {
 
 
 void check_declaration(node_t *declaration) {
-  node_t *aux = declaration->child;
-  if (get_element(current, declaration->value) != NULL) {
-    return;
+  node_t *aux = declaration;
+
+  printf("=========\n");
+  printf("%s\n", aux->type);
+  printf("%s\n", aux->sibling->type);
+  aux = aux->child;
+  while(aux != NULL) {
+    printf("%s\n", aux->type);
+    aux = aux->sibling;
   }
-  insert_element(current, aux->type, aux->value, NULL);
+  printf("=========\n");
+
+  /*if (get_element(current, declaration->value) != NULL) {*/
+    /*return;*/
+  /*}*/
+  /*insert_element(current, aux->type, aux->value, NULL);*/
 }
 
 
@@ -109,8 +120,6 @@ void check_func_declaration(node_t *func_declaration) {
 
     // get types of params
     while(aux != NULL) {
-      param_type *param_aux = func_declaration->param;
-
       insert_type(aux->child->type, func_declaration);
 
       // if the next node is an id, skip it
@@ -148,8 +157,6 @@ void check_func_definition(node_t *func_definition) {
 
     // get types of params
     while(aux != NULL) {
-      param_type *param_aux = func_definition->param;
-
       insert_type(aux->child->type, func_definition);
 
       // if the next node is an id, skip it

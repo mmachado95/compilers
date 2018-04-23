@@ -98,7 +98,6 @@ symbol *insert_element(table *to_insert, char *name, char *type, param_type *par
 
 //return table symbol with the same name
 symbol *get_element(table *table, char *name) {
-
   symbol *aux = table->symbol;
 
   while(aux != NULL) {
