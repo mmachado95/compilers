@@ -43,6 +43,15 @@ table *create_table(char *name) {
     tables = new_table;
   }
 
+  if (strcmp(name, "Global") == 0) {
+    param_type *type_int = (param_type *) malloc(sizeof(param_type));
+    type_int->name = strdup("Int");
+    param_type *type_void = (param_type *) malloc(sizeof(param_type));
+    type_void->name = strdup("Void");
+    insert_element(tables, "putchar", "Int", type_int);
+    insert_element(tables, "getchar", "Int", type_void);
+  }
+
   return new_table;
 }
 
