@@ -81,21 +81,8 @@ void check_program(node_t *ast) {
 
 void check_declaration(node_t *declaration) {
   node_t *aux = declaration;
-
-  printf("=========\n");
-  printf("%s\n", aux->type);
-  printf("%s\n", aux->sibling->type);
   aux = aux->child;
-  while(aux != NULL) {
-    printf("%s\n", aux->type);
-    aux = aux->sibling;
-  }
-  printf("=========\n");
-
-  /*if (get_element(current, declaration->value) != NULL) {*/
-    /*return;*/
-  /*}*/
-  /*insert_element(current, aux->type, aux->value, NULL);*/
+  insert_element(tables, aux->sibling->value, aux->type, NULL);
 }
 
 

@@ -143,14 +143,15 @@ void show_tables() {
     while(aux2 != NULL) {
       if(aux2->type != NULL) {
         aux2->type[0] = aux2->type[0] + 32; // Lower Case
-        printf("%s\t%s(", aux2->name, aux2->type);
+
+        printf("%s\t%s", aux2->name, aux2->type);
 
         param_type *param_aux = aux2->param;
         int i = 0;
         while(param_aux != NULL) {
           param_aux->name[0] = param_aux->name[0] + 32; // Lower Case
           if (i == 0) {
-            printf("%s", param_aux->name);
+            printf("(%s", param_aux->name);
             i++;
           }
           else {
@@ -158,7 +159,12 @@ void show_tables() {
           }
           param_aux = param_aux->next;
         }
-        printf(")\n");
+        if (i != 0) {
+          printf(")\n");
+        }
+        else {
+          printf("\n");
+        }
       }
 
       else {
