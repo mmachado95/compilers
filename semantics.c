@@ -16,7 +16,7 @@ void check_program(node_t *ast) {
     check_func_declaration(ast);
   }
   if (strcmp(ast->type, "FuncDefinition") == 0) {
-    //check_func_definition(ast);
+    check_func_definition(ast);
   }
   if (strcmp(ast->type, "ParamList") == 0) {
     //check_param_list(ast);
@@ -111,6 +111,45 @@ void check_func_declaration(node_t *func_declaration) {
       param_type *param_aux = func_declaration->param;
 
       insert_type(aux->child->type, func_declaration);
+
+      // if the next node is an id, skip it
+      if(aux->sibling != NULL && strcmp("Id", aux->sibling->type) == 0) {
+        aux = aux->sibling;
+      }
+
+      aux = aux->sibling;
+    }
+
+  }
+
+  current = tables;
+}
+
+
+void check_func_definition(node_t *func_definition) {
+  // save type of function
+  char *func_type = func_definition->child->type;
+
+  // go to FunctionDeclarator
+  node_t *aux = func_definition->child->sibling;
+
+  // if table for function doesn't exist already
+  if (get_table(aux->value) == NULL) {
+    char *func_name = aux->value;
+    // create table for function
+    current = create_table(func_name);
+
+    // insert element in global table
+    symbol *func_definition = insert_element(tables, func_name, func_type, NULL);
+
+    // go to the first paramdeclaration
+    aux = aux->sibling->child;
+
+    // get types of params
+    while(aux != NULL) {
+      param_type *param_aux = func_definition->param;
+
+      insert_type(aux->child->type, func_definition);
 
       // if the next node is an id, skip it
       if(aux->sibling != NULL && strcmp("Id", aux->sibling->type) == 0) {
