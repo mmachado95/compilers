@@ -10,7 +10,7 @@ void check_program(node_t *ast) {
     check_program(ast->child);
   }
   if (strcmp(ast->type, "Declaration") == 0) {
-    //check_declaration(ast);
+    check_declaration(ast);
   }
   if (strcmp(ast->type, "FuncDeclaration") == 0) {
     check_func_declaration(ast);
@@ -78,14 +78,15 @@ void check_program(node_t *ast) {
   }
 }
 
+
 void check_declaration(node_t *declaration) {
   node_t *aux = declaration->child;
-
   if (get_element(current, declaration->value) != NULL) {
     return;
   }
   insert_element(current, aux->type, aux->value, NULL);
 }
+
 
 void check_func_declaration(node_t *func_declaration) {
   // save type of function

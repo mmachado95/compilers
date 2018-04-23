@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
 
       if(errors == 0) {
         print_ast(ast, 0);
-        create_table("Global");
+        current = create_table("Global");
         check_program(ast);
         show_tables();
         destroy_ast(ast);
