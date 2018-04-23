@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "symbol_table.h"
 
 // util function to add a symbol to the end of a table
@@ -34,7 +35,7 @@ table *create_table(char *name) {
       }
 
       aux = aux->next;
-    } 
+    }
 
     // add to end of list
     aux->next = new_table;
@@ -62,6 +63,7 @@ table *get_table(char *name) {
 
 // insert new symbol at table end
 symbol *insert_element(table *to_insert, char *name, char *type, param_type *params_types) {
+
   // create the symbol
   symbol *new_symbol=(symbol *) malloc(sizeof(symbol));
   new_symbol->name = strdup(name);
@@ -82,7 +84,7 @@ symbol *insert_element(table *to_insert, char *name, char *type, param_type *par
     to_insert->symbol = new_symbol;
   }
 
-  return new_symbol; 
+  return new_symbol;
 }
 
 //return table symbol with the same name
@@ -122,20 +124,30 @@ void show_tables() {
   table *aux = tables;
 
   while(aux != NULL) {
-    symbol *aux2 = aux->symbol;
     if(strcmp("Global", aux->name) != 0) {
       printf("===== Function %s Symbol Table =====\n", aux->name);
     } else {
       printf("===== %s Symbol Table =====\n", aux->name);
     }
 
+    symbol *aux2 = aux->symbol;
+
     while(aux2 != NULL) {
       if(aux2->type != NULL) {
+        aux2->type[0] = aux2->type[0] + 32; // Lower Case
         printf("%s\t%s(", aux2->name, aux2->type);
 
         param_type *param_aux = aux2->param;
+        int i = 0;
         while(param_aux != NULL) {
-          printf("%s,", param_aux->name);
+          param_aux->name[0] = param_aux->name[0] + 32; // Lower Case
+          if (i == 0) {
+            printf("%s", param_aux->name);
+            i++;
+          }
+          else {
+            printf(",%s", param_aux->name);
+          }
           param_aux = param_aux->next;
         }
         printf(")\n");
