@@ -29,6 +29,7 @@ typedef struct tab {
   struct tab *next;
 } table;
 
+void insert_default_functions(table *to_insert);
 table *create_table(char *name);
 table *get_table(char *name);
 symbol *insert_element(table *table, char *name, char *type, param_type *params_types);

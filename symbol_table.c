@@ -4,19 +4,15 @@
 #include <ctype.h>
 #include "symbol_table.h"
 
-// util function to add a symbol to the end of a table
-void add_symbol_to_table_end(table *to_insert, symbol *new_symbol) {
-
-  while(to_insert->next != NULL) {
-    to_insert = to_insert->next;
-  }
-
-  to_insert->next = to_insert;
+// adds the default functions to the global table
+void insert_default_functions(table *to_insert) {
+  param_type *type_int = (param_type *) malloc(sizeof(param_type));
+  type_int->name = strdup("Int");
+  param_type *type_void = (param_type *) malloc(sizeof(param_type));
+  type_void->name = strdup("Void");
+  insert_element(to_insert, "putchar", "Int", type_int);
+  insert_element(to_insert, "getchar", "Int", type_void);
 }
-
-// ================================================
-// ==================== MAIN ======================
-// ================================================
 
 table *create_table(char *name) {
   // creates the table and respective elements
@@ -41,15 +37,6 @@ table *create_table(char *name) {
     aux->next = new_table;
   } else {
     tables = new_table;
-  }
-
-  if (strcmp(name, "Global") == 0) {
-    param_type *type_int = (param_type *) malloc(sizeof(param_type));
-    type_int->name = strdup("Int");
-    param_type *type_void = (param_type *) malloc(sizeof(param_type));
-    type_void->name = strdup("Void");
-    insert_element(tables, "putchar", "Int", type_int);
-    insert_element(tables, "getchar", "Int", type_void);
   }
 
   return new_table;
