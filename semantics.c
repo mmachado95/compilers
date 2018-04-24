@@ -18,9 +18,6 @@ void check_program(node_t *ast) {
   else if (strcmp(ast->type, "FuncDefinition") == 0) {
     check_func_definition(ast);
   }
-  else if (strcmp(ast->type, "ParamList") == 0) {
-    //check_param_list(ast);
-  }
   // TODO check if func body ahs child or not
   else if (strcmp(ast->type, "FuncBody") == 0) {
     check_program(ast);
