@@ -106,21 +106,8 @@ void check_func_declaration(node_t *func_declaration) {
     // insert element in global table
     symbol *func_declaration = insert_element(tables, func_name, func_type, NULL);
 
-    // go to the first paramdeclaration
-    aux = aux->sibling->child;
-
-    // get types of params
-    while(aux != NULL) {
-      insert_type(aux->child->type, func_declaration);
-
-      // if the next node is an id, skip it
-      if(aux->sibling != NULL && strcmp("Id", aux->sibling->type) == 0) {
-        aux = aux->sibling;
-      }
-
-      aux = aux->sibling;
-    }
-
+    // function that adds the param types to the symbol
+    check_param_list(aux->sibling, func_declaration);
   }
 
   current = tables;
@@ -143,22 +130,25 @@ void check_func_definition(node_t *func_definition) {
     // insert element in global table
     symbol *func_definition = insert_element(tables, func_name, func_type, NULL);
 
-    // go to the first paramdeclaration
-    aux = aux->sibling->child;
-
-    // get types of params
-    while(aux != NULL) {
-      insert_type(aux->child->type, func_definition);
-
-      // if the next node is an id, skip it
-      if(aux->sibling != NULL && strcmp("Id", aux->sibling->type) == 0) {
-        aux = aux->sibling;
-      }
-
-      aux = aux->sibling;
-    }
-
+    // handle param list
+    check_param_list(aux->sibling, func_definition);
   }
 
   current = tables;
+}
+
+void check_param_list(node_t *param_list, symbol *func_declaration) {
+  node_t *param_declaration = param_list->child;
+
+  // get types of params
+  while(param_declaration != NULL) {
+    insert_type(param_declaration->child->type, func_declaration);
+
+    // if the next node is an id, skip it
+    if(param_declaration->sibling != NULL && strcmp("Id", param_declaration->sibling->type) == 0) {
+      param_declaration = param_declaration->sibling;
+    }
+
+    param_declaration = param_declaration->sibling;
+  }
 }
