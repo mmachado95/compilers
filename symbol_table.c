@@ -101,12 +101,12 @@ symbol *get_element(table *table, char *name) {
   symbol *aux = table->symbol;
 
   while(aux != NULL) {
-    printf("%s %s\n", name, aux->name );
     if (strcmp(name, aux->name) == 0) {
       return aux;
     }
     aux = aux->next;
   }
+
   return NULL;
 }
 
