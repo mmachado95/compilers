@@ -176,6 +176,9 @@ void show_tables() {
       aux2 = aux2->next;
     }
 
+    if(aux->next != NULL && aux->next->print==1) {
+      printf("\n");
+    }
     aux=aux->next;
   }
 }
