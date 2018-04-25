@@ -120,65 +120,62 @@ void insert_type(char *name, symbol *to_insert_type) {
   }
 }
 
+// aux function to show function param types
+void show_func_param_types(param_type *param) {
+  param_type *aux = param;
+  aux->name[0] = tolower(aux->name[0]);
+  printf("%s", aux->name);
+  
+  aux = aux->next;
+
+  while(aux != NULL) {
+    printf(",");
+    aux->name[0] = tolower(aux->name[0]);
+    printf("%s", aux->name);
+    aux = aux->next;
+  }
+}
+
+void show_symbol(symbol *symbol) {
+  symbol->type[0] = tolower(symbol->type[0]);
+  printf("%s\t%s", symbol->name, symbol->type);
+
+  if (symbol->is_param == 1) {
+    printf("\tparam\n");
+  }
+  else if (symbol->param != NULL) {
+    printf("(");
+    show_func_param_types(symbol->param);
+    printf(")\n");
+  } else {
+    printf("\n");
+  }
+}
+
+void show_table(table *table) {
+  symbol *aux = table->symbol;
+
+  // check if it's global function or not
+  if(strcmp("Global", table->name) != 0) {
+    printf("===== Function %s Symbol Table =====\n", table->name);
+  } else {
+    printf("===== %s Symbol Table =====\n", table->name);
+  }
+
+  while(aux != NULL) {
+    show_symbol(aux);
+    aux = aux->next;
+  }
+}
+
 void show_tables() {
   table *aux = tables;
 
   while(aux != NULL) {
-    if (aux->print == 0) {
-      aux = aux->next;
-      continue;
-    }
-
-    if(strcmp("Global", aux->name) != 0) {
-      printf("===== Function %s Symbol Table =====\n", aux->name);
-    } else {
-      printf("===== %s Symbol Table =====\n", aux->name);
-    }
-
-    symbol *aux2 = aux->symbol;
-    while(aux2 != NULL) {
-      if(aux2->type != NULL) {
-        aux2->type[0] = aux2->type[0] + 32; // Lower Case
-
-        if (aux2->name != NULL) {
-          printf("%s\t%s", aux2->name, aux2->type);
-        } else {
-          printf("\t%s", aux2->type);
-        }
-        if(aux2->is_param == 1) {
-          printf("\tparam");
-        }
-
-        param_type *param_aux = aux2->param;
-        int i = 0;
-        while(param_aux != NULL) {
-          param_aux->name[0] = param_aux->name[0] + 32; // Lower Case
-          if (i == 0) {
-            printf("(%s", param_aux->name);
-            i++;
-          }
-          else {
-            printf(",%s", param_aux->name);
-          }
-          param_aux = param_aux->next;
-        }
-        if (i != 0) {
-          printf(")\n");
-        }
-        else {
-          printf("\n");
-        }
-      }
-      else {
-        printf("%s\n", aux2->name);
-      }
-
-      aux2 = aux2->next;
-    }
-
-    if(aux->next != NULL && aux->next->print==1) {
+    if(aux->print) {
+      show_table(aux);
       printf("\n");
     }
-    aux=aux->next;
+    aux = aux->next;
   }
 }

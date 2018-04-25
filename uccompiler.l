@@ -158,7 +158,6 @@ int main(int argc, char *argv[]) {
         insert_default_functions(current);
         check_program(ast);
         show_tables();
-        printf("\n");
         print_ast(ast, 0);
         destroy_ast(ast);
       }

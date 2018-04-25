@@ -39,8 +39,10 @@ table *get_table(char *name);
 symbol *insert_element(table *table, char *name, char *type, param_type *params_types);
 symbol *get_element(table *table, char *name);
 void insert_type(char *name, symbol *to_insert_type);
+void show_func_param_types(param_type *param);
+void show_symbol(symbol *symbol);
+void show_table(table *table);
 void show_tables();
-
 
 table *tables;
 table *current;
