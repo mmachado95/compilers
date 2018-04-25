@@ -17,6 +17,7 @@ void insert_default_functions(table *to_insert) {
 table *create_table(char *name) {
   // creates the table and respective elements
   table *new_table = (table *)malloc(sizeof(table));
+  new_table->print = 0;
   new_table->name = strdup(name);
   new_table->symbol = NULL;
   new_table->next = NULL;
@@ -62,7 +63,11 @@ symbol *insert_element(table *to_insert, char *name, char *type, param_type *par
 
   // create the symbol
   symbol *new_symbol=(symbol *) malloc(sizeof(symbol));
-  new_symbol->name = strdup(name);
+  new_symbol->is_param = 0;
+  new_symbol->name = NULL;
+  if (name != NULL) {
+    new_symbol->name = strdup(name);
+  }
   new_symbol->type = strdup(type);
   new_symbol->param = params_types;
   new_symbol->next = NULL;
@@ -119,6 +124,11 @@ void show_tables() {
   table *aux = tables;
 
   while(aux != NULL) {
+    if (aux->print == 0) {
+      aux = aux->next;
+      continue;
+    }
+
     if(strcmp("Global", aux->name) != 0) {
       printf("===== Function %s Symbol Table =====\n", aux->name);
     } else {
@@ -126,12 +136,18 @@ void show_tables() {
     }
 
     symbol *aux2 = aux->symbol;
-
     while(aux2 != NULL) {
       if(aux2->type != NULL) {
         aux2->type[0] = aux2->type[0] + 32; // Lower Case
 
-        printf("%s\t%s", aux2->name, aux2->type);
+        if (aux2->name != NULL) {
+          printf("%s\t%s", aux2->name, aux2->type);
+        } else {
+          printf("\t%s", aux2->type);
+        }
+        if(aux2->is_param == 1) {
+          printf("\tparam");
+        }
 
         param_type *param_aux = aux2->param;
         int i = 0;
@@ -153,7 +169,6 @@ void show_tables() {
           printf("\n");
         }
       }
-
       else {
         printf("%s\n", aux2->name);
       }

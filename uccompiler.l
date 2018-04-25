@@ -131,6 +131,7 @@ int main(int argc, char *argv[]) {
       yylex();
     }
     else if (strcmp(argv[1], "-2") == 0) {
+      print_tokens = 0;
       yyparse();
       destroy_ast(ast);
     }
@@ -153,6 +154,7 @@ int main(int argc, char *argv[]) {
 
       if(errors == 0) {
         current = create_table("Global");
+        current->print = 1;
         insert_default_functions(current);
         check_program(ast);
         show_tables();
