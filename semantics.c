@@ -82,6 +82,7 @@ void check_program(node_t *ast) {
   check_program(ast->sibling);
 }
 
+
 void check_declaration(node_t *declaration) {
   node_t *aux = declaration->child;
 
@@ -184,14 +185,23 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
 
 
 void check_call(node_t *operator_) {
-
+  /*
+  table global_table = *get_table("Global");
+  symbol function = *get_element(&global_table, operator_->child->value);
+  operator_->type_e = function.type; */
+  check_program(operator_->child);
+  operator_->type_e = operator_->child->type_e;
 }
 
 
 void check_terminal(node_t *terminal) {
   if (strcmp(terminal->type, "Id") == 0) {
-    symbol id = *get_element(current, terminal->value);
-    terminal->type_e = id.type;
+    symbol *id = get_element(current, terminal->value);
+    if (id == NULL) {
+      table global_table = *get_table("Global");
+      id = get_element(&global_table, terminal->value);
+    }
+    terminal->type_e = id->type;
   }
   else if (strcmp(terminal->type, "IntLit") == 0) {
     terminal->type_e = strdup("int");
