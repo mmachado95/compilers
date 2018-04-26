@@ -9,46 +9,45 @@ void check_program(node_t *ast) {
   if (strcmp(ast->type, "Program") == 0) {
     check_program(ast->child);
   }
-  if (strcmp(ast->type, "Declaration") == 0) {
-    //check_declaration(ast);
+  else if (strcmp(ast->type, "Declaration") == 0) {
+    check_declaration(ast);
   }
-  if (strcmp(ast->type, "FuncDeclaration") == 0) {
+  else if (strcmp(ast->type, "FuncDeclaration") == 0) {
     check_func_declaration(ast);
   }
-  if (strcmp(ast->type, "FuncDefinition") == 0) {
+  else if (strcmp(ast->type, "FuncDefinition") == 0) {
     check_func_definition(ast);
-  }
-  if (strcmp(ast->type, "ParamList") == 0) {
-    //check_param_list(ast);
+    current = tables;
   }
   // TODO check if func body ahs child or not
-  if (strcmp(ast->type, "FuncBody") == 0) {
-    check_program(ast);
+  else if (strcmp(ast->type, "FuncBody") == 0) {
+    check_program(ast->child);
+    current = tables;
   }
-  if (strcmp(ast->type, "If") == 0) {
+  else if (strcmp(ast->type, "If") == 0) {
     //check_if(ast);
   }
-  if (strcmp(ast->type, "While") == 0) {
+  else if (strcmp(ast->type, "While") == 0) {
     //check_while(ast);
   }
-  if (strcmp(ast->type, "Return") == 0) {
+  else if (strcmp(ast->type, "Return") == 0) {
     //check_return(ast);
   }
-  if (strcmp(ast->type, "Store") == 0) {
+  else if (strcmp(ast->type, "Store") == 0) {
     //check_assign_operator(ast);
   }
-  if (strcmp(ast->type, "Add") == 0
+  else if (strcmp(ast->type, "Add") == 0
       || strcmp(ast->type, "Sub") == 0
       || strcmp(ast->type, "Mul") == 0
       || strcmp(ast->type, "Div") == 0
       || strcmp(ast->type, "Mod") == 0) {
     //check_arithmetic_operator(ast);
   }
-  if (strcmp(ast->type, "Plus") == 0
+  else if (strcmp(ast->type, "Plus") == 0
       || strcmp(ast->type, "Minus") == 0) {
     //check_unary_operator(ast);
   }
-  if (strcmp(ast->type, "Eq") == 0
+  else if (strcmp(ast->type, "Eq") == 0
       || strcmp(ast->type, "Ne") == 0
       || strcmp(ast->type, "Le") == 0
       || strcmp(ast->type, "Ge") == 0
@@ -57,35 +56,41 @@ void check_program(node_t *ast) {
       || strcmp(ast->type, "Mod") == 0) {
     //check_relational_operator(ast);
   }
-  if (strcmp(ast->type, "Not") == 0
+  else if (strcmp(ast->type, "Not") == 0
       || strcmp(ast->type, "And") == 0
       || strcmp(ast->type, "Or") == 0) {
     //check_logical_operator(ast);
   }
-  if (strcmp(ast->type, "BitWiseAnd") == 0
+  else if (strcmp(ast->type, "BitWiseAnd") == 0
       || strcmp(ast->type, "BitWiseOr") == 0
       || strcmp(ast->type, "BitWiseXor") == 0) {
     //check_bitwise_operator(ast);
   }
-  if (strcmp(ast->type, "Call") == 0) {
+  else if (strcmp(ast->type, "Call") == 0) {
     //check_call(ast);
   }
-  if (strcmp(ast->type, "Id") == 0
+  else if (strcmp(ast->type, "Id") == 0
       || strcmp(ast->type, "IntLit") == 0
       || strcmp(ast->type, "ChrLit") == 0
       || strcmp(ast->type, "RealLit") == 0) {
     //check_terminal(ast);
   }
+
+  // iterate to the next node
+  check_program(ast->sibling);
 }
 
 void check_declaration(node_t *declaration) {
   node_t *aux = declaration->child;
 
-  if (get_element(current, declaration->value) != NULL) {
-    return;
+  // if symbol is not in table, add to table
+  if (get_element(current, aux->sibling->value) == NULL) {
+    insert_element(current, aux->sibling->value, aux->type, NULL);
+  } else {
+    // should print an error of declaration already declared
   }
-  insert_element(current, aux->type, aux->value, NULL);
 }
+
 
 void check_func_declaration(node_t *func_declaration) {
   // save type of function
@@ -103,63 +108,69 @@ void check_func_declaration(node_t *func_declaration) {
     // insert element in global table
     symbol *func_declaration = insert_element(tables, func_name, func_type, NULL);
 
-    // go to the first paramdeclaration
-    aux = aux->sibling->child;
-
-    // get types of params
-    while(aux != NULL) {
-      param_type *param_aux = func_declaration->param;
-
-      insert_type(aux->child->type, func_declaration);
-
-      // if the next node is an id, skip it
-      if(aux->sibling != NULL && strcmp("Id", aux->sibling->type) == 0) {
-        aux = aux->sibling;
-      }
-
-      aux = aux->sibling;
-    }
-
+    // function that adds the param types to the symbol
+    check_param_list(aux->sibling, func_declaration, 0);
   }
 
   current = tables;
 }
 
-
 void check_func_definition(node_t *func_definition) {
-  // save type of function
   char *func_type = func_definition->child->type;
 
-  // go to FunctionDeclarator
+  //go to FunctionDeclarator
   node_t *aux = func_definition->child->sibling;
 
-  // if table for function doesn't exist already
-  if (get_table(aux->value) == NULL) {
-    char *func_name = aux->value;
-    // create table for function
+  // save function name
+  char *func_name = aux->value;
+
+  symbol *func;
+  // check if table is already declared
+  current = get_table(func_name);
+  if(current == NULL) {
     current = create_table(func_name);
+    // insert function in global table
+    func = insert_element(tables, func_name, func_type, NULL);
+    // add functions param types to global
+    check_param_list(aux->sibling, func, 0);
+  } else {
+    func = get_element(tables, func_name);
+  }
+  // function is defined, we need to print
+  current->print = 1;
 
-    // insert element in global table
-    symbol *func_definition = insert_element(tables, func_name, func_type, NULL);
+  // add return statement to table
+  insert_element(current, "return", func_type, NULL);
 
-    // go to the first paramdeclaration
-    aux = aux->sibling->child;
+  // add param to table function
+  check_param_list(aux->sibling, func, 1);
 
-    // get types of params
-    while(aux != NULL) {
-      param_type *param_aux = func_definition->param;
+  check_program(aux->sibling->sibling);
+}
 
-      insert_type(aux->child->type, func_definition);
+void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
+  node_t *param_list_aux = param_list->child;
 
-      // if the next node is an id, skip it
-      if(aux->sibling != NULL && strcmp("Id", aux->sibling->type) == 0) {
-        aux = aux->sibling;
-      }
+  // get types of params
+  while(param_list_aux != NULL) {
+    char *param_type = param_list_aux->child->type;
 
-      aux = aux->sibling;
+    // go to function id
+    node_t *param_declaration = param_list_aux->child->sibling;
+    if(param_declaration != NULL && strcmp("Id", param_declaration->type) != 0) {
+      param_declaration = param_declaration->sibling;
     }
 
-  }
+    // check if it's a function defenition
+    if(is_func_def == 1) {
+      if(param_declaration != NULL && get_element(current, param_declaration->value) == NULL) {
+        symbol *new_symbol = insert_element(current, param_declaration->value, param_type, NULL);
+        new_symbol->is_param = 1;
+      }
+    } else {
+      insert_type(param_type, func);
+    }
 
-  current = tables;
+    param_list_aux = param_list_aux->sibling;
+  }
 }

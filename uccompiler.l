@@ -130,15 +130,35 @@ int main(int argc, char *argv[]) {
       yyparse();
       yylex();
     }
-    if (strcmp(argv[1], "-t") == 0) {
+    else if (strcmp(argv[1], "-2") == 0) {
+      print_tokens = 0;
+      yyparse();
+      destroy_ast(ast);
+    }
+    else if (strcmp(argv[1], "-t") == 0) {
       print_tokens = 0;
       yyparse();
 
       if(errors == 0) {
         print_ast(ast, 0);
-        create_table("Global");
+        /*current = create_table("Global");*/
+        /*insert_default_functions(current);*/
+        /*check_program(ast);*/
+        /*show_tables();*/
+        destroy_ast(ast);
+      }
+    }
+    else if (strcmp(argv[1], "-s") == 0) {
+      print_tokens = 0;
+      yyparse();
+
+      if(errors == 0) {
+        current = create_table("Global");
+        current->print = 1;
+        insert_default_functions(current);
         check_program(ast);
         show_tables();
+        print_ast(ast, 0);
         destroy_ast(ast);
       }
     }

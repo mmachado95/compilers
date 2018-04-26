@@ -76,8 +76,6 @@ node_t *add_sibling(node_t *original, node_t *sibling) {
   }
 
   aux->sibling = sibling;
-  //printf("Adding sibling to node %s!!\n", original->type);
-  //printf("-> %s!!\n", sibling->type);
 
   return original;
 }

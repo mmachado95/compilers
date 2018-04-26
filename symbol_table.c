@@ -4,23 +4,20 @@
 #include <ctype.h>
 #include "symbol_table.h"
 
-// util function to add a symbol to the end of a table
-void add_symbol_to_table_end(table *to_insert, symbol *new_symbol) {
-
-  while(to_insert->next != NULL) {
-    to_insert = to_insert->next;
-  }
-
-  to_insert->next = to_insert;
+// adds the default functions to the global table
+void insert_default_functions(table *to_insert) {
+  param_type *type_int = (param_type *) malloc(sizeof(param_type));
+  type_int->name = strdup("Int");
+  param_type *type_void = (param_type *) malloc(sizeof(param_type));
+  type_void->name = strdup("Void");
+  insert_element(to_insert, "putchar", "Int", type_int);
+  insert_element(to_insert, "getchar", "Int", type_void);
 }
-
-// ================================================
-// ==================== MAIN ======================
-// ================================================
 
 table *create_table(char *name) {
   // creates the table and respective elements
   table *new_table = (table *)malloc(sizeof(table));
+  new_table->print = 0;
   new_table->name = strdup(name);
   new_table->symbol = NULL;
   new_table->next = NULL;
@@ -41,15 +38,6 @@ table *create_table(char *name) {
     aux->next = new_table;
   } else {
     tables = new_table;
-  }
-
-  if (strcmp(name, "Global") == 0) {
-    param_type *type_int = (param_type *) malloc(sizeof(param_type));
-    type_int->name = strdup("Int");
-    param_type *type_void = (param_type *) malloc(sizeof(param_type));
-    type_void->name = strdup("Void");
-    insert_element(tables, "putchar", "Int", type_int);
-    insert_element(tables, "getchar", "Int", type_void);
   }
 
   return new_table;
@@ -75,7 +63,11 @@ symbol *insert_element(table *to_insert, char *name, char *type, param_type *par
 
   // create the symbol
   symbol *new_symbol=(symbol *) malloc(sizeof(symbol));
-  new_symbol->name = strdup(name);
+  new_symbol->is_param = 0;
+  new_symbol->name = NULL;
+  if (name != NULL) {
+    new_symbol->name = strdup(name);
+  }
   new_symbol->type = strdup(type);
   new_symbol->param = params_types;
   new_symbol->next = NULL;
@@ -104,7 +96,6 @@ symbol *get_element(table *table, char *name) {
     if (strcmp(name, aux->name) == 0) {
       return aux;
     }
-
     aux = aux->next;
   }
 
@@ -129,46 +120,62 @@ void insert_type(char *name, symbol *to_insert_type) {
   }
 }
 
+// aux function to show function param types
+void show_func_param_types(param_type *param) {
+  param_type *aux = param;
+  aux->name[0] = tolower(aux->name[0]);
+  printf("%s", aux->name);
+  
+  aux = aux->next;
+
+  while(aux != NULL) {
+    printf(",");
+    aux->name[0] = tolower(aux->name[0]);
+    printf("%s", aux->name);
+    aux = aux->next;
+  }
+}
+
+void show_symbol(symbol *symbol) {
+  symbol->type[0] = tolower(symbol->type[0]);
+  printf("%s\t%s", symbol->name, symbol->type);
+
+  if (symbol->is_param == 1) {
+    printf("\tparam\n");
+  }
+  else if (symbol->param != NULL) {
+    printf("(");
+    show_func_param_types(symbol->param);
+    printf(")\n");
+  } else {
+    printf("\n");
+  }
+}
+
+void show_table(table *table) {
+  symbol *aux = table->symbol;
+
+  // check if it's global function or not
+  if(strcmp("Global", table->name) != 0) {
+    printf("===== Function %s Symbol Table =====\n", table->name);
+  } else {
+    printf("===== %s Symbol Table =====\n", table->name);
+  }
+
+  while(aux != NULL) {
+    show_symbol(aux);
+    aux = aux->next;
+  }
+}
+
 void show_tables() {
   table *aux = tables;
 
   while(aux != NULL) {
-    if(strcmp("Global", aux->name) != 0) {
-      printf("===== Function %s Symbol Table =====\n", aux->name);
-    } else {
-      printf("===== %s Symbol Table =====\n", aux->name);
+    if(aux->print) {
+      show_table(aux);
+      printf("\n");
     }
-
-    symbol *aux2 = aux->symbol;
-
-    while(aux2 != NULL) {
-      if(aux2->type != NULL) {
-        aux2->type[0] = aux2->type[0] + 32; // Lower Case
-        printf("%s\t%s(", aux2->name, aux2->type);
-
-        param_type *param_aux = aux2->param;
-        int i = 0;
-        while(param_aux != NULL) {
-          param_aux->name[0] = param_aux->name[0] + 32; // Lower Case
-          if (i == 0) {
-            printf("%s", param_aux->name);
-            i++;
-          }
-          else {
-            printf(",%s", param_aux->name);
-          }
-          param_aux = param_aux->next;
-        }
-        printf(")\n");
-      }
-
-      else {
-        printf("%s\n", aux2->name);
-      }
-
-      aux2 = aux2->next;
-    }
-
-    aux=aux->next;
+    aux = aux->next;
   }
 }

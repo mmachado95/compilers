@@ -12,6 +12,8 @@ typedef struct pt_ {
 } param_type;
 
 typedef struct sym {
+  // if the symbol is a param we need to print param at the end
+  int is_param;
   // identifier of variable, function etc
   char *name;
   // type of variable, function etc
@@ -22,6 +24,8 @@ typedef struct sym {
 } symbol;
 
 typedef struct tab {
+  // table is supposed to be printed
+  int print;
   // name of table
   char *name;
   // symbols that table has
@@ -29,13 +33,16 @@ typedef struct tab {
   struct tab *next;
 } table;
 
+void insert_default_functions(table *to_insert);
 table *create_table(char *name);
 table *get_table(char *name);
 symbol *insert_element(table *table, char *name, char *type, param_type *params_types);
 symbol *get_element(table *table, char *name);
 void insert_type(char *name, symbol *to_insert_type);
+void show_func_param_types(param_type *param);
+void show_symbol(symbol *symbol);
+void show_table(table *table);
 void show_tables();
-
 
 table *tables;
 table *current;
