@@ -1,10 +1,13 @@
 #include "semantics.h"
 
 void check_program(node_t *ast) {
+
   // stop condition
   if (ast == NULL) {
     return;
   }
+
+  printf("%s\n", ast->type );
 
   if (strcmp(ast->type, "Program") == 0) {
     check_program(ast->child);
@@ -73,21 +76,25 @@ void check_program(node_t *ast) {
       || strcmp(ast->type, "IntLit") == 0
       || strcmp(ast->type, "ChrLit") == 0
       || strcmp(ast->type, "RealLit") == 0) {
-    //check_terminal(ast);
+    check_terminal(ast);
   }
 
-  // iterate to the next node
   check_program(ast->sibling);
 }
 
 void check_declaration(node_t *declaration) {
   node_t *aux = declaration->child;
 
+
   // if symbol is not in table, add to table
   if (get_element(current, aux->sibling->value) == NULL) {
     insert_element(current, aux->sibling->value, aux->type, NULL);
   } else {
     // should print an error of declaration already declared
+  }
+
+  if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
+    check_program(aux->sibling->sibling);
   }
 }
 
@@ -172,5 +179,21 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
     }
 
     param_list_aux = param_list_aux->sibling;
+  }
+}
+
+
+void check_terminal(node_t *terminal) {
+  if (strcmp(terminal->type, "Id") == 0) {
+    // TODO
+  }
+  else if (strcmp(terminal->type, "IntLit") == 0) {
+    terminal->type_e = strdup("int");
+  }
+  else if (strcmp(terminal->type, "ChrLit") == 0) {
+    terminal->type_e = strdup("int");
+  }
+  else if (strcmp(terminal->type, "RealLit") == 0) {
+    // TODO
   }
 }

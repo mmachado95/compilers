@@ -16,6 +16,7 @@ node_t* create_node(char *type, char *value) {
     n->value = strdup(value);
   }
 
+  n->type_e = NULL;
   n->child = NULL;
   n->sibling = NULL;
   return n;
@@ -68,7 +69,7 @@ node_t *add_sibling(node_t *original, node_t *sibling) {
   if (original && sibling == NULL) {
     return NULL;
   }
-  
+
   node_t *aux = original;
 
   while (aux->sibling != NULL) {
@@ -102,10 +103,17 @@ void print_ast(node_t *n, int depth){
     printf("..");
 
   if(n->value != NULL){
-    printf("%s(%s)\n", n->type,n->value);
-  } else{
-    printf("%s\n", n->type);
+    printf("%s(%s)", n->type,n->value);
   }
+  else {
+    printf("%s", n->type);
+  }
+
+  if (n->type_e != NULL) {
+    printf(" - %s", n->type_e );
+  }
+
+  printf("\n");
 
   if(n->child != NULL) {
     print_ast(n->child, depth + 1);

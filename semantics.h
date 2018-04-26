@@ -24,6 +24,6 @@ void check_logical_operator(node_t *operator_);
 void check_bitwise_operator(node_t *operator_);
 void check_assign_operator(node_t *operator_);
 void check_call(node_t *operator_);
-void check_terminal(node_t *terminals);
+void check_terminal(node_t *terminal);
 
 #endif
