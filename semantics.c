@@ -70,7 +70,7 @@ void check_program(node_t *ast) {
     //check_bitwise_operator(ast);
   }
   else if (strcmp(ast->type, "Call") == 0) {
-    //check_call(ast);
+    check_call(ast);
   }
   else if (strcmp(ast->type, "Id") == 0
       || strcmp(ast->type, "IntLit") == 0
@@ -183,9 +183,15 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
 }
 
 
+void check_call(node_t *operator_) {
+
+}
+
+
 void check_terminal(node_t *terminal) {
   if (strcmp(terminal->type, "Id") == 0) {
-    // TODO
+    symbol id = *get_element(current, terminal->value);
+    terminal->type_e = id.type;
   }
   else if (strcmp(terminal->type, "IntLit") == 0) {
     terminal->type_e = strdup("int");
