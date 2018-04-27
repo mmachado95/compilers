@@ -37,7 +37,7 @@ void check_program(node_t *ast) {
     //check_return(ast);
   }
   else if (strcmp(ast->type, "Store") == 0) {
-    //check_assign_operator(ast);
+    check_assign_operator(ast);
   }
   else if (strcmp(ast->type, "Add") == 0
       || strcmp(ast->type, "Sub") == 0
@@ -56,8 +56,8 @@ void check_program(node_t *ast) {
       || strcmp(ast->type, "Ge") == 0
       || strcmp(ast->type, "Lt") == 0
       || strcmp(ast->type, "Gt") == 0
-      || strcmp(ast->type, "Mod") == 0) {
-    //check_relational_operator(ast);
+    /*|| strcmp(ast->type, "Mod") == 0*/)  {
+    check_relational_operator(ast);
   }
   else if (strcmp(ast->type, "Not") == 0
       || strcmp(ast->type, "And") == 0
@@ -184,13 +184,21 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
 }
 
 
-void check_call(node_t *operator_) {
-  /*
-  table global_table = *get_table("Global");
-  symbol function = *get_element(&global_table, operator_->child->value);
-  operator_->type_e = function.type; */
+void check_assign_operator(node_t *operator_) {
   check_program(operator_->child);
   operator_->type_e = operator_->child->type_e;
+}
+
+
+void check_call(node_t *operator_) {
+  check_program(operator_->child);
+  operator_->type_e = operator_->child->type_e;
+}
+
+
+void check_relational_operator(node_t *operator_) {
+  check_program(operator_->child);
+  operator_->type_e = strdup("int");
 }
 
 
