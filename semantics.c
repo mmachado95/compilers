@@ -34,7 +34,7 @@ void check_program(node_t *ast) {
     //check_while(ast);
   }
   else if (strcmp(ast->type, "Return") == 0) {
-    //check_return(ast);
+    check_return(ast);
   }
   else if (strcmp(ast->type, "Store") == 0) {
     check_assign_operator(ast);
@@ -48,7 +48,7 @@ void check_program(node_t *ast) {
   }
   else if (strcmp(ast->type, "Plus") == 0
       || strcmp(ast->type, "Minus") == 0) {
-    //check_unary_operator(ast);
+    check_unary_operator(ast);
   }
   else if (strcmp(ast->type, "Eq") == 0
       || strcmp(ast->type, "Ne") == 0
@@ -67,7 +67,7 @@ void check_program(node_t *ast) {
   else if (strcmp(ast->type, "BitWiseAnd") == 0
       || strcmp(ast->type, "BitWiseOr") == 0
       || strcmp(ast->type, "BitWiseXor") == 0) {
-    //check_bitwise_operator(ast);
+    check_bitwise_operator(ast);
   }
   else if (strcmp(ast->type, "Call") == 0) {
     check_call(ast);
@@ -169,7 +169,7 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
       param_declaration = param_declaration->sibling;
     }
 
-    // check if it's a function defenition
+    // check if it's a function definition
     if(is_func_def == 1) {
       if(param_declaration != NULL && get_element(current, param_declaration->value) == NULL) {
         symbol *new_symbol = insert_element(current, param_declaration->value, param_type, NULL);
@@ -200,6 +200,24 @@ void check_relational_operator(node_t *operator_) {
   check_program(operator_->child);
   operator_->type_e = strdup("int");
 }
+
+
+void check_bitwise_operator(node_t *operator_) {
+  check_program(operator_->child);
+  operator_->type_e = strdup("int");
+}
+
+
+void check_unary_operator(node_t *operator_) {
+  check_program(operator_->child);
+  operator_->type_e = strdup("int");
+}
+
+
+void check_return(node_t *return_) {
+  check_program(return_->child);
+}
+
 
 
 void check_terminal(node_t *terminal) {
