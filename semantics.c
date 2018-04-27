@@ -22,7 +22,7 @@ void check_program(node_t *ast) {
     check_func_definition(ast);
     current = tables;
   }
-  // TODO check if func body ahs child or not
+  // TODO check if func body has child or not
   else if (strcmp(ast->type, "FuncBody") == 0) {
     check_program(ast->child);
     current = tables;
@@ -62,7 +62,7 @@ void check_program(node_t *ast) {
   else if (strcmp(ast->type, "Not") == 0
       || strcmp(ast->type, "And") == 0
       || strcmp(ast->type, "Or") == 0) {
-    //check_logical_operator(ast);
+    check_logical_operator(ast);
   }
   else if (strcmp(ast->type, "BitWiseAnd") == 0
       || strcmp(ast->type, "BitWiseOr") == 0
@@ -94,9 +94,12 @@ void check_declaration(node_t *declaration) {
     // should print an error of declaration already declared
   }
 
+  // Deverao ser anotados apenas os nos correspondentes a expressoes.
+  // Declarações ou statements que nao sejam expressoes nao devem ser anotados.
+  /*
   if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
     check_program(aux->sibling->sibling);
-  }
+  } */
 }
 
 
@@ -214,10 +217,15 @@ void check_unary_operator(node_t *operator_) {
 }
 
 
+void check_logical_operator(node_t *operator_) {
+  check_program(operator_->child);
+  operator_->type_e = strdup("int");
+}
+
+
 void check_return(node_t *return_) {
   check_program(return_->child);
 }
-
 
 
 void check_terminal(node_t *terminal) {
