@@ -7,7 +7,7 @@ void check_program(node_t *ast) {
     return;
   }
 
-  printf("%s\n", ast->type );
+  // printf("%s\n", ast->type );
 
   if (strcmp(ast->type, "Program") == 0) {
     check_program(ast->child);
@@ -27,12 +27,13 @@ void check_program(node_t *ast) {
     check_program(ast->child);
     current = tables;
   }
+  /*
   else if (strcmp(ast->type, "If") == 0) {
     //check_if(ast);
   }
   else if (strcmp(ast->type, "While") == 0) {
     //check_while(ast);
-  }
+  } */
   else if (strcmp(ast->type, "Return") == 0) {
     check_return(ast);
   }
@@ -78,6 +79,9 @@ void check_program(node_t *ast) {
       || strcmp(ast->type, "RealLit") == 0) {
     check_terminal(ast);
   }
+  else {
+    check_program(ast->child);
+  }
 
   check_program(ast->sibling);
 }
@@ -96,10 +100,10 @@ void check_declaration(node_t *declaration) {
 
   // Deverao ser anotados apenas os nos correspondentes a expressoes.
   // Declarações ou statements que nao sejam expressoes nao devem ser anotados.
-  /*
+
   if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
     check_program(aux->sibling->sibling);
-  } */
+  }
 }
 
 
@@ -231,7 +235,8 @@ void check_return(node_t *return_) {
 void check_arithmetic_operator(node_t *operator_) {
   check_program(operator_->child);
   // TODO -> isto deve estar mal
-  if (strcmp(operator_->child->type_e, "int") == 0 || strcmp(operator_->child->sibling->type_e, "int") == 0) {
+  if (strcmp(operator_->child->type_e, "int") == 0 || strcmp(operator_->child->sibling->type_e, "int") ||
+      strcmp(operator_->child->type_e, "Int") == 0 || strcmp(operator_->child->sibling->type_e, "Int")) {
     operator_->type_e = strdup("int");
   }
   else {
