@@ -46,8 +46,7 @@ void check_program(node_t *ast) {
   else if (strcmp(ast->type, "Add") == 0
       || strcmp(ast->type, "Sub") == 0
       || strcmp(ast->type, "Mul") == 0
-      || strcmp(ast->type, "Div") == 0
-      || strcmp(ast->type, "Mod") == 0) {
+      || strcmp(ast->type, "Div") == 0) {
     check_arithmetic_operator(ast);
   }
   else if (strcmp(ast->type, "Plus") == 0
@@ -60,7 +59,7 @@ void check_program(node_t *ast) {
       || strcmp(ast->type, "Ge") == 0
       || strcmp(ast->type, "Lt") == 0
       || strcmp(ast->type, "Gt") == 0
-    /*|| strcmp(ast->type, "Mod") == 0*/)  {
+      || strcmp(ast->type, "Mod") == 0)  {
     check_relational_operator(ast);
   }
   else if (strcmp(ast->type, "Not") == 0
@@ -243,7 +242,7 @@ void check_bitwise_operator(node_t *operator_) {
 
 void check_unary_operator(node_t *operator_) {
   check_program(operator_->child);
-  operator_->type_e = strdup("int");
+  operator_->type_e = operator_->child->type_e;
 }
 
 
