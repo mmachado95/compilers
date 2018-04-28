@@ -253,7 +253,12 @@ void check_terminal(node_t *terminal) {
       table global_table = *get_table("Global");
       id = get_element(&global_table, terminal->value);
     }
-    terminal->type_e = id->type;
+    if (id == NULL) {
+      terminal->type_e = strdup("undef");
+    }
+    else {
+      terminal->type_e = id->type;
+    }
   }
   else if (strcmp(terminal->type, "IntLit") == 0) {
     terminal->type_e = strdup("int");
@@ -262,6 +267,6 @@ void check_terminal(node_t *terminal) {
     terminal->type_e = strdup("int");
   }
   else if (strcmp(terminal->type, "RealLit") == 0) {
-    // TODO
+    terminal->type_e = strdup("double");
   }
 }
