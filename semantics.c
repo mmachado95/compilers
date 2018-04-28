@@ -44,7 +44,7 @@ void check_program(node_t *ast) {
       || strcmp(ast->type, "Mul") == 0
       || strcmp(ast->type, "Div") == 0
       || strcmp(ast->type, "Mod") == 0) {
-    //check_arithmetic_operator(ast);
+    check_arithmetic_operator(ast);
   }
   else if (strcmp(ast->type, "Plus") == 0
       || strcmp(ast->type, "Minus") == 0) {
@@ -225,6 +225,19 @@ void check_logical_operator(node_t *operator_) {
 
 void check_return(node_t *return_) {
   check_program(return_->child);
+}
+
+
+void check_arithmetic_operator(node_t *operator_) {
+  check_program(operator_->child);
+  // TODO -> isto deve estar mal
+  if (strcmp(operator_->child->type_e, "int") == 0 || strcmp(operator_->child->sibling->type_e, "int") == 0) {
+    operator_->type_e = strdup("int");
+  }
+  else {
+    // isto deve estar mt mal
+    operator_->type_e = strdup("char");
+  }
 }
 
 
