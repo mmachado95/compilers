@@ -211,7 +211,23 @@ void check_relational_operator(node_t *operator_) {
 
 void check_bitwise_operator(node_t *operator_) {
   check_program(operator_->child);
-  operator_->type_e = strdup("int");
+
+  // ORDER: double, int, short, char
+  if (strcmp(operator_->child->type_e, "double") == 0 || strcmp(operator_->child->sibling->type_e, "double") == 0 || strcmp(operator_->child->type_e, "Double") == 0 || strcmp(operator_->child->sibling->type_e, "Double") == 0) {
+    operator_->type_e = strdup("double");
+  }
+  else if (strcmp(operator_->child->type_e, "int") == 0 || strcmp(operator_->child->sibling->type_e, "int") == 0 || strcmp(operator_->child->type_e, "Int") == 0 || strcmp(operator_->child->sibling->type_e, "Int") == 0) {
+    operator_->type_e = strdup("int");
+  }
+  else if (strcmp(operator_->child->type_e, "short") == 0 || strcmp(operator_->child->sibling->type_e, "short") == 0 || strcmp(operator_->child->type_e, "Short") == 0 || strcmp(operator_->child->sibling->type_e, "Short") == 0) {
+    operator_->type_e = strdup("short");
+  }
+  else if (strcmp(operator_->child->type_e, "char") == 0 || strcmp(operator_->child->sibling->type_e, "char") == 0 || strcmp(operator_->child->type_e, "Char") == 0 || strcmp(operator_->child->sibling->type_e, "Char") == 0) {
+    operator_->type_e = strdup("char");
+  }
+  else {
+    operator_->type_e = strdup("undef");
+  }
 }
 
 
@@ -234,14 +250,22 @@ void check_return(node_t *return_) {
 
 void check_arithmetic_operator(node_t *operator_) {
   check_program(operator_->child);
-  // TODO -> isto deve estar mal
-  if (strcmp(operator_->child->type_e, "int") == 0 || strcmp(operator_->child->sibling->type_e, "int") ||
-      strcmp(operator_->child->type_e, "Int") == 0 || strcmp(operator_->child->sibling->type_e, "Int")) {
+
+  // ORDER: double, int, short, char
+  if (strcmp(operator_->child->type_e, "double") == 0 || strcmp(operator_->child->sibling->type_e, "double") == 0 || strcmp(operator_->child->type_e, "Double") == 0 || strcmp(operator_->child->sibling->type_e, "Double") == 0) {
+    operator_->type_e = strdup("double");
+  }
+  else if (strcmp(operator_->child->type_e, "int") == 0 || strcmp(operator_->child->sibling->type_e, "int") == 0 || strcmp(operator_->child->type_e, "Int") == 0 || strcmp(operator_->child->sibling->type_e, "Int") == 0) {
     operator_->type_e = strdup("int");
   }
-  else {
-    // isto deve estar mt mal
+  else if (strcmp(operator_->child->type_e, "short") == 0 || strcmp(operator_->child->sibling->type_e, "short") == 0 || strcmp(operator_->child->type_e, "Short") == 0 || strcmp(operator_->child->sibling->type_e, "Short") == 0) {
+    operator_->type_e = strdup("short");
+  }
+  else if (strcmp(operator_->child->type_e, "char") == 0 || strcmp(operator_->child->sibling->type_e, "char") == 0 || strcmp(operator_->child->type_e, "Char") == 0 || strcmp(operator_->child->sibling->type_e, "Char") == 0) {
     operator_->type_e = strdup("char");
+  }
+  else {
+    operator_->type_e = strdup("undef");
   }
 }
 
