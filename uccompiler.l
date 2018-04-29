@@ -1,4 +1,6 @@
 %{
+  //Miguel Machado 2014214547
+  //Teresa Salazar 2015
   #include "y.tab.h"
   #define PRINTF if(print_tokens == 1) printf
   #include "ast.h"
@@ -141,10 +143,6 @@ int main(int argc, char *argv[]) {
 
       if(errors == 0) {
         print_ast(ast, 0);
-        /*current = create_table("Global");*/
-        /*insert_default_functions(current);*/
-        /*check_program(ast);*/
-        /*show_tables();*/
         destroy_ast(ast);
       }
     }
@@ -157,7 +155,9 @@ int main(int argc, char *argv[]) {
         current->print = 1;
         insert_default_functions(current);
         check_program(ast);
+        printf("Arrived here\n");
         show_tables();
+        printf("passed here\n");
         print_ast(ast, 0);
         destroy_ast(ast);
       }
