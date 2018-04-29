@@ -207,10 +207,40 @@ void check_assign_operator(node_t *operator_) {
 void check_call(node_t *operator_) {
   check_program(operator_->child);
   operator_->type_e = operator_->child->type_e;
+
   if (strcmp(operator_->child->type_e, "undef") == 0) {
     // Error - Symbol is not a function
     printf("Line %d, col %d: Symbol %s is not a function\n", line, col, operator_->child->value);
     // TODO -> when this error occurs, "Unknown symbol" appears to. Remove it, maybe?
+  }
+
+  else { // TODO -> else or not else?
+    int number_of_args_required = 0;
+    table global_table = *get_table("Global");
+    symbol *symbol = get_element(&global_table, operator_->child->value);
+
+    if (symbol != NULL) {
+      if (symbol->param != NULL) {
+        number_of_args_required++;
+        param_type *aux = symbol->param;
+        aux = aux->next;
+        while(aux != NULL) {
+          number_of_args_required++;
+          aux = aux->next;
+        }
+      }
+    }
+
+    int number_of_args_provided = 0;
+    node_t *aux = operator_->child->sibling;
+    while (aux != NULL) {
+      number_of_args_provided++;
+      aux = aux->sibling;
+    }
+    if (number_of_args_required != number_of_args_provided) {
+      // Error - Wrong number of arguments
+      printf("Line %d, col %d: Wrong number of arguments to function %s (got %d, required %d)\n", line, col, operator_->child->value, number_of_args_provided, number_of_args_required);
+    }
   }
 }
 
