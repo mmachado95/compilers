@@ -3,10 +3,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "symbol_table.h"
 
 typedef struct node {
   char *type;
   char *value;
+  char *type_e; // type of element (int, ...)
   struct node *child;
   struct node *sibling;
 } node_t;

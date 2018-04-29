@@ -1,10 +1,13 @@
 #include "semantics.h"
 
 void check_program(node_t *ast) {
+
   // stop condition
   if (ast == NULL) {
     return;
   }
+
+  // printf("%s\n", ast->type );
 
   if (strcmp(ast->type, "Program") == 0) {
     check_program(ast->child);
@@ -19,33 +22,36 @@ void check_program(node_t *ast) {
     check_func_definition(ast);
     current = tables;
   }
-  // TODO check if func body ahs child or not
+  // TODO check if func body has child or not
   else if (strcmp(ast->type, "FuncBody") == 0) {
     check_program(ast->child);
     current = tables;
   }
+  else if (strcmp(ast->type, "Comma") == 0) {
+    check_comma(ast);
+  }
+  /*
   else if (strcmp(ast->type, "If") == 0) {
     //check_if(ast);
   }
   else if (strcmp(ast->type, "While") == 0) {
     //check_while(ast);
-  }
+  } */
   else if (strcmp(ast->type, "Return") == 0) {
-    //check_return(ast);
+    check_return(ast);
   }
   else if (strcmp(ast->type, "Store") == 0) {
-    //check_assign_operator(ast);
+    check_assign_operator(ast);
   }
   else if (strcmp(ast->type, "Add") == 0
       || strcmp(ast->type, "Sub") == 0
       || strcmp(ast->type, "Mul") == 0
-      || strcmp(ast->type, "Div") == 0
-      || strcmp(ast->type, "Mod") == 0) {
-    //check_arithmetic_operator(ast);
+      || strcmp(ast->type, "Div") == 0) {
+    check_arithmetic_operator(ast);
   }
   else if (strcmp(ast->type, "Plus") == 0
       || strcmp(ast->type, "Minus") == 0) {
-    //check_unary_operator(ast);
+    check_unary_operator(ast);
   }
   else if (strcmp(ast->type, "Eq") == 0
       || strcmp(ast->type, "Ne") == 0
@@ -53,41 +59,52 @@ void check_program(node_t *ast) {
       || strcmp(ast->type, "Ge") == 0
       || strcmp(ast->type, "Lt") == 0
       || strcmp(ast->type, "Gt") == 0
-      || strcmp(ast->type, "Mod") == 0) {
-    //check_relational_operator(ast);
+      || strcmp(ast->type, "Mod") == 0)  {
+    check_relational_operator(ast);
   }
   else if (strcmp(ast->type, "Not") == 0
       || strcmp(ast->type, "And") == 0
       || strcmp(ast->type, "Or") == 0) {
-    //check_logical_operator(ast);
+    check_logical_operator(ast);
   }
   else if (strcmp(ast->type, "BitWiseAnd") == 0
       || strcmp(ast->type, "BitWiseOr") == 0
       || strcmp(ast->type, "BitWiseXor") == 0) {
-    //check_bitwise_operator(ast);
+    check_bitwise_operator(ast);
   }
   else if (strcmp(ast->type, "Call") == 0) {
-    //check_call(ast);
+    check_call(ast);
   }
   else if (strcmp(ast->type, "Id") == 0
       || strcmp(ast->type, "IntLit") == 0
       || strcmp(ast->type, "ChrLit") == 0
       || strcmp(ast->type, "RealLit") == 0) {
-    //check_terminal(ast);
+    check_terminal(ast);
+  }
+  else {
+    check_program(ast->child);
   }
 
-  // iterate to the next node
   check_program(ast->sibling);
 }
 
+
 void check_declaration(node_t *declaration) {
   node_t *aux = declaration->child;
+
 
   // if symbol is not in table, add to table
   if (get_element(current, aux->sibling->value) == NULL) {
     insert_element(current, aux->sibling->value, aux->type, NULL);
   } else {
     // should print an error of declaration already declared
+  }
+
+  // Deverao ser anotados apenas os nos correspondentes a expressoes.
+  // Declarações ou statements que nao sejam expressoes nao devem ser anotados.
+
+  if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
+    check_program(aux->sibling->sibling);
   }
 }
 
@@ -161,7 +178,7 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
       param_declaration = param_declaration->sibling;
     }
 
-    // check if it's a function defenition
+    // check if it's a function definition
     if(is_func_def == 1) {
       if(param_declaration != NULL && get_element(current, param_declaration->value) == NULL) {
         symbol *new_symbol = insert_element(current, param_declaration->value, param_type, NULL);
@@ -172,5 +189,117 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
     }
 
     param_list_aux = param_list_aux->sibling;
+  }
+}
+
+
+// Not sure
+void check_comma(node_t *comma) {
+  check_program(comma->child);
+  comma->type_e = comma->child->sibling->type_e;
+}
+
+
+void check_assign_operator(node_t *operator_) {
+  check_program(operator_->child);
+  operator_->type_e = operator_->child->type_e;
+}
+
+
+void check_call(node_t *operator_) {
+  check_program(operator_->child);
+  operator_->type_e = operator_->child->type_e;
+}
+
+
+void check_relational_operator(node_t *operator_) {
+  check_program(operator_->child);
+  operator_->type_e = strdup("int");
+}
+
+
+void check_bitwise_operator(node_t *operator_) {
+  check_program(operator_->child);
+
+  // ORDER: double, int, short, char
+  if (strcmp(operator_->child->type_e, "undef") == 0 || strcmp(operator_->child->sibling->type_e, "undef") == 0) {
+    operator_->type_e = strdup("undef");
+  }
+  else if (strcmp(operator_->child->type_e, "double") == 0 || strcmp(operator_->child->sibling->type_e, "double") == 0 || strcmp(operator_->child->type_e, "Double") == 0 || strcmp(operator_->child->sibling->type_e, "Double") == 0) {
+    operator_->type_e = strdup("double");
+  }
+  else if (strcmp(operator_->child->type_e, "int") == 0 || strcmp(operator_->child->sibling->type_e, "int") == 0 || strcmp(operator_->child->type_e, "Int") == 0 || strcmp(operator_->child->sibling->type_e, "Int") == 0) {
+    operator_->type_e = strdup("int");
+  }
+  else if (strcmp(operator_->child->type_e, "short") == 0 || strcmp(operator_->child->sibling->type_e, "short") == 0 || strcmp(operator_->child->type_e, "Short") == 0 || strcmp(operator_->child->sibling->type_e, "Short") == 0) {
+    operator_->type_e = strdup("short");
+  }
+  else if (strcmp(operator_->child->type_e, "char") == 0 || strcmp(operator_->child->sibling->type_e, "char") == 0 || strcmp(operator_->child->type_e, "Char") == 0 || strcmp(operator_->child->sibling->type_e, "Char") == 0) {
+    operator_->type_e = strdup("char");
+  }
+}
+
+
+void check_unary_operator(node_t *operator_) {
+  check_program(operator_->child);
+  operator_->type_e = operator_->child->type_e;
+}
+
+
+void check_logical_operator(node_t *operator_) {
+  check_program(operator_->child);
+  operator_->type_e = strdup("int");
+}
+
+
+void check_return(node_t *return_) {
+  check_program(return_->child);
+}
+
+
+void check_arithmetic_operator(node_t *operator_) {
+  check_program(operator_->child);
+
+  // ORDER: double, int, short, char
+  if (strcmp(operator_->child->type_e, "undef") == 0 || strcmp(operator_->child->sibling->type_e, "undef") == 0) {
+    operator_->type_e = strdup("undef");
+  }
+  else if (strcmp(operator_->child->type_e, "double") == 0 || strcmp(operator_->child->sibling->type_e, "double") == 0 || strcmp(operator_->child->type_e, "Double") == 0 || strcmp(operator_->child->sibling->type_e, "Double") == 0) {
+    operator_->type_e = strdup("double");
+  }
+  else if (strcmp(operator_->child->type_e, "int") == 0 || strcmp(operator_->child->sibling->type_e, "int") == 0 || strcmp(operator_->child->type_e, "Int") == 0 || strcmp(operator_->child->sibling->type_e, "Int") == 0) {
+    operator_->type_e = strdup("int");
+  }
+  else if (strcmp(operator_->child->type_e, "short") == 0 || strcmp(operator_->child->sibling->type_e, "short") == 0 || strcmp(operator_->child->type_e, "Short") == 0 || strcmp(operator_->child->sibling->type_e, "Short") == 0) {
+    operator_->type_e = strdup("short");
+  }
+  else if (strcmp(operator_->child->type_e, "char") == 0 || strcmp(operator_->child->sibling->type_e, "char") == 0 || strcmp(operator_->child->type_e, "Char") == 0 || strcmp(operator_->child->sibling->type_e, "Char") == 0) {
+    operator_->type_e = strdup("char");
+  }
+}
+
+
+void check_terminal(node_t *terminal) {
+  if (strcmp(terminal->type, "Id") == 0) {
+    symbol *id = get_element(current, terminal->value);
+    if (id == NULL) {
+      table global_table = *get_table("Global");
+      id = get_element(&global_table, terminal->value);
+    }
+    if (id == NULL) {
+      terminal->type_e = strdup("undef");
+    }
+    else {
+      terminal->type_e = id->type;
+    }
+  }
+  else if (strcmp(terminal->type, "IntLit") == 0) {
+    terminal->type_e = strdup("int");
+  }
+  else if (strcmp(terminal->type, "ChrLit") == 0) {
+    terminal->type_e = strdup("int");
+  }
+  else if (strcmp(terminal->type, "RealLit") == 0) {
+    terminal->type_e = strdup("double");
   }
 }

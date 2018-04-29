@@ -16,6 +16,7 @@ node_t* create_node(char *type, char *value) {
     n->value = strdup(value);
   }
 
+  n->type_e = NULL;
   n->child = NULL;
   n->sibling = NULL;
   return n;
@@ -68,7 +69,7 @@ node_t *add_sibling(node_t *original, node_t *sibling) {
   if (original && sibling == NULL) {
     return NULL;
   }
-  
+
   node_t *aux = original;
 
   while (aux->sibling != NULL) {
@@ -102,10 +103,33 @@ void print_ast(node_t *n, int depth){
     printf("..");
 
   if(n->value != NULL){
-    printf("%s(%s)\n", n->type,n->value);
-  } else{
-    printf("%s\n", n->type);
+    printf("%s(%s)", n->type, n->value);
   }
+  else {
+    printf("%s", n->type);
+  }
+
+  // Annotated AST
+  if (n->type_e != NULL) {
+    printf(" - %s", n->type_e );
+
+    if (n->value != NULL) {
+      table global_table = *get_table("Global");
+      symbol *symbol = get_element(&global_table, n->value);
+      if (symbol != NULL) {
+        if (symbol->is_param == 1) {
+          printf("\tparam");
+        }
+        else if (symbol->param != NULL) {
+          printf("(");
+          show_func_param_types(symbol->param);
+          printf(")");
+        }
+      }
+    }
+  }
+
+  printf("\n");
 
   if(n->child != NULL) {
     print_ast(n->child, depth + 1);
