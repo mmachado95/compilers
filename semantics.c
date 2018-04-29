@@ -207,6 +207,11 @@ void check_assign_operator(node_t *operator_) {
 void check_call(node_t *operator_) {
   check_program(operator_->child);
   operator_->type_e = operator_->child->type_e;
+  if (strcmp(operator_->child->type_e, "undef") == 0) {
+    // Error - Symbol is not a function
+    printf("Line %d, col %d: Symbol %s is not a function\n", line, col, operator_->child->value);
+    // TODO -> when this error occurs, "Unknown symbol" appears to. Remove it, maybe?
+  }
 }
 
 
