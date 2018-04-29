@@ -97,12 +97,9 @@ void check_declaration(node_t *declaration) {
   if (get_element(current, aux->sibling->value) == NULL) {
     insert_element(current, aux->sibling->value, aux->type, NULL);
   } else {
+    // Error - symbol already defined
     printf("Line %d, col %d: Symbol %s already defined\n", line, col, aux->sibling->value);
-    // should print an error of declaration already declared
   }
-
-  // Deverao ser anotados apenas os nos correspondentes a expressoes.
-  // Declarações ou statements que nao sejam expressoes nao devem ser anotados.
 
   if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
     check_program(aux->sibling->sibling);
@@ -288,6 +285,8 @@ void check_terminal(node_t *terminal) {
       id = get_element(&global_table, terminal->value);
     }
     if (id == NULL) {
+      // Error - Unknown symbol
+      printf("Line %d, col %d: Unknown symbol %s\n", line, col, terminal->value);
       terminal->type_e = strdup("undef");
     }
     else {
