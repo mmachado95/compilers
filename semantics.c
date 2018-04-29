@@ -97,6 +97,7 @@ void check_declaration(node_t *declaration) {
   if (get_element(current, aux->sibling->value) == NULL) {
     insert_element(current, aux->sibling->value, aux->type, NULL);
   } else {
+    printf("Line %d, col %d: Symbol %s already defined\n", line, col, aux->sibling->value);
     // should print an error of declaration already declared
   }
 
