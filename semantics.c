@@ -98,7 +98,7 @@ void check_declaration(node_t *declaration) {
     insert_element(current, aux->sibling->value, aux->type, NULL);
   } else {
     // Error - symbol already defined
-    printf("Line %d, col %d: Symbol %s already defined\n", declaration->line, declaration->col, aux->sibling->value);
+    printf("Line %d, col %d: Symbol %s already defined\n", aux->sibling->line, aux->sibling->col, aux->sibling->value);
   }
 
   if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
@@ -215,19 +215,27 @@ void check_call(node_t *operator_) {
     // TODO -> when this error occurs, "Unknown symbol" appears to. Remove it, maybe?
   }
 
-  else { // TODO -> else or not else?
+  else {
     int number_of_args_required = 0;
     table global_table = *get_table("Global");
     symbol *symbol = get_element(&global_table, operator_->child->value);
 
-    if (symbol != NULL) {
-      if (symbol->param != NULL) {
-        number_of_args_required++;
-        param_type *aux = symbol->param;
-        aux = aux->next;
-        while(aux != NULL) {
+    int param_not_void = 1;
+
+    if (symbol != NULL && param_not_void == 1) {
+      if (symbol->param != NULL && param_not_void == 1) {
+        if (strcmp(symbol->param->name, "void") == 0 || strcmp(symbol->param->name, "Void") == 0) {
+          number_of_args_required = 0;
+          param_not_void = 0;
+        }
+        if (param_not_void == 1) {
           number_of_args_required++;
+          param_type *aux = symbol->param;
           aux = aux->next;
+          while(aux != NULL) {
+            number_of_args_required++;
+            aux = aux->next;
+          }
         }
       }
     }

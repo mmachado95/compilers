@@ -40,7 +40,7 @@
 %type <node> Program FunctionsAndDeclarations FunctionDefinition
             FunctionDeclaration Declaration FunctionDeclarator TypeSpec FunctionBody Declarator
             Expr ParameterList ParameterDeclaration CommaExpr CommaExprTwo DeclarationsAndStatements
-            Statement CommaParamDeclaration CommaDeclarator StatementWithError StatementList
+            Statement CommaParamDeclaration CommaDeclarator StatementWithError StatementList ID_terminal
 
 
 %%
@@ -129,16 +129,20 @@ CommaDeclarator: COMMA Declarator CommaDeclarator           {$$ = add_sibling($2
                | /*empty*/                                  {$$ = NULL;}
                ;
 
-TypeSpec: CHAR    {$$ = insert_node(line, col-yylen, "Char", NULL, 0);}
-        | INT     {$$ = insert_node(line, col-yylen, "Int", NULL, 0);}
-        | VOID    {$$ = insert_node(line, col-yylen, "Void", NULL, 0);}
-        | SHORT   {$$ = insert_node(line, col-yylen, "Short", NULL, 0);}
-        | DOUBLE  {$$ = insert_node(line, col-yylen, "Double", NULL, 0);}
+TypeSpec: CHAR    {$$ = insert_node(line, col-strlen("Char"), "Char", NULL, 0);}
+        | INT     {$$ = insert_node(line, col-strlen("Int"), "Int", NULL, 0);}
+        | VOID    {$$ = insert_node(line, col-strlen("Void"), "Void", NULL, 0);}
+        | SHORT   {$$ = insert_node(line, col-strlen("Short"), "Short", NULL, 0);}
+        | DOUBLE  {$$ = insert_node(line, col-strlen("Double"), "Double", NULL, 0);}
         ;
 
-Declarator: ID ASSIGN Expr        {$$ = insert_node(line, col-yylen, "Declaration", NULL, 2, insert_node(line, col-yylen, "Id", $1, 0), $3);}
-          | ID                    {$$ = insert_node(line, col-yylen, "Declaration", NULL, 1, insert_node(line, col-yylen, "Id", $1, 0));}
+Declarator: ID_terminal ASSIGN Expr        {$$ = insert_node(line, col-yylen, "Declaration", NULL, 2, $1);}
+          | ID_terminal                    {$$ = insert_node(line, col-yylen, "Declaration", NULL, 1, $1);}
           ;
+
+
+ID_terminal: ID                   {$$ = insert_node(line, col-1-strlen($1), "Id", $1, 0);}
+
 
 Expr: Expr ASSIGN Expr            {$$ = insert_node(line, col-yylen, "Store", NULL, 2, $1, $3);}
     | Expr PLUS Expr              {$$ = insert_node(line, col-yylen, "Add", NULL, 2, $1, $3);}
