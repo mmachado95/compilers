@@ -141,7 +141,7 @@ Declarator: ID_terminal ASSIGN Expr        {$$ = insert_node(line, col-yylen, "D
           ;
 
 
-ID_terminal: ID                   {$$ = insert_node(line, col-1-strlen($1), "Id", $1, 0);}
+ID_terminal: ID                   {$$ = insert_node(line, col-strlen($1), "Id", $1, 0);}
 
 
 Expr: Expr ASSIGN Expr            {$$ = insert_node(line, col-yylen, "Store", NULL, 2, $1, $3);}
