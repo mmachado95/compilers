@@ -6,12 +6,10 @@
 
 // adds the default functions to the global table
 void insert_default_functions(table *to_insert) {
-  param_type *type_int = (param_type *) malloc(sizeof(param_type));
-  type_int->name = strdup("Int");
-  param_type *type_void = (param_type *) malloc(sizeof(param_type));
-  type_void->name = strdup("Void");
-  insert_element(to_insert, "putchar", "Int", type_int);
-  insert_element(to_insert, "getchar", "Int", type_void);
+  symbol *put_char = insert_element(to_insert, "putchar", "Int", NULL);
+  insert_type("Int", put_char);
+  symbol *get_char = insert_element(to_insert, "getchar", "Int", NULL);
+  insert_type("Void", get_char);
 }
 
 table *create_table(char *name) {

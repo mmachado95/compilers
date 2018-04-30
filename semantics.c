@@ -216,8 +216,8 @@ void check_call(node_t *operator_) {
 
   else {
     int number_of_args_required = 0;
-    table global_table = *get_table("Global");
-    symbol *symbol = get_element(&global_table, operator_->child->value);
+    table *global_table = get_table("Global");
+    symbol *symbol = get_element(global_table, operator_->child->value);
 
     int param_not_void = 1;
 
@@ -323,9 +323,10 @@ void check_arithmetic_operator(node_t *operator_) {
 void check_terminal(node_t *terminal) {
   if (strcmp(terminal->type, "Id") == 0) {
     symbol *id = get_element(current, terminal->value);
+
     if (id == NULL) {
-      table global_table = *get_table("Global");
-      id = get_element(&global_table, terminal->value);
+      table *global_table = get_table("Global");
+      id = get_element(global_table, terminal->value);
     }
     if (id == NULL) {
       // Error - Unknown symbol
