@@ -90,7 +90,6 @@ void check_program(node_t *ast) {
 
 
 void check_declaration(node_t *declaration) {
-  printf("declaration\n");
   node_t *aux = declaration->child;
 
 
@@ -105,12 +104,10 @@ void check_declaration(node_t *declaration) {
   if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
     check_program(aux->sibling->sibling);
   }
-  printf("declaration2\n");
 }
 
 
 void check_func_declaration(node_t *func_declaration) {
-  printf(" func declaration\n");
   // save type of function
   char *func_type = func_declaration->child->type;
 
@@ -130,12 +127,10 @@ void check_func_declaration(node_t *func_declaration) {
     check_param_list(aux->sibling, func_declaration, 0);
   }
 
-  printf(" func declaration2\n");
   current = tables;
 }
 
 void check_func_definition(node_t *func_definition) {
-  printf(" func definition\n");
   char *func_type = func_definition->child->type;
 
   //go to FunctionDeclarator
@@ -167,11 +162,9 @@ void check_func_definition(node_t *func_definition) {
 
   check_program(aux->sibling->sibling);
 
-  printf(" func definition2\n");
 }
 
 void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
-  printf("param list\n");
   node_t *param_list_aux = param_list->child;
 
   // get types of params
@@ -196,29 +189,23 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
 
     param_list_aux = param_list_aux->sibling;
   }
-  printf("param list2\n");
 }
 
 
 // Not sure
 void check_comma(node_t *comma) {
-  printf("comma\n");
   check_program(comma->child);
   comma->type_e = comma->child->sibling->type_e;
-  printf("comma2\n");
 }
 
 
 void check_assign_operator(node_t *operator_) {
-  printf("assign\n");
   check_program(operator_->child);
   operator_->type_e = operator_->child->type_e;
-  printf("assign2\n");
 }
 
 
 void check_call(node_t *operator_) {
-  printf("call\n");
   check_program(operator_->child);
   operator_->type_e = operator_->child->type_e;
 
@@ -253,23 +240,19 @@ void check_call(node_t *operator_) {
     }
     if (number_of_args_required != number_of_args_provided) {
       // Error - Wrong number of arguments
-      printf("Line %d, col %d: Wrong number of arguments to function %s (got %d, required %d)\n", aux->line, aux->col, operator_->child->value, number_of_args_provided, number_of_args_required);
+      printf("Line %d, col %d: Wrong number of arguments to function %s (got %d, required %d)\n", operator_->child->line, operator_->child->col, operator_->child->value, number_of_args_provided, number_of_args_required);
     }
   }
-  printf("call2\n");
 }
 
 
 void check_relational_operator(node_t *operator_) {
-  printf("relational\n");
   check_program(operator_->child);
   operator_->type_e = strdup("int");
-  printf("relational2\n");
 }
 
 
 void check_bitwise_operator(node_t *operator_) {
-  printf("bitwise\n");
   check_program(operator_->child);
 
   // ORDER: double, int, short, char
@@ -288,35 +271,27 @@ void check_bitwise_operator(node_t *operator_) {
   else if (strcmp(operator_->child->type_e, "char") == 0 || strcmp(operator_->child->sibling->type_e, "char") == 0 || strcmp(operator_->child->type_e, "Char") == 0 || strcmp(operator_->child->sibling->type_e, "Char") == 0) {
     operator_->type_e = strdup("char");
   }
-  printf("bitwise2\n");
 }
 
 
 void check_unary_operator(node_t *operator_) {
-  printf("unary\n");
   check_program(operator_->child);
   operator_->type_e = operator_->child->type_e;
-  printf("unary2\n");
 }
 
 
 void check_logical_operator(node_t *operator_) {
-  printf("logical\n");
   check_program(operator_->child);
   operator_->type_e = strdup("int");
-  printf("logical2\n");
 }
 
 
 void check_return(node_t *return_) {
-  printf("return\n");
   check_program(return_->child);
-  printf("return2\n");
 }
 
 
 void check_arithmetic_operator(node_t *operator_) {
-  printf("arithmetic\n");
   check_program(operator_->child);
 
   // ORDER: double, int, short, char
@@ -335,12 +310,10 @@ void check_arithmetic_operator(node_t *operator_) {
   else if (strcmp(operator_->child->type_e, "char") == 0 || strcmp(operator_->child->sibling->type_e, "char") == 0 || strcmp(operator_->child->type_e, "Char") == 0 || strcmp(operator_->child->sibling->type_e, "Char") == 0) {
     operator_->type_e = strdup("char");
   }
-  printf("arithmetic2\n");
 }
 
 
 void check_terminal(node_t *terminal) {
-  printf("Terminal\n");
   if (strcmp(terminal->type, "Id") == 0) {
     symbol *id = get_element(current, terminal->value);
     if (id == NULL) {
@@ -365,5 +338,4 @@ void check_terminal(node_t *terminal) {
   else if (strcmp(terminal->type, "RealLit") == 0) {
     terminal->type_e = strdup("double");
   }
-  printf("Terminal2\n");
 }

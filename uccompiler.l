@@ -155,9 +155,7 @@ int main(int argc, char *argv[]) {
         current->print = 1;
         insert_default_functions(current);
         check_program(ast);
-        printf("Arrived here\n");
         show_tables();
-        printf("passed here\n");
         print_ast(ast, 0);
         destroy_ast(ast);
       }

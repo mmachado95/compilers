@@ -44,7 +44,7 @@
 
 
 %%
-Program: FunctionsAndDeclarations                                                         {ast = insert_node(line, col, "Program", NULL, 1, $1);}
+Program: FunctionsAndDeclarations                                                         {ast = insert_node(line, col-yylen, "Program", NULL, 1, $1);}
        ;
 
 FunctionsAndDeclarations: FunctionsAndDeclarations FunctionDefinition                     {$$ = add_sibling($1, $2);}
@@ -55,11 +55,11 @@ FunctionsAndDeclarations: FunctionsAndDeclarations FunctionDefinition           
                         | Declaration                                                     {$$ = $1;}
                         ;
 
-FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody                              {$$ = insert_node(line, col, "FuncDefinition", NULL, 3, $1, $2, $3);}
+FunctionDefinition: TypeSpec FunctionDeclarator FunctionBody                              {$$ = insert_node(line, col-yylen, "FuncDefinition", NULL, 3, $1, $2, $3);}
                   ;
 
-FunctionBody: LBRACE RBRACE                                                               {$$ = insert_node(line, col, "FuncBody", NULL, 0);}
-            | LBRACE DeclarationsAndStatements RBRACE                                     {$$ = insert_node(line, col, "FuncBody", NULL, 1, $2);}
+FunctionBody: LBRACE RBRACE                                                               {$$ = insert_node(line, col-yylen, "FuncBody", NULL, 0);}
+            | LBRACE DeclarationsAndStatements RBRACE                                     {$$ = insert_node(line, col-yylen, "FuncBody", NULL, 1, $2);}
             ;
 
 DeclarationsAndStatements: Statement DeclarationsAndStatements                            {$$ = add_sibling($1, $2);}
@@ -75,7 +75,7 @@ StatementWithError: Statement                                                   
 Statement: CommaExpr SEMI                                               {$$=$1;}
          | SEMI                                                         {$$ = NULL;}
          | LBRACE StatementList RBRACE                                  { if($2 != NULL && $2->sibling != NULL) {
-                                                                            $$ = insert_node(line, col, "StatList", NULL, 1, $2);
+                                                                            $$ = insert_node(line, col-yylen, "StatList", NULL, 1, $2);
                                                                           }
                                                                           else {
                                                                             $$ = $2;
@@ -83,34 +83,34 @@ Statement: CommaExpr SEMI                                               {$$=$1;}
                                                                         }
          | LBRACE RBRACE                                                {$$ = NULL;}
          | LBRACE error RBRACE                                          {$$ = NULL;}
-         | IF LPAR CommaExpr RPAR StatementWithError %prec THEN         { $3 = make_node_correct(line, col, $3); $5 = make_node_correct(line, col, $5);
-                                                                          $$ = insert_node(line, col, "If", NULL, 3, $3, $5, insert_node(line, col, "Null", NULL, 0));
+         | IF LPAR CommaExpr RPAR StatementWithError %prec THEN         { $3 = make_node_correct(line, col-yylen, $3); $5 = make_node_correct(line, col-yylen, $5);
+                                                                          $$ = insert_node(line, col-yylen, "If", NULL, 3, $3, $5, insert_node(line, col-yylen, "Null", NULL, 0));
                                                                         }
-         | IF LPAR CommaExpr RPAR StatementWithError ELSE StatementWithError  { $3 = make_node_correct(line, col, $3); $5 = make_node_correct(line, col, $5); $7 = make_node_correct(line, col, $7);
-                                                                                $$ = insert_node(line, col, "If", NULL, 3, $3, $5, $7);
+         | IF LPAR CommaExpr RPAR StatementWithError ELSE StatementWithError  { $3 = make_node_correct(line, col-yylen, $3); $5 = make_node_correct(line, col-yylen, $5); $7 = make_node_correct(line, col-yylen, $7);
+                                                                                $$ = insert_node(line, col-yylen, "If", NULL, 3, $3, $5, $7);
                                                                               }
-         | WHILE LPAR CommaExpr RPAR StatementWithError                 { $3 = make_node_correct(line, col, $3); $5 = make_node_correct(line, col, $5);
-                                                                          $$ = insert_node(line, col, "While", NULL, 2, $3, $5);}
-         | RETURN CommaExpr SEMI                                        { $2 = make_node_correct(line, col, $2);
-                                                                          $$ = insert_node(line, col, "Return", NULL, 1, $2);}
-         | RETURN SEMI                                                  {$$ = insert_node(line, col, "Return", NULL, 1, insert_node(line, col, "Null", NULL, 0));}
+         | WHILE LPAR CommaExpr RPAR StatementWithError                 { $3 = make_node_correct(line, col-yylen, $3); $5 = make_node_correct(line, col-yylen, $5);
+                                                                          $$ = insert_node(line, col-yylen, "While", NULL, 2, $3, $5);}
+         | RETURN CommaExpr SEMI                                        { $2 = make_node_correct(line, col-yylen, $2);
+                                                                          $$ = insert_node(line, col-yylen, "Return", NULL, 1, $2);}
+         | RETURN SEMI                                                  {$$ = insert_node(line, col-yylen, "Return", NULL, 1, insert_node(line, col-yylen, "Null", NULL, 0));}
          ;
 
 StatementList: StatementList StatementWithError                          {$$ = add_sibling($1, $2);}
              | StatementWithError                                        {$$=$1;}
              ;
 
-FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {$$ = insert_node(line, col, "FuncDeclaration", NULL, 2, $1, $2);}
+FunctionDeclaration: TypeSpec FunctionDeclarator SEMI       {$$ = insert_node(line, col-yylen, "FuncDeclaration", NULL, 2, $1, $2);}
                    ;
 
-FunctionDeclarator: ID LPAR ParameterList RPAR              {$$ = add_sibling(insert_node(line, col, "Id", $1, 0), $3);}
+FunctionDeclarator: ID LPAR ParameterList RPAR              {$$ = add_sibling(insert_node(line, col-yylen, "Id", $1, 0), $3);}
                   ;
 
-ParameterList: ParameterDeclaration CommaParamDeclaration   {$$ = insert_node(line, col, "ParamList", NULL, 2, $1, $2);}
+ParameterList: ParameterDeclaration CommaParamDeclaration   {$$ = insert_node(line, col-yylen, "ParamList", NULL, 2, $1, $2);}
              ;
 
-ParameterDeclaration: TypeSpec ID                           {$$ = insert_node(line, col, "ParamDeclaration", NULL, 2, $1, insert_node(line, col, "Id", $2, 0));}
-                    | TypeSpec                              {$$ = insert_node(line, col, "ParamDeclaration", NULL, 1, $1);}
+ParameterDeclaration: TypeSpec ID                           {$$ = insert_node(line, col-yylen, "ParamDeclaration", NULL, 2, $1, insert_node(line, col-yylen, "Id", $2, 0));}
+                    | TypeSpec                              {$$ = insert_node(line, col-yylen, "ParamDeclaration", NULL, 1, $1);}
                     ;
 
 CommaParamDeclaration: COMMA ParameterDeclaration CommaParamDeclaration           {$$ = add_sibling($2, $3);}
@@ -129,49 +129,49 @@ CommaDeclarator: COMMA Declarator CommaDeclarator           {$$ = add_sibling($2
                | /*empty*/                                  {$$ = NULL;}
                ;
 
-TypeSpec: CHAR    {$$ = insert_node(line, col, "Char", NULL, 0);}
-        | INT     {$$ = insert_node(line, col, "Int", NULL, 0);}
-        | VOID    {$$ = insert_node(line, col, "Void", NULL, 0);}
-        | SHORT   {$$ = insert_node(line, col, "Short", NULL, 0);}
-        | DOUBLE  {$$ = insert_node(line, col, "Double", NULL, 0);}
+TypeSpec: CHAR    {$$ = insert_node(line, col-yylen, "Char", NULL, 0);}
+        | INT     {$$ = insert_node(line, col-yylen, "Int", NULL, 0);}
+        | VOID    {$$ = insert_node(line, col-yylen, "Void", NULL, 0);}
+        | SHORT   {$$ = insert_node(line, col-yylen, "Short", NULL, 0);}
+        | DOUBLE  {$$ = insert_node(line, col-yylen, "Double", NULL, 0);}
         ;
 
-Declarator: ID ASSIGN Expr        {$$ = insert_node(line, col, "Declaration", NULL, 2, insert_node(line, col, "Id", $1, 0), $3);}
-          | ID                    {$$ = insert_node(line, col, "Declaration", NULL, 1, insert_node(line, col, "Id", $1, 0));}
+Declarator: ID ASSIGN Expr        {$$ = insert_node(line, col-yylen, "Declaration", NULL, 2, insert_node(line, col-yylen, "Id", $1, 0), $3);}
+          | ID                    {$$ = insert_node(line, col-yylen, "Declaration", NULL, 1, insert_node(line, col-yylen, "Id", $1, 0));}
           ;
 
-Expr: Expr ASSIGN Expr            {$$ = insert_node(line, col, "Store", NULL, 2, $1, $3);}
-    | Expr PLUS Expr              {$$ = insert_node(line, col, "Add", NULL, 2, $1, $3);}
-    | Expr MINUS Expr             {$$ = insert_node(line, col, "Sub", NULL, 2, $1, $3);}
-    | Expr MUL Expr               {$$ = insert_node(line, col, "Mul", NULL, 2, $1, $3);}
-    | Expr DIV Expr               {$$ = insert_node(line, col, "Div", NULL, 2, $1, $3);}
-    | Expr MOD Expr               {$$ = insert_node(line, col, "Mod", NULL, 2, $1, $3);}
-    | Expr OR Expr                {$$ = insert_node(line, col, "Or", NULL, 2, $1, $3);}
-    | Expr AND Expr               {$$ = insert_node(line, col, "And", NULL, 2, $1, $3);}
-    | Expr BITWISEAND Expr        {$$ = insert_node(line, col, "BitWiseAnd", NULL, 2, $1, $3);}
-    | Expr BITWISEOR Expr         {$$ = insert_node(line, col, "BitWiseOr", NULL, 2, $1, $3);}
-    | Expr BITWISEXOR Expr        {$$ = insert_node(line, col, "BitWiseXor", NULL, 2, $1, $3);}
-    | Expr EQ Expr                {$$ = insert_node(line, col, "Eq", NULL, 2, $1, $3);}
-    | Expr NE Expr                {$$ = insert_node(line, col, "Ne", NULL, 2, $1, $3);}
-    | Expr LE Expr                {$$ = insert_node(line, col, "Le", NULL, 2, $1, $3);}
-    | Expr GE Expr                {$$ = insert_node(line, col, "Ge", NULL, 2, $1, $3);}
-    | Expr LT Expr                {$$ = insert_node(line, col, "Lt", NULL, 2, $1, $3);}
-    | Expr GT Expr                {$$ = insert_node(line, col, "Gt", NULL, 2, $1, $3);}
-    | PLUS Expr %prec NOT         {$$ = insert_node(line, col, "Plus", NULL, 1, $2);}
-    | MINUS Expr %prec NOT        {$$ = insert_node(line, col, "Minus", NULL, 1, $2);}
-    | NOT Expr                    {$$ = insert_node(line, col, "Not", NULL, 1, $2);}
-    | ID LPAR CommaExprTwo RPAR   {$$ = insert_node(line, col, "Call", NULL, 2, insert_node(line, col, "Id", $1, 0), $3);}
-    | ID LPAR RPAR                {$$ = insert_node(line, col, "Call", NULL, 1, insert_node(line, col, "Id", $1, 0));}
-    | ID                          {$$ = insert_node(line, col, "Id", $1, 0);}
-    | INTLIT                      {$$ = insert_node(line, col, "IntLit", $1, 0);}
-    | CHRLIT                      {$$ = insert_node(line, col, "ChrLit", $1, 0);}
-    | REALLIT                     {$$ = insert_node(line, col, "RealLit", $1, 0);}
+Expr: Expr ASSIGN Expr            {$$ = insert_node(line, col-yylen, "Store", NULL, 2, $1, $3);}
+    | Expr PLUS Expr              {$$ = insert_node(line, col-yylen, "Add", NULL, 2, $1, $3);}
+    | Expr MINUS Expr             {$$ = insert_node(line, col-yylen, "Sub", NULL, 2, $1, $3);}
+    | Expr MUL Expr               {$$ = insert_node(line, col-yylen, "Mul", NULL, 2, $1, $3);}
+    | Expr DIV Expr               {$$ = insert_node(line, col-yylen, "Div", NULL, 2, $1, $3);}
+    | Expr MOD Expr               {$$ = insert_node(line, col-yylen, "Mod", NULL, 2, $1, $3);}
+    | Expr OR Expr                {$$ = insert_node(line, col-yylen, "Or", NULL, 2, $1, $3);}
+    | Expr AND Expr               {$$ = insert_node(line, col-yylen, "And", NULL, 2, $1, $3);}
+    | Expr BITWISEAND Expr        {$$ = insert_node(line, col-yylen, "BitWiseAnd", NULL, 2, $1, $3);}
+    | Expr BITWISEOR Expr         {$$ = insert_node(line, col-yylen, "BitWiseOr", NULL, 2, $1, $3);}
+    | Expr BITWISEXOR Expr        {$$ = insert_node(line, col-yylen, "BitWiseXor", NULL, 2, $1, $3);}
+    | Expr EQ Expr                {$$ = insert_node(line, col-yylen, "Eq", NULL, 2, $1, $3);}
+    | Expr NE Expr                {$$ = insert_node(line, col-yylen, "Ne", NULL, 2, $1, $3);}
+    | Expr LE Expr                {$$ = insert_node(line, col-yylen, "Le", NULL, 2, $1, $3);}
+    | Expr GE Expr                {$$ = insert_node(line, col-yylen, "Ge", NULL, 2, $1, $3);}
+    | Expr LT Expr                {$$ = insert_node(line, col-yylen, "Lt", NULL, 2, $1, $3);}
+    | Expr GT Expr                {$$ = insert_node(line, col-yylen, "Gt", NULL, 2, $1, $3);}
+    | PLUS Expr %prec NOT         {$$ = insert_node(line, col-yylen, "Plus", NULL, 1, $2);}
+    | MINUS Expr %prec NOT        {$$ = insert_node(line, col-yylen, "Minus", NULL, 1, $2);}
+    | NOT Expr                    {$$ = insert_node(line, col-yylen, "Not", NULL, 1, $2);}
+    | ID LPAR CommaExprTwo RPAR   {$$ = insert_node(line, col-yylen, "Call", NULL, 2, insert_node(line, col-yylen, "Id", $1, 0), $3);}
+    | ID LPAR RPAR                {$$ = insert_node(line, col-yylen, "Call", NULL, 1, insert_node(line, col-yylen, "Id", $1, 0));}
+    | ID                          {$$ = insert_node(line, col-yylen, "Id", $1, 0);}
+    | INTLIT                      {$$ = insert_node(line, col-yylen, "IntLit", $1, 0);}
+    | CHRLIT                      {$$ = insert_node(line, col-yylen, "ChrLit", $1, 0);}
+    | REALLIT                     {$$ = insert_node(line, col-yylen, "RealLit", $1, 0);}
     | LPAR CommaExpr RPAR         {$$ = $2;}
     | ID LPAR error RPAR          {$$ = NULL;}
     | LPAR error RPAR             {$$ = NULL;}
     ;
 
-CommaExpr: CommaExpr COMMA CommaExpr   {$$ = insert_node(line, col, "Comma", NULL, 2, $1, $3);}
+CommaExpr: CommaExpr COMMA CommaExpr   {$$ = insert_node(line, col-yylen, "Comma", NULL, 2, $1, $3);}
          | Expr                        {$$=$1;}
          ;
 
