@@ -98,7 +98,7 @@ void check_declaration(node_t *declaration) {
     insert_element(current, aux->sibling->value, aux->type, NULL);
   } else {
     // Error - symbol already defined
-    printf("Line %d, col %d: Symbol %s already defined\n", line, col, aux->sibling->value);
+    printf("Line %d, col %d: Symbol %s already defined\n", declaration->line, declaration->col, aux->sibling->value);
   }
 
   if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
@@ -161,6 +161,7 @@ void check_func_definition(node_t *func_definition) {
   check_param_list(aux->sibling, func, 1);
 
   check_program(aux->sibling->sibling);
+
 }
 
 void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
@@ -210,7 +211,7 @@ void check_call(node_t *operator_) {
 
   if (strcmp(operator_->child->type_e, "undef") == 0) {
     // Error - Symbol is not a function
-    printf("Line %d, col %d: Symbol %s is not a function\n", line, col, operator_->child->value);
+    printf("Line %d, col %d: Symbol %s is not a function\n", operator_->line, operator_->col, operator_->child->value);
     // TODO -> when this error occurs, "Unknown symbol" appears to. Remove it, maybe?
   }
 
@@ -239,7 +240,7 @@ void check_call(node_t *operator_) {
     }
     if (number_of_args_required != number_of_args_provided) {
       // Error - Wrong number of arguments
-      printf("Line %d, col %d: Wrong number of arguments to function %s (got %d, required %d)\n", line, col, operator_->child->value, number_of_args_provided, number_of_args_required);
+      printf("Line %d, col %d: Wrong number of arguments to function %s (got %d, required %d)\n", operator_->child->line, operator_->child->col, operator_->child->value, number_of_args_provided, number_of_args_required);
     }
   }
 }
@@ -321,7 +322,7 @@ void check_terminal(node_t *terminal) {
     }
     if (id == NULL) {
       // Error - Unknown symbol
-      printf("Line %d, col %d: Unknown symbol %s\n", line, col, terminal->value);
+      printf("Line %d, col %d: Unknown symbol %s\n", terminal->line, terminal->col, terminal->value);
       terminal->type_e = strdup("undef");
     }
     else {

@@ -4,9 +4,13 @@
 #include <string.h>
 #include "ast.h"
 
-node_t* create_node(char *type, char *value) {
+node_t* create_node(int line, int col, char *type, char *value) {
   // allocate memory for new node
   node_t *n = (node_t*) malloc(sizeof (node_t));
+
+  // save line and col of symbol
+  n->line = line;
+  n->col = col;
 
   // save strings (save lines by using strdup)
   n->type = strdup(type);
@@ -23,7 +27,7 @@ node_t* create_node(char *type, char *value) {
 }
 
 // insert node in ast
-node_t* insert_node(char *type, char *value, int n_args, ...) {
+node_t* insert_node(int line, int col, char *type, char *value, int n_args, ...) {
   int i;
 
   // list of extra args passed to function
@@ -32,7 +36,7 @@ node_t* insert_node(char *type, char *value, int n_args, ...) {
   va_start(args, n_args);
 
   // create node
-  node_t *new_node = create_node(type, value);
+  node_t *new_node = create_node(line, col, type, value);
   //printf("New node -> %s %s\n", new_node->type, new_node->value);
   node_t *aux;
 
@@ -81,9 +85,9 @@ node_t *add_sibling(node_t *original, node_t *sibling) {
   return original;
 }
 
-node_t *make_node_correct(node_t *node_to_correct) {
+node_t *make_node_correct(int line, int col, node_t *node_to_correct) {
   if (node_to_correct == NULL) {
-    node_to_correct = insert_node("Null", NULL, 0);
+    node_to_correct = insert_node(line, col, "Null", NULL, 0);
   }
   return node_to_correct;
 }
@@ -91,7 +95,7 @@ node_t *make_node_correct(node_t *node_to_correct) {
 void insert_node_special(node_t *first, node_t *second) {
   node_t *n = second;
   while(n != NULL){
-    node_t *t = insert_node(first->type, NULL, 0);
+    node_t *t = insert_node(first->line, first->col, first->type, NULL, 0);
     t = add_sibling(t, n->child);
     n->child = t;
     n = n->sibling;
