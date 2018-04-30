@@ -92,11 +92,10 @@ void check_program(node_t *ast) {
 void check_declaration(node_t *declaration) {
   node_t *aux = declaration->child;
 
-
   // if symbol is not in table, add to table
   if (get_element(current, aux->sibling->value) == NULL) {
     insert_element(current, aux->sibling->value, aux->type, NULL);
-  } else {
+  } else if (strcmp("Global", current->name) != 0){
     // Error - symbol already defined
     printf("Line %d, col %d: Symbol %s already defined\n", aux->sibling->line, aux->sibling->col, aux->sibling->value);
   }
