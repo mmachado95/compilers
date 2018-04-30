@@ -136,7 +136,7 @@ TypeSpec: CHAR    {$$ = insert_node(line, col-strlen("Char"), "Char", NULL, 0);}
         | DOUBLE  {$$ = insert_node(line, col-strlen("Double"), "Double", NULL, 0);}
         ;
 
-Declarator: ID_terminal ASSIGN Expr        {$$ = insert_node(line, col-yylen, "Declaration", NULL, 2, $1);}
+Declarator: ID_terminal ASSIGN Expr        {$$ = insert_node(line, col-yylen, "Declaration", NULL, 2, $1, $3);}
           | ID_terminal                    {$$ = insert_node(line, col-yylen, "Declaration", NULL, 1, $1);}
           ;
 
