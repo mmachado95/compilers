@@ -252,9 +252,9 @@ void check_call(node_t *operator_) {
       printf("Line %d, col %d: Wrong number of arguments to function %s (got %d, required %d)\n", operator_->child->line, operator_->child->col, operator_->child->value, number_of_args_provided, number_of_args_required);
     }
 
-    /* comments because wrong answer and I don't think this is needed
 
-    else { // TODO -> else or not else ?
+    /* Comment because WA
+    else {
 
       if (symbol != NULL && param_not_void == 1) {
         if (symbol->param != NULL && param_not_void == 1) {
@@ -268,15 +268,11 @@ void check_call(node_t *operator_) {
             node_t *aux2 = operator_->child->sibling;
 
             while(aux != NULL && aux2 != NULL) {
-              // Intlit e int OK
-              // RealLit e double OK
-              // ChrLit e int OK
-              // TODO -> mas assim quando é que não é OK? porque na verdade é tudo int...
-              if ((strcmp(aux->name, "Int") == 0 && strcmp(aux2->type, "IntLit") == 0) ||
-                  (strcmp(aux->name, "Int") == 0 && strcmp(aux2->type, "RealLit") == 0) ||
-                  (strcmp(aux->name, "Int") == 0 && strcmp(aux2->type, "ChrLit") == 0)) {
-                  aux = aux->next;
-                  aux2 = aux2->sibling;
+              //printf("%s %s %s \n", symbol->name, aux->name, aux2->type_e);
+              // TODO -> check if we can use strcasecmp
+              if (strcasecmp(aux->name, aux2->type_e) == 0) {
+                aux = aux->next;
+                aux2 = aux2->sibling;
               }
               else {
                 // Error - Operator cannot be applied to
@@ -290,11 +286,11 @@ void check_call(node_t *operator_) {
                 int index = 0;
                 while (aux != NULL) {
                   if (index == 0) {
-                    printf(" %s", aux->type);
+                    printf(" %s", aux->type_e);
                     index++;
                   }
                   else {
-                    printf(", %s", aux->type);
+                    printf(", %s", aux->type_e);
                   }
                   aux = aux->sibling;
                 }
@@ -305,7 +301,7 @@ void check_call(node_t *operator_) {
           }
         }
       }
-    } */
+    }*/
   }
 }
 
