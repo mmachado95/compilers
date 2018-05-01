@@ -252,6 +252,8 @@ void check_call(node_t *operator_) {
       printf("Line %d, col %d: Wrong number of arguments to function %s (got %d, required %d)\n", operator_->child->line, operator_->child->col, operator_->child->value, number_of_args_provided, number_of_args_required);
     }
 
+    /* comments because wrong answer and I don't think this is needed
+
     else { // TODO -> else or not else ?
 
       if (symbol != NULL && param_not_void == 1) {
@@ -303,8 +305,7 @@ void check_call(node_t *operator_) {
           }
         }
       }
-
-    }
+    } */
   }
 }
 
