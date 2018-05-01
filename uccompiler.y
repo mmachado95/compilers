@@ -129,11 +129,11 @@ CommaDeclarator: COMMA Declarator CommaDeclarator           {$$ = add_sibling($2
                | /*empty*/                                  {$$ = NULL;}
                ;
 
-TypeSpec: CHAR    {$$ = insert_node(line, col, "Char", NULL, 0);}
-        | INT     {$$ = insert_node(line, col, "Int", NULL, 0);}
-        | VOID    {$$ = insert_node(line, col, "Void", NULL, 0);}
-        | SHORT   {$$ = insert_node(line, col, "Short", NULL, 0);}
-        | DOUBLE  {$$ = insert_node(line, col, "Double", NULL, 0);}
+TypeSpec: CHAR    {$$ = insert_node(line, col - 4, "Char", NULL, 0);}
+        | INT     {$$ = insert_node(line, col - 3, "Int", NULL, 0);}
+        | VOID    {$$ = insert_node(line, col - 4, "Void", NULL, 0);}
+        | SHORT   {$$ = insert_node(line, col - 5, "Short", NULL, 0);}
+        | DOUBLE  {$$ = insert_node(line, col - 6, "Double", NULL, 0);}
         ;
 
 Declarator: ID_terminal ASSIGN Expr         {$$ = insert_node(line, col, "Declaration", NULL, 2, $1, $3);}
