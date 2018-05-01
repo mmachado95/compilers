@@ -92,6 +92,11 @@ void check_program(node_t *ast) {
 void check_declaration(node_t *declaration) {
   node_t *aux = declaration->child;
 
+  if (strcmp(aux->type, "void") == 0 || strcmp(aux->type, "Void") == 0) {
+    // Error - invalid use of void type in declaration
+    printf("Line %d, col %d: Invalid use of void type in declaration\n", aux->line, aux->col);
+  }
+
   // if symbol is not in table, add to table
   if (get_element(current, aux->sibling->value) == NULL) {
     insert_element(current, aux->sibling->value, aux->type, NULL);
@@ -209,9 +214,8 @@ void check_call(node_t *operator_) {
   operator_->type_e = operator_->child->type_e;
 
   if (strcmp(operator_->child->type_e, "undef") == 0) {
-    // Error - Symbol is not a function
-    printf("Line %d, col %d: Symbol %s is not a function\n", operator_->line, operator_->col, operator_->child->value);
-    // TODO -> when this error occurs, "Unknown symbol" appears to. Remove it, maybe?
+    // Error - Symbol is not a function - TODO -> check this
+    // printf("Line %d, col %d: Symbol %s is not a function\n", operator_->line, operator_->col, operator_->child->value);
   }
 
   else {
