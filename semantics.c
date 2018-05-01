@@ -232,9 +232,7 @@ void check_call(node_t *operator_) {
           param_not_void = 0;
         }
         if (param_not_void == 1) {
-          number_of_args_required++;
           param_type *aux = symbol->param;
-          aux = aux->next;
           while(aux != NULL) {
             number_of_args_required++;
             aux = aux->next;
@@ -252,6 +250,60 @@ void check_call(node_t *operator_) {
     if (number_of_args_required != number_of_args_provided) {
       // Error - Wrong number of arguments
       printf("Line %d, col %d: Wrong number of arguments to function %s (got %d, required %d)\n", operator_->child->line, operator_->child->col, operator_->child->value, number_of_args_provided, number_of_args_required);
+    }
+
+    else { // TODO -> else or not else ?
+
+      if (symbol != NULL && param_not_void == 1) {
+        if (symbol->param != NULL && param_not_void == 1) {
+          if (strcmp(symbol->param->name, "void") == 0 || strcmp(symbol->param->name, "Void") == 0) {
+            number_of_args_required = 0;
+            param_not_void = 0;
+          }
+
+          if (param_not_void == 1) {
+            param_type *aux = symbol->param;
+            node_t *aux2 = operator_->child->sibling;
+
+            while(aux != NULL && aux2 != NULL) {
+              // Intlit e int OK
+              // RealLit e double OK
+              // ChrLit e int OK
+              // TODO -> mas assim quando é que não é OK? porque na verdade é tudo int...
+              if ((strcmp(aux->name, "Int") == 0 && strcmp(aux2->type, "IntLit") == 0) ||
+                  (strcmp(aux->name, "Int") == 0 && strcmp(aux2->type, "RealLit") == 0) ||
+                  (strcmp(aux->name, "Int") == 0 && strcmp(aux2->type, "ChrLit") == 0)) {
+                  aux = aux->next;
+                  aux2 = aux2->sibling;
+              }
+              else {
+                // Error - Operator cannot be applied to
+                if (number_of_args_provided > 1) {
+                  printf("Operator %s cannot be applied to types", symbol->name);
+                }
+                else {
+                  printf("Operator %s cannot be applied to type", symbol->name);
+                }
+                node_t *aux = operator_->child->sibling;
+                int index = 0;
+                while (aux != NULL) {
+                  if (index == 0) {
+                    printf(" %s", aux->type);
+                    index++;
+                  }
+                  else {
+                    printf(", %s", aux->type);
+                  }
+                  aux = aux->sibling;
+                }
+                printf("\n");
+                return;
+              }
+            }
+          }
+        }
+      }
+
     }
   }
 }
