@@ -218,6 +218,7 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def, int pri
 
   if (print_error == 1 && param_void_error != NULL) {
     current->print = 0;
+    func->to_print = 0;
     printf("Line %d, col %d: Invalid use of void type in declaration\n", param_void_error->line, param_void_error->col);
   }
 }

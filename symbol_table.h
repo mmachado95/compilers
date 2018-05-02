@@ -12,6 +12,7 @@ typedef struct pt_ {
 } param_type;
 
 typedef struct sym {
+  int to_print;
   // if the symbol is a param we need to print param at the end
   int is_param;
   // identifier of variable, function etc
