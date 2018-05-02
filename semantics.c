@@ -94,7 +94,7 @@ void check_declaration(node_t *declaration) {
 
   if (strcmp(aux->type, "void") == 0 || strcmp(aux->type, "Void") == 0) {
     // Error - invalid use of void type in declaration
-    printf("Line %d, col %d: Invalid use of void type in declaration\n", aux->line, aux->col);
+    printf("Line %d, col %d: Invalid use of void type in declaration\n", aux->sibling->line, aux->sibling->col);
   }
 
   // if symbol is not in table, add to table
