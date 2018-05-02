@@ -143,20 +143,26 @@ void check_func_definition(node_t *func_definition) {
   // save function name
   char *func_name = aux->value;
 
+  // pointer to function symbol
   symbol *func;
-  // check if table is already declared
+
+  // if table for function doesn't exist we need to create it
   current = get_table(func_name);
   if(current == NULL) {
+    // function is defined, we need to print
     current = create_table(func_name);
+    current->print = 1;
+
     // insert function in global table
     func = insert_element(tables, func_name, func_type, NULL);
+
     // add functions param types to global
     check_param_list(aux->sibling, func, 0, 1);
   } else {
+    // function is defined, we need to print
     func = get_element(tables, func_name);
+    current->print = 1;
   }
-  // function is defined, we need to print
-  current->print = 1;
 
   // add return statement to table
   insert_element(current, "return", func_type, NULL);
@@ -184,9 +190,6 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def, int pri
 
     // if there is a void and its not isolated
     if (strcmp("Void", param_type) == 0) {
-      has_void_param = 1;
-    }
-    if(number_of_params > 1 && has_void_param == 1) {
       param_void_error = param_list_aux->child;
     }
 
@@ -207,6 +210,10 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def, int pri
     }
 
     param_list_aux = param_list_aux->sibling;
+  }
+
+  if(number_of_params <= 1 && has_void_param == 0) {
+    param_void_error = NULL;
   }
 
   if (print_error == 1 && param_void_error != NULL) {
