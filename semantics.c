@@ -7,8 +7,6 @@ void check_program(node_t *ast) {
     return;
   }
 
-  // printf("%s\n", ast->type );
-
   if (strcmp(ast->type, "Program") == 0) {
     check_program(ast->child);
   }
@@ -17,12 +15,23 @@ void check_program(node_t *ast) {
   }
   else if (strcmp(ast->type, "FuncDeclaration") == 0) {
     check_func_declaration(ast);
+
+    // doesnt expand tree if func has error
+    if (ast->has_error == 1) {
+      check_program(ast->sibling);
+      return;
+    }
   }
   else if (strcmp(ast->type, "FuncDefinition") == 0) {
     check_func_definition(ast);
     current = tables;
+
+    // doesnt expand tree if func has error
+    if (ast->has_error == 1) {
+      check_program(ast->sibling);
+      return;
+    }
   }
-  // TODO check if func body has child or not
   else if (strcmp(ast->type, "FuncBody") == 0) {
     check_program(ast->child);
     current = tables;
@@ -125,10 +134,10 @@ void check_func_declaration(node_t *func_declaration) {
     current = create_table(func_name);
 
     // insert element in global table
-    symbol *func_declaration = insert_element(tables, func_name, func_type, NULL);
+    symbol *func_declaration_sym = insert_element(tables, func_name, func_type, NULL);
 
     // function that adds the param types to the symbol
-    check_param_list(aux->sibling, func_declaration, 0, 1);
+    check_param_list(func_declaration, aux->sibling, func_declaration_sym, 0, 1);
   }
 
   current = tables;
@@ -157,7 +166,7 @@ void check_func_definition(node_t *func_definition) {
     func = insert_element(tables, func_name, func_type, NULL);
 
     // add functions param types to global
-    check_param_list(aux->sibling, func, 0, 1);
+    check_param_list(func_definition, aux->sibling, func, 0, 1);
   } else {
     // function is defined, we need to print
     func = get_element(tables, func_name);
@@ -168,13 +177,15 @@ void check_func_definition(node_t *func_definition) {
   insert_element(current, "return", func_type, NULL);
 
   // add param to table function
-  check_param_list(aux->sibling, func, 1, 0);
+  check_param_list(func_definition, aux->sibling, func, 1, 0);
 
-  check_program(aux->sibling->sibling);
 
+  if (func_definition->has_error == 0) {
+    check_program(aux->sibling->sibling);
+  }
 }
 
-void check_param_list(node_t *param_list, symbol *func, int is_func_def, int print_error) {
+void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is_func_def, int print_error) {
   node_t *param_list_aux = param_list->child;
 
   // vars used to help check foi void error
@@ -218,6 +229,7 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def, int pri
 
   if (print_error == 1 && param_void_error != NULL) {
     current->print = 0;
+    func_node->has_error = 1;
     func->to_print = 0;
     printf("Line %d, col %d: Invalid use of void type in declaration\n", param_void_error->line, param_void_error->col);
   }
@@ -279,57 +291,6 @@ void check_call(node_t *operator_) {
       // Error - Wrong number of arguments
       printf("Line %d, col %d: Wrong number of arguments to function %s (got %d, required %d)\n", operator_->child->line, operator_->child->col, operator_->child->value, number_of_args_provided, number_of_args_required);
     }
-
-
-    /* Comment because WA
-    else {
-
-      if (symbol != NULL && param_not_void == 1) {
-        if (symbol->param != NULL && param_not_void == 1) {
-          if (strcmp(symbol->param->name, "void") == 0 || strcmp(symbol->param->name, "Void") == 0) {
-            number_of_args_required = 0;
-            param_not_void = 0;
-          }
-
-          if (param_not_void == 1) {
-            param_type *aux = symbol->param;
-            node_t *aux2 = operator_->child->sibling;
-
-            while(aux != NULL && aux2 != NULL) {
-              //printf("%s %s %s \n", symbol->name, aux->name, aux2->type_e);
-              // TODO -> check if we can use strcasecmp
-              if (strcasecmp(aux->name, aux2->type_e) == 0) {
-                aux = aux->next;
-                aux2 = aux2->sibling;
-              }
-              else {
-                // Error - Operator cannot be applied to
-                if (number_of_args_provided > 1) {
-                  printf("Operator %s cannot be applied to types", symbol->name);
-                }
-                else {
-                  printf("Operator %s cannot be applied to type", symbol->name);
-                }
-                node_t *aux = operator_->child->sibling;
-                int index = 0;
-                while (aux != NULL) {
-                  if (index == 0) {
-                    printf(" %s", aux->type_e);
-                    index++;
-                  }
-                  else {
-                    printf(", %s", aux->type_e);
-                  }
-                  aux = aux->sibling;
-                }
-                printf("\n");
-                return;
-              }
-            }
-          }
-        }
-      }
-    }*/
   }
 }
 

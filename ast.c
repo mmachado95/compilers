@@ -8,6 +8,8 @@ node_t* create_node(int line, int col, char *type, char *value) {
   // allocate memory for new node
   node_t *n = (node_t*) malloc(sizeof (node_t));
 
+  n->has_error = 0;
+
   // save line and col of symbol
   n->line = line;
   n->col = col;
@@ -118,8 +120,9 @@ void print_ast(node_t *n, int depth){
     printf(" - %s", n->type_e );
 
     if (n->value != NULL) {
-      table global_table = *get_table("Global");
-      symbol *symbol = get_element(&global_table, n->value);
+      table *global_table = get_table("Global");
+      symbol *symbol = get_element(global_table, n->value);
+
       if (symbol != NULL) {
         if (symbol->is_param == 1) {
           printf("\tparam");

@@ -6,6 +6,7 @@
 #include "symbol_table.h"
 
 typedef struct node {
+  int has_error;
   int line, col;
   char *type;
   char *value;
