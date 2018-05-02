@@ -94,7 +94,7 @@ void check_declaration(node_t *declaration) {
 
   if (strcmp(aux->type, "void") == 0 || strcmp(aux->type, "Void") == 0) {
     // Error - invalid use of void type in declaration
-    printf("Line %d, col %d: Invalid use of void type in declaration\n", aux->line, aux->col);
+    printf("Line %d, col %d: Invalid use of void type in declaration\n", aux->sibling->line, aux->sibling->col);
   }
 
   // if symbol is not in table, add to table
@@ -128,7 +128,7 @@ void check_func_declaration(node_t *func_declaration) {
     symbol *func_declaration = insert_element(tables, func_name, func_type, NULL);
 
     // function that adds the param types to the symbol
-    check_param_list(aux->sibling, func_declaration, 0);
+    check_param_list(aux->sibling, func_declaration, 0, 1);
   }
 
   current = tables;
@@ -143,37 +143,55 @@ void check_func_definition(node_t *func_definition) {
   // save function name
   char *func_name = aux->value;
 
+  // pointer to function symbol
   symbol *func;
-  // check if table is already declared
+
+  // if table for function doesn't exist we need to create it
   current = get_table(func_name);
   if(current == NULL) {
+    // function is defined, we need to print
     current = create_table(func_name);
+    current->print = 1;
+
     // insert function in global table
     func = insert_element(tables, func_name, func_type, NULL);
+
     // add functions param types to global
-    check_param_list(aux->sibling, func, 0);
+    check_param_list(aux->sibling, func, 0, 1);
   } else {
+    // function is defined, we need to print
     func = get_element(tables, func_name);
+    current->print = 1;
   }
-  // function is defined, we need to print
-  current->print = 1;
 
   // add return statement to table
   insert_element(current, "return", func_type, NULL);
 
   // add param to table function
-  check_param_list(aux->sibling, func, 1);
+  check_param_list(aux->sibling, func, 1, 0);
 
   check_program(aux->sibling->sibling);
 
 }
 
-void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
+void check_param_list(node_t *param_list, symbol *func, int is_func_def, int print_error) {
   node_t *param_list_aux = param_list->child;
+
+  // vars used to help check foi void error
+  node_t *param_void_error = NULL;
+  int number_of_params = 0;
+  int has_void_param = 0;
+
 
   // get types of params
   while(param_list_aux != NULL) {
     char *param_type = param_list_aux->child->type;
+    number_of_params++;
+
+    // if there is a void and its not isolated
+    if (strcmp("Void", param_type) == 0) {
+      param_void_error = param_list_aux->child;
+    }
 
     // go to function id
     node_t *param_declaration = param_list_aux->child->sibling;
@@ -192,6 +210,15 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
     }
 
     param_list_aux = param_list_aux->sibling;
+  }
+
+  if(number_of_params <= 1 && has_void_param == 0) {
+    param_void_error = NULL;
+  }
+
+  if (print_error == 1 && param_void_error != NULL) {
+    current->print = 0;
+    printf("Line %d, col %d: Invalid use of void type in declaration\n", param_void_error->line, param_void_error->col);
   }
 }
 
