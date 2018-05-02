@@ -128,7 +128,7 @@ void check_func_declaration(node_t *func_declaration) {
     symbol *func_declaration = insert_element(tables, func_name, func_type, NULL);
 
     // function that adds the param types to the symbol
-    check_param_list(aux->sibling, func_declaration, 0);
+    check_param_list(aux->sibling, func_declaration, 0, 1);
   }
 
   current = tables;
@@ -151,7 +151,7 @@ void check_func_definition(node_t *func_definition) {
     // insert function in global table
     func = insert_element(tables, func_name, func_type, NULL);
     // add functions param types to global
-    check_param_list(aux->sibling, func, 0);
+    check_param_list(aux->sibling, func, 0, 1);
   } else {
     func = get_element(tables, func_name);
   }
@@ -162,18 +162,33 @@ void check_func_definition(node_t *func_definition) {
   insert_element(current, "return", func_type, NULL);
 
   // add param to table function
-  check_param_list(aux->sibling, func, 1);
+  check_param_list(aux->sibling, func, 1, 0);
 
   check_program(aux->sibling->sibling);
 
 }
 
-void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
+void check_param_list(node_t *param_list, symbol *func, int is_func_def, int print_error) {
   node_t *param_list_aux = param_list->child;
+
+  // vars used to help check foi void error
+  node_t *param_void_error = NULL;
+  int number_of_params = 0;
+  int has_void_param = 0;
+
 
   // get types of params
   while(param_list_aux != NULL) {
     char *param_type = param_list_aux->child->type;
+    number_of_params++;
+
+    // if there is a void and its not isolated
+    if (strcmp("Void", param_type) == 0) {
+      has_void_param = 1;
+    }
+    if(number_of_params > 1 && has_void_param == 1) {
+      param_void_error = param_list_aux->child;
+    }
 
     // go to function id
     node_t *param_declaration = param_list_aux->child->sibling;
@@ -192,6 +207,10 @@ void check_param_list(node_t *param_list, symbol *func, int is_func_def) {
     }
 
     param_list_aux = param_list_aux->sibling;
+  }
+
+  if (print_error == 1 && param_void_error != NULL) {
+    printf("Line %d, col %d: Invalid use of void type in declaration\n", param_void_error->line, param_void_error->col);
   }
 }
 
