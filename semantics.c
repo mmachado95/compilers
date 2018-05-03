@@ -102,21 +102,18 @@ void check_program(node_t *ast) {
 void check_declaration(node_t *declaration) {
   node_t *aux = declaration->child;
 
+  // invalid use of void type in declaration
   if (strcmp(aux->type, "void") == 0 || strcmp(aux->type, "Void") == 0) {
-    // Error - invalid use of void type in declaration
     printf("Line %d, col %d: Invalid use of void type in declaration\n", aux->sibling->line, aux->sibling->col);
   }
-
-  // if symbol is not in table, add to table
-  if (get_element(current, aux->sibling->value) == NULL) {
-    insert_element(current, aux->sibling->value, aux->type, NULL);
-  } else if (strcmp("Global", current->name) != 0) {
-    // Error - symbol already defined
-    printf("Line %d, col %d: Symbol %s already defined\n", aux->sibling->line, aux->sibling->col, aux->sibling->value);
-  }
-
-  if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
-    check_program(aux->sibling->sibling);
+  else {
+    if (get_element(current, aux->sibling->value) == NULL) {
+      insert_element(current, aux->sibling->value, aux->type, NULL);
+    } else if (strcmp("Global", current->name) != 0) {
+      printf("Line %d, col %d: Symbol %s already defined\n", aux->sibling->line, aux->sibling->col, aux->sibling->value);
+    } if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
+      check_program(aux->sibling->sibling);
+    }
   }
 }
 
@@ -209,7 +206,7 @@ void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int i
     number_of_params++;
 
     // if there is a void and its not isolated
-    if (strcmp("Void", param_type) == 0) {
+    if (param_void_error == NULL && strcmp("Void", param_type) == 0) {
       param_void_error = param_list_aux->child;
     }
 
