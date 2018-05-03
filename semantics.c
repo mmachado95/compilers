@@ -314,11 +314,8 @@ void check_relational_operator(node_t *operator_) {
 void check_bitwise_operator(node_t *operator_) {
   check_program(operator_->child);
 
-  // ORDER: double, int, short, char
-  if (strcmp(operator_->child->type_e, "undef") == 0 || strcmp(operator_->child->sibling->type_e, "undef") == 0) {
-    operator_->type_e = strdup("undef");
-  }
-  else if (strcmp(operator_->child->type_e, "double") == 0 || strcmp(operator_->child->sibling->type_e, "double") == 0 || strcmp(operator_->child->type_e, "Double") == 0 || strcmp(operator_->child->sibling->type_e, "Double") == 0) {
+  // ORDER: double, int, short, char, undex
+  if (strcmp(operator_->child->type_e, "double") == 0 || strcmp(operator_->child->sibling->type_e, "double") == 0 || strcmp(operator_->child->type_e, "Double") == 0 || strcmp(operator_->child->sibling->type_e, "Double") == 0) {
     operator_->type_e = strdup("double");
   }
   else if (strcmp(operator_->child->type_e, "int") == 0 || strcmp(operator_->child->sibling->type_e, "int") == 0 || strcmp(operator_->child->type_e, "Int") == 0 || strcmp(operator_->child->sibling->type_e, "Int") == 0) {
@@ -329,6 +326,9 @@ void check_bitwise_operator(node_t *operator_) {
   }
   else if (strcmp(operator_->child->type_e, "char") == 0 || strcmp(operator_->child->sibling->type_e, "char") == 0 || strcmp(operator_->child->type_e, "Char") == 0 || strcmp(operator_->child->sibling->type_e, "Char") == 0) {
     operator_->type_e = strdup("char");
+  }
+  else if (strcmp(operator_->child->type_e, "undef") == 0 || strcmp(operator_->child->sibling->type_e, "undef") == 0) {
+    operator_->type_e = strdup("undef");
   }
 }
 
@@ -353,11 +353,8 @@ void check_return(node_t *return_) {
 void check_arithmetic_operator(node_t *operator_) {
   check_program(operator_->child);
 
-  // ORDER: double, int, short, char
-  if (strcmp(operator_->child->type_e, "undef") == 0 || strcmp(operator_->child->sibling->type_e, "undef") == 0) {
-    operator_->type_e = strdup("undef");
-  }
-  else if (strcmp(operator_->child->type_e, "double") == 0 || strcmp(operator_->child->sibling->type_e, "double") == 0 || strcmp(operator_->child->type_e, "Double") == 0 || strcmp(operator_->child->sibling->type_e, "Double") == 0) {
+  // ORDER: double, int, short, char, undex
+  if (strcmp(operator_->child->type_e, "double") == 0 || strcmp(operator_->child->sibling->type_e, "double") == 0 || strcmp(operator_->child->type_e, "Double") == 0 || strcmp(operator_->child->sibling->type_e, "Double") == 0) {
     operator_->type_e = strdup("double");
   }
   else if (strcmp(operator_->child->type_e, "int") == 0 || strcmp(operator_->child->sibling->type_e, "int") == 0 || strcmp(operator_->child->type_e, "Int") == 0 || strcmp(operator_->child->sibling->type_e, "Int") == 0) {
@@ -368,6 +365,9 @@ void check_arithmetic_operator(node_t *operator_) {
   }
   else if (strcmp(operator_->child->type_e, "char") == 0 || strcmp(operator_->child->sibling->type_e, "char") == 0 || strcmp(operator_->child->type_e, "Char") == 0 || strcmp(operator_->child->sibling->type_e, "Char") == 0) {
     operator_->type_e = strdup("char");
+  }
+  else if (strcmp(operator_->child->type_e, "undef") == 0 || strcmp(operator_->child->sibling->type_e, "undef") == 0) {
+    operator_->type_e = strdup("undef");
   }
 }
 
