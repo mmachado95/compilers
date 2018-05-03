@@ -223,13 +223,74 @@ void check_func_definition(node_t *func_definition) {
   } else {
     func = get_element(tables, func_name);
 
-    // if table of function is already supposed to be printed, it means it was already defined
-    if(current->print == 1) {
-      printf("Line %d, col %d: Symbol %s already defined\n", aux->line, aux->col, aux->value);
-      func_definition->has_error = 1;
-    } else {
-      current->print = 1;
+    char *func_declaration_type = func->type;
+    char *func_definition_type = func_definition->child->type;
+    //printf("TESTE %s %s\n", func_declaration_type, func_definition_type);
+
+
+    if (strcmp(func_declaration_type, func_definition_type) != 0) {
+      current->print = 0;
+      char *aux_func_type = strdup(func_type);
+      aux_func_type[0] = tolower(aux_func_type[0]);
+
+      char *aux_func_declaration_type = strdup(func_declaration_type);
+      aux_func_declaration_type[0] = tolower(aux_func_declaration_type[0]);
+
+      printf("Line %d, col %d: Conflicting types (got ", aux->line, aux->col);
+      printf("%s(", aux_func_type);
+      show_func_param_types(func->param);
+
+      printf("), expected %s(", aux_func_declaration_type);
+
+      free(aux_func_declaration_type);
+      free(aux_func_type);
+
+      node_t *aux_node = func_definition->child->sibling->sibling->child;
+      int index = 0;
+      while (aux_node != NULL) {
+        char *aux_node_child_type = strdup(aux_node->child->type);
+        aux_node_child_type[0] = tolower(aux_node_child_type[0]);
+        if (index == 0) {
+          printf("%s", aux_node_child_type);
+          index++;
+        }
+        else {
+          printf(",%s", aux_node_child_type);
+        }
+        aux_node = aux_node->sibling;
+        free(aux_node_child_type);
+      }
+      printf("))\n");
     }
+    else {
+      // if table of function is already supposed to be printed, it means it was already defined
+      if(current->print == 1) {
+        printf("Line %d, col %d: Symbol %s already defined\n", aux->line, aux->col, aux->value);
+        func_definition->has_error = 1;
+      } else {
+        current->print = 1;
+      }
+    }
+
+    /*
+    int conflicting_types_error = 0;
+    param_type *aux_param = func->param;
+    node_t *aux_node = func_definition->child->sibling->sibling->child;
+
+    while (aux_param != NULL && aux_node != NULL && conflicting_types_error == 0) {
+      if (strcmp(aux_param->name, aux_node->child->type) != 0) {
+        conflicting_types_error = 1;
+      }
+      aux_param = aux_param->next;
+      aux_node = aux_node->sibling;
+      if ((aux_param == NULL && aux_node != NULL) || (aux_node == NULL && aux_param != NULL)) { // if one has more args than the other
+        conflicting_types_error = 1;
+      }
+    }
+
+    if (conflicting_types_error == 1) {
+      printf("Line %d, col %d: Conflicting types (got %s", aux->line, aux->col);
+    } */
   }
 
   // add param to table function
