@@ -137,6 +137,9 @@ void check_func_declaration(node_t *func_declaration) {
     // insert element in global table
     symbol *func_declaration_sym = insert_element(tables, func_name, func_type, NULL);
 
+    // add return statement to table
+    insert_element(current, "return", func_type, NULL);
+
     // function that adds the param types to the symbol
     check_param_list(func_declaration, aux->sibling, func_declaration_sym, 0, 1);
   }
@@ -166,20 +169,25 @@ void check_func_definition(node_t *func_definition) {
     // insert function in global table
     func = insert_element(tables, func_name, func_type, NULL);
 
+    // add return statement to table
+    insert_element(current, "return", func_type, NULL);
+
     // add functions param types to global
     check_param_list(func_definition, aux->sibling, func, 0, 1);
   } else {
-    // function is defined, we need to print
     func = get_element(tables, func_name);
-    current->print = 1;
-  }
 
-  // add return statement to table
-  insert_element(current, "return", func_type, NULL);
+    // if table of function is already supposed to be printed, it means it was already defined
+    if(current->print == 1) {
+      printf("Line %d, col %d: Symbol %s already defined\n", aux->line, aux->col, aux->value);
+      func_definition->has_error = 1;
+    } else {
+      current->print = 1;
+    }
+  }
 
   // add param to table function
   check_param_list(func_definition, aux->sibling, func, 1, 0);
-
 
   if (func_definition->has_error == 0) {
     check_program(aux->sibling->sibling);
