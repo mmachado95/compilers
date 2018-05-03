@@ -207,6 +207,8 @@ void check_func_definition(node_t *func_definition) {
 
   // if table for function doesn't exist we need to create it
   current = get_table(func_name);
+
+  int void_error = 0;
   if(current == NULL) {
     // function is defined, we need to print
     current = create_table(func_name);
@@ -220,55 +222,64 @@ void check_func_definition(node_t *func_definition) {
 
     // add functions param types to global
     check_param_list(func_definition, aux->sibling, func, 0, 1);
-  } else {
+
+  }
+
+  else {
     func = get_element(tables, func_name);
+    int declaration_has_error = func->has_error;
 
-    char *func_declaration_type = func->type;
-    char *func_definition_type = func_definition->child->type;
-    //printf("TESTE %s %s\n", func_declaration_type, func_definition_type);
-
-
-    if (strcmp(func_declaration_type, func_definition_type) != 0) {
-      current->print = 0;
-      char *aux_func_type = strdup(func_type);
-      aux_func_type[0] = tolower(aux_func_type[0]);
-
-      char *aux_func_declaration_type = strdup(func_declaration_type);
-      aux_func_declaration_type[0] = tolower(aux_func_declaration_type[0]);
-
-      printf("Line %d, col %d: Conflicting types (got ", aux->line, aux->col);
-      printf("%s(", aux_func_type);
-      show_func_param_types(func->param);
-
-      printf("), expected %s(", aux_func_declaration_type);
-
-      free(aux_func_declaration_type);
-      free(aux_func_type);
-
-      node_t *aux_node = func_definition->child->sibling->sibling->child;
-      int index = 0;
-      while (aux_node != NULL) {
-        char *aux_node_child_type = strdup(aux_node->child->type);
-        aux_node_child_type[0] = tolower(aux_node_child_type[0]);
-        if (index == 0) {
-          printf("%s", aux_node_child_type);
-          index++;
-        }
-        else {
-          printf(",%s", aux_node_child_type);
-        }
-        aux_node = aux_node->sibling;
-        free(aux_node_child_type);
-      }
-      printf("))\n");
+    void_error = check_param_list(func_definition, aux->sibling, func, 1, 1);
+    if (declaration_has_error == 0) {
+      func->to_print = 1;
     }
-    else {
-      // if table of function is already supposed to be printed, it means it was already defined
-      if(current->print == 1) {
-        printf("Line %d, col %d: Symbol %s already defined\n", aux->line, aux->col, aux->value);
-        func_definition->has_error = 1;
-      } else {
-        current->print = 1;
+
+    if (void_error == 0) {
+      char *func_declaration_type = strdup(func->type);
+      func_declaration_type[0] = tolower(func_declaration_type[0]);
+      char *func_definition_type = strdup(func_definition->child->type);
+      func_definition_type[0] = tolower(func_definition_type[0]);
+      //printf("TESTE %s %s\n", func_declaration_type, func_definition_type);
+
+
+      if (strcmp(func_declaration_type, func_definition_type) != 0) {
+        current->print = 0;
+
+        printf("Line %d, col %d: Conflicting types (got ", aux->line, aux->col);
+        printf("%s(", func_definition_type);
+
+        node_t *aux_node = func_definition->child->sibling->sibling->child;
+        int index = 0;
+        while (aux_node != NULL) {
+          char *aux_node_child_type = strdup(aux_node->child->type);
+          aux_node_child_type[0] = tolower(aux_node_child_type[0]);
+          if (index == 0) {
+            printf("%s", aux_node_child_type);
+            index++;
+          }
+          else {
+            printf(",%s", aux_node_child_type);
+          }
+          aux_node = aux_node->sibling;
+          free(aux_node_child_type);
+        }
+
+        printf("), expected %s(", func_declaration_type);
+        show_func_param_types(func->param);
+
+        free(func_definition_type);
+        free(func_declaration_type);
+
+        printf("))\n");
+      }
+      else {
+        // if table of function is already supposed to be printed, it means it was already defined
+        if(current->print == 1) {
+          printf("Line %d, col %d: Symbol %s already defined\n", aux->line, aux->col, aux->value);
+          func_definition->has_error = 1;
+        } else {
+          current->print = 1;
+        }
       }
     }
 
@@ -301,7 +312,7 @@ void check_func_definition(node_t *func_definition) {
   }
 }
 
-void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is_func_def, int print_error) {
+int check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is_func_def, int print_error) {
   node_t *param_list_aux = param_list->child;
 
   // vars used to help check foi void error
@@ -349,7 +360,9 @@ void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int i
     func->has_error = 1;
     func->to_print = 0;
     printf("Line %d, col %d: Invalid use of void type in declaration\n", param_void_error->line, param_void_error->col);
+    return 1;
   }
+  return 0;
 }
 
 
