@@ -117,11 +117,9 @@ void check_declaration(node_t *declaration) {
     }
   }
 
-  if (declaration->child->sibling->sibling != NULL) {
-    char *aux_name = malloc(10 * sizeof(char));
-    strcpy(aux_name, declaration->child->sibling->sibling->type_e);
-    char *aux2_name = malloc(10 * sizeof(char));
-    strcpy(aux2_name, declaration->child->type);
+  if (aux->sibling->sibling != NULL) {
+    char *aux_name = strdup(aux->sibling->sibling->type_e);
+    char *aux2_name = strdup(aux->type);
     aux_name[0] = tolower(aux_name[0]);
     aux2_name[0] = tolower(aux2_name[0]);
 
@@ -241,8 +239,7 @@ void check_func_definition(node_t *func_definition) {
       func_definition_type[0] = tolower(func_definition_type[0]);
       //printf("TESTE %s %s\n", func_declaration_type, func_definition_type);
 
-
-      if (strcmp(func_declaration_type, func_definition_type) != 0) {
+      if (strcmp(func_declaration_type, func_definition_type) != 0 || conflicting_types_params(func, func_definition) == 1) {
         current->print = 0;
 
         printf("Line %d, col %d: Conflicting types (got ", aux->line, aux->col);
@@ -282,26 +279,6 @@ void check_func_definition(node_t *func_definition) {
         }
       }
     }
-
-    /*
-    int conflicting_types_error = 0;
-    param_type *aux_param = func->param;
-    node_t *aux_node = func_definition->child->sibling->sibling->child;
-
-    while (aux_param != NULL && aux_node != NULL && conflicting_types_error == 0) {
-      if (strcmp(aux_param->name, aux_node->child->type) != 0) {
-        conflicting_types_error = 1;
-      }
-      aux_param = aux_param->next;
-      aux_node = aux_node->sibling;
-      if ((aux_param == NULL && aux_node != NULL) || (aux_node == NULL && aux_param != NULL)) { // if one has more args than the other
-        conflicting_types_error = 1;
-      }
-    }
-
-    if (conflicting_types_error == 1) {
-      printf("Line %d, col %d: Conflicting types (got %s", aux->line, aux->col);
-    } */
   }
 
   // add param to table function
@@ -515,4 +492,30 @@ void check_terminal(node_t *terminal) {
   else if (strcmp(terminal->type, "RealLit") == 0) {
     terminal->type_e = strdup("double");
   }
+}
+
+int conflicting_types_params(symbol *func_declaration, node_t *func_definition) {
+  param_type *aux_param = func_declaration->param;
+  node_t *aux_node = func_definition->child->sibling->sibling->child;
+
+  while (aux_param != NULL && aux_node != NULL) {
+    char *aux_type = strdup(aux_node->child->type);
+    aux_param->name[0] = tolower(aux_param->name[0]);
+    aux_type[0] = tolower(aux_type[0]);
+
+    if(strcmp(aux_param->name, aux_type) != 0) {
+      return 1;
+    }
+
+    free(aux_type);
+
+    aux_node = aux_node->sibling;
+    aux_param = aux_param->next;
+
+    if((aux_param != NULL && aux_node == NULL) || (aux_param == NULL && aux_node != NULL)) {
+      return 1;
+    }
+  }
+
+  return 0;
 }
