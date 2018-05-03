@@ -61,8 +61,9 @@ symbol *insert_element(table *to_insert, char *name, char *type, param_type *par
 
   // create the symbol
   symbol *new_symbol=(symbol *) malloc(sizeof(symbol));
-  new_symbol->is_param = 0;
+  new_symbol->has_error = 0;
   new_symbol->to_print = 1;
+  new_symbol->is_param = 0;
   new_symbol->name = NULL;
   if (name != NULL) {
     new_symbol->name = strdup(name);

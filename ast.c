@@ -119,11 +119,11 @@ void print_ast(node_t *n, int depth){
   if (n->type_e != NULL) {
     printf(" - %s", n->type_e );
 
-    if (n->value != NULL) {
+    if (n->value != NULL && strcmp("undef", n->type_e) != 0) {
       table *global_table = get_table("Global");
       symbol *symbol = get_element(global_table, n->value);
 
-      if (symbol != NULL) {
+      if (symbol != NULL && symbol->has_error == 0) {
         if (symbol->is_param == 1) {
           printf("\tparam");
         }

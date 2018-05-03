@@ -12,6 +12,9 @@ typedef struct pt_ {
 } param_type;
 
 typedef struct sym {
+  // used to know if function has error or not. If function has an error we give the terminal type undef
+  int has_error;
+  // used to know if function is supposed to print in the global table
   int to_print;
   // if the symbol is a param we need to print param at the end
   int is_param;

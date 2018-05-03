@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include "semantics.h"
 
 void check_program(node_t *ast) {
@@ -230,6 +231,7 @@ void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int i
   if (print_error == 1 && param_void_error != NULL) {
     current->print = 0;
     func_node->has_error = 1;
+    func->has_error = 1;
     func->to_print = 0;
     printf("Line %d, col %d: Invalid use of void type in declaration\n", param_void_error->line, param_void_error->col);
   }
@@ -364,19 +366,16 @@ void check_arithmetic_operator(node_t *operator_) {
 
 void check_terminal(node_t *terminal) {
   if (strcmp(terminal->type, "Id") == 0) {
-    symbol *id = get_element(current, terminal->value);
+    symbol *global_id = get_element(tables, terminal->value);
+    symbol *local_id = get_element(current, terminal->value);
 
-    if (id == NULL) {
-      table *global_table = get_table("Global");
-      id = get_element(global_table, terminal->value);
-    }
-    if (id == NULL) {
-      // Error - Unknown symbol
+    if(local_id != NULL && local_id->has_error == 0) {
+      terminal->type_e = local_id->type;
+    } else if (global_id != NULL && global_id->has_error == 0) {
+      terminal->type_e = global_id->type;
+    } else {
       printf("Line %d, col %d: Unknown symbol %s\n", terminal->line, terminal->col, terminal->value);
       terminal->type_e = strdup("undef");
-    }
-    else {
-      terminal->type_e = id->type;
     }
   }
   else if (strcmp(terminal->type, "IntLit") == 0) {
