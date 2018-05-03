@@ -30,5 +30,6 @@ void check_assign_operator(node_t *operator_);
 void check_call(node_t *operator_);
 void check_terminal(node_t *terminal);
 int conflicting_types_params(symbol *func_declaration, node_t *func_definition);
+void check_param_names(node_t *func);
 
 #endif

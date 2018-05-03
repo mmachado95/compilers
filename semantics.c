@@ -184,9 +184,11 @@ void check_func_declaration(node_t *func_declaration) {
     // add return statement to table
     insert_element(current, "return", func_type, NULL);
 
+    check_param_names(func_declaration);
+
     // function that adds the param types to the symbol
     check_param_list(func_declaration, aux->sibling, func_declaration_sym, 0, 1);
-  }
+  } 
 
   current = tables;
 }
@@ -218,6 +220,8 @@ void check_func_definition(node_t *func_definition) {
     // add return statement to table
     insert_element(current, "return", func_type, NULL);
 
+    check_param_names(func_definition);
+
     // add functions param types to global
     check_param_list(func_definition, aux->sibling, func, 0, 1);
 
@@ -226,6 +230,8 @@ void check_func_definition(node_t *func_definition) {
   else {
     func = get_element(tables, func_name);
     int declaration_has_error = func->has_error;
+
+    check_param_names(func_definition);
 
     void_error = check_param_list(func_definition, aux->sibling, func, 1, 1);
     if (declaration_has_error == 0) {
@@ -237,7 +243,6 @@ void check_func_definition(node_t *func_definition) {
       func_declaration_type[0] = tolower(func_declaration_type[0]);
       char *func_definition_type = strdup(func_definition->child->type);
       func_definition_type[0] = tolower(func_definition_type[0]);
-      //printf("TESTE %s %s\n", func_declaration_type, func_definition_type);
 
       if (strcmp(func_declaration_type, func_definition_type) != 0 || conflicting_types_params(func, func_definition) == 1) {
         current->print = 0;
@@ -518,4 +523,28 @@ int conflicting_types_params(symbol *func_declaration, node_t *func_definition) 
   }
 
   return 0;
+}
+
+
+void check_param_names(node_t *func) {
+  node_t *aux = func->child->sibling->sibling->child;
+  node_t *aux2 = aux;
+
+  while (aux != NULL) {
+    if (aux->child->sibling != NULL) {
+      aux2 = aux->sibling;
+      while (aux2 != NULL) {
+        if (aux2->child->sibling != NULL) {
+          //printf("%s %s\n", aux->child->sibling->value, aux2->child->sibling->value);
+          if (strcmp(aux->child->sibling->value, aux2->child->sibling->value) == 0) {
+            printf("Line %d, col %d: Symbol %s already defined\n", aux2->child->sibling->line, aux2->child->sibling->col, aux2->child->sibling->value);
+            return;
+          }
+        }
+        aux2 = aux2->sibling;
+      }
+    }
+    aux = aux->sibling;
+    aux2 = aux;
+  }
 }
