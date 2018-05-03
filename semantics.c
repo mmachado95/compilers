@@ -102,21 +102,70 @@ void check_program(node_t *ast) {
 void check_declaration(node_t *declaration) {
   node_t *aux = declaration->child;
 
+  if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
+    check_program(aux->sibling->sibling);
+  }
+
   if (strcmp(aux->type, "void") == 0 || strcmp(aux->type, "Void") == 0) {
     // Error - invalid use of void type in declaration
     printf("Line %d, col %d: Invalid use of void type in declaration\n", aux->sibling->line, aux->sibling->col);
   }
 
+  if (declaration->child->sibling->sibling != NULL) {
+    char *aux_name = malloc(10 * sizeof(char));
+    strcpy(aux_name, declaration->child->sibling->sibling->type_e);
+    char *aux2_name = malloc(10 * sizeof(char));
+    strcpy(aux2_name, declaration->child->type);
+    aux_name[0] = tolower(aux_name[0]);
+    aux2_name[0] = tolower(aux2_name[0]);
+
+    int score_aux;
+    int score_aux2;
+
+    // undef, double, int, short, char
+    if (strcmp(aux_name, "undef") == 0) {
+      score_aux = 5;
+    }
+    if (strcmp(aux2_name, "undef") == 0) {
+      score_aux2 = 5;
+    }
+    if (strcmp(aux_name, "double") == 0) {
+      score_aux = 4;
+    }
+    if (strcmp(aux2_name, "double") == 0) {
+      score_aux2 = 4;
+    }
+    if (strcmp(aux_name, "int") == 0) {
+      score_aux = 3;
+    }
+    if (strcmp(aux2_name, "int") == 0) {
+      score_aux2 = 3;
+    }
+    if (strcmp(aux_name, "short") == 0) {
+      score_aux = 2;
+    }
+    if (strcmp(aux2_name, "short") == 0) {
+      score_aux2 = 2;
+    }
+    if (strcmp(aux_name, "char") == 0) {
+      score_aux = 3;
+    }
+    if (strcmp(aux2_name, "char") == 0) {
+      score_aux2 = 3;
+    }
+
+    if (score_aux2 < score_aux)  {
+      printf("Line %d, col %d: Conflicting types (got %s, expected %s)\n", aux->sibling->line, aux->sibling->col, aux_name, aux2_name);
+    }
+  }
+
   // if symbol is not in table, add to table
   if (get_element(current, aux->sibling->value) == NULL) {
     insert_element(current, aux->sibling->value, aux->type, NULL);
-  } else if (strcmp("Global", current->name) != 0) {
+  }
+  else if (strcmp("Global", current->name) != 0) {
     // Error - symbol already defined
     printf("Line %d, col %d: Symbol %s already defined\n", aux->sibling->line, aux->sibling->col, aux->sibling->value);
-  }
-
-  if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
-    check_program(aux->sibling->sibling);
   }
 }
 
