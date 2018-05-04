@@ -10,7 +10,6 @@
 extern int line;
 extern int col;
 
-// =========== MAIN FUNCTIONS =============
 void check_program(node_t *program);
 void check_declaration(node_t *declaration);
 void check_func_declaration(node_t *func_declaration);

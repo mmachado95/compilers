@@ -40,13 +40,6 @@ void check_program(node_t *ast) {
   else if (strcmp(ast->type, "Comma") == 0) {
     check_comma(ast);
   }
-  /*
-  else if (strcmp(ast->type, "If") == 0) {
-    //check_if(ast);
-  }
-  else if (strcmp(ast->type, "While") == 0) {
-    //check_while(ast);
-  } */
   else if (strcmp(ast->type, "Return") == 0) {
     check_return(ast);
   }
@@ -101,10 +94,7 @@ void check_program(node_t *ast) {
 
 void check_declaration(node_t *declaration) {
   node_t *aux = declaration->child;
-
-  if (aux->sibling->sibling != NULL) { //safe check, not sure if needed
-    check_program(aux->sibling->sibling);
-  }
+  check_program(aux->sibling->sibling);
 
   if (strcmp(aux->type, "void") == 0 || strcmp(aux->type, "Void") == 0) {
     printf("Line %d, col %d: Invalid use of void type in declaration\n", aux->sibling->line, aux->sibling->col);
@@ -126,7 +116,6 @@ void check_declaration(node_t *declaration) {
     int score_aux;
     int score_aux2;
 
-    // undef, double, int, short, char
     if (strcmp(aux_name, "undef") == 0) {
       score_aux = 5;
     }
@@ -240,17 +229,10 @@ void check_func_declaration(node_t *func_declaration) {
 void check_func_definition(node_t *func_definition) {
   char *func_type = func_definition->child->type;
 
-  //go to FunctionDeclarator
+  // go to FunctionDeclarator
   node_t *aux = func_definition->child->sibling;
-
-  // save function name
   char *func_name = aux->value;
-
-  // pointer to function symbol
   symbol *func;
-
-  // if table for function doesn't exist we need to create it
-
   int void_error = check_void_error(func_definition, aux->sibling, NULL);
 
   if (void_error == 0) {
@@ -305,7 +287,7 @@ void check_func_definition(node_t *func_definition) {
         // Error - Conflicting types
         if (strcmp(func_declaration_type, func_definition_type) != 0 || conflicting_types_params(func, func_definition) == 1) {
           current->print = 0;
-          func_definition->has_error = 1; 
+          func_definition->has_error = 1;
           printf("Line %d, col %d: Conflicting types (got ", aux->line, aux->col);
           printf("%s(", func_definition_type);
 
@@ -338,7 +320,6 @@ void check_func_definition(node_t *func_definition) {
           current->is_func_definition = 1;
         }
       }
-      // Error - Symbol alreeady defined (int a, int a)
       check_param_names(func_definition);
     }
 
@@ -348,27 +329,24 @@ void check_func_definition(node_t *func_definition) {
   }
 }
 
+
 int check_void_error(node_t *func_node, node_t *param_list, symbol *func) {
   node_t *param_list_aux = param_list->child;
-
-  // vars used to help check foi void error
   node_t *param_void_error = NULL;
   int number_of_params = 0;
   int has_void_param = 0;
-
 
   if (strcmp("Void", param_list_aux->child->type) == 0 && param_list_aux->child->sibling != NULL) {
     printf("Line %d, col %d: Invalid use of void type in declaration\n", param_list_aux->child->line, param_list_aux->child->col);
     return 1;
   }
 
-
   // get types of params
   while(param_list_aux != NULL) {
     char *param_type = param_list_aux->child->type;
     number_of_params++;
 
-    // if there is a void and its not isolated
+    // if there is a void and it's not isolated
     if (param_void_error == NULL && strcmp("Void", param_type) == 0) {
       param_void_error = param_list_aux->child;
     }
@@ -395,7 +373,6 @@ int check_void_error(node_t *func_node, node_t *param_list, symbol *func) {
 }
 
 
-
 void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is_func_def) {
   node_t *param_list_aux = param_list->child;
 
@@ -409,7 +386,7 @@ void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int i
       param_declaration = param_declaration->sibling;
     }
 
-    // check if it's a function definition -> nao e bem assim (??)
+    // check if it's a function definition
     if(is_func_def == 1) {
       if(param_declaration != NULL && get_element(current, param_declaration->value) == NULL) {
         symbol *new_symbol = insert_element(current, param_declaration->value, param_type, NULL);
@@ -426,7 +403,6 @@ void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int i
 }
 
 
-// Not sure
 void check_comma(node_t *comma) {
   check_program(comma->child);
   comma->type_e = comma->child->sibling->type_e;
@@ -442,11 +418,6 @@ void check_assign_operator(node_t *operator_) {
 void check_call(node_t *operator_) {
   check_program(operator_->child);
   operator_->type_e = operator_->child->type_e;
-
-  if (strcmp(operator_->child->type_e, "undef") == 0) {
-    // Error - Symbol is not a function - TODO -> check this
-    // printf("Line %d, col %d: Symbol %s is not a function\n", operator_->line, operator_->col, operator_->child->value);
-  }
 
   else {
     int number_of_args_required = 0;
@@ -494,7 +465,6 @@ void check_relational_operator(node_t *operator_) {
 void check_bitwise_operator(node_t *operator_) {
   check_program(operator_->child);
 
-  // ORDER: double, int, short, char, undex
   if (strcmp(operator_->child->type_e, "double") == 0 || strcmp(operator_->child->sibling->type_e, "double") == 0 || strcmp(operator_->child->type_e, "Double") == 0 || strcmp(operator_->child->sibling->type_e, "Double") == 0) {
     operator_->type_e = strdup("double");
   }
@@ -533,7 +503,6 @@ void check_return(node_t *return_) {
 void check_arithmetic_operator(node_t *operator_) {
   check_program(operator_->child);
 
-  // ORDER: double, int, short, char, undex
   if (strcmp(operator_->child->type_e, "double") == 0 || strcmp(operator_->child->sibling->type_e, "double") == 0 || strcmp(operator_->child->type_e, "Double") == 0 || strcmp(operator_->child->sibling->type_e, "Double") == 0) {
     operator_->type_e = strdup("double");
   }
@@ -577,6 +546,16 @@ void check_terminal(node_t *terminal) {
   }
 }
 
+
+int check_conflicting_types(char *got, char *expected, int line, int col) {
+  if (strcmp(got, expected) == 0) {
+    printf("Line %d, col %d: Conflicting types (got %s, expected %s)\n", line, col, got, expected);
+    return 1;
+  }
+  return 0;
+}
+
+
 int conflicting_types_params(symbol *func_declaration, node_t *func_definition) {
   param_type *aux_param = func_declaration->param;
   node_t *aux_node = func_definition->child->sibling->sibling->child;
@@ -613,7 +592,6 @@ void check_param_names(node_t *func) {
       aux2 = aux->sibling;
       while (aux2 != NULL) {
         if (aux2->child->sibling != NULL) {
-          //printf("%s %s\n", aux->child->sibling->value, aux2->child->sibling->value);
           if (strcmp(aux->child->sibling->value, aux2->child->sibling->value) == 0) {
             printf("Line %d, col %d: Symbol %s already defined\n", aux2->child->sibling->line, aux2->child->sibling->col, aux2->child->sibling->value);
             return;
