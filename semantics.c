@@ -17,7 +17,7 @@ void check_program(node_t *ast) {
   else if (strcmp(ast->type, "FuncDeclaration") == 0) {
     check_func_declaration(ast);
 
-    // doesnt expand tree if func has error
+    // doesn't expand tree if func has error
     if (ast->has_error == 1) {
       check_program(ast->sibling);
       return;
@@ -27,7 +27,7 @@ void check_program(node_t *ast) {
     check_func_definition(ast);
     current = tables;
 
-    // doesnt expand tree if func has error
+    // doesn't expand tree if func has error
     if (ast->has_error == 1) {
       check_program(ast->sibling);
       return;
@@ -419,39 +419,39 @@ void check_call(node_t *operator_) {
   check_program(operator_->child);
   operator_->type_e = operator_->child->type_e;
 
-  else {
-    int number_of_args_required = 0;
-    table *global_table = get_table("Global");
-    symbol *symbol = get_element(global_table, operator_->child->value);
+  int number_of_args_required = 0;
+  table *global_table = get_table("Global");
+  symbol *symbol = get_element(global_table, operator_->child->value);
 
-    int param_not_void = 1;
+  int param_not_void = 1;
 
-    if (symbol != NULL && param_not_void == 1) {
-      if (symbol->param != NULL && param_not_void == 1) {
-        if (strcmp(symbol->param->name, "void") == 0 || strcmp(symbol->param->name, "Void") == 0) {
-          number_of_args_required = 0;
-          param_not_void = 0;
-        }
-        if (param_not_void == 1) {
-          param_type *aux = symbol->param;
-          while(aux != NULL) {
-            number_of_args_required++;
-            aux = aux->next;
-          }
+  if (symbol != NULL && param_not_void == 1) {
+    if (symbol->param != NULL && param_not_void == 1) {
+      if (strcmp(symbol->param->name, "void") == 0 || strcmp(symbol->param->name, "Void") == 0) {
+        number_of_args_required = 0;
+        param_not_void = 0;
+      }
+      if (param_not_void == 1) {
+        param_type *aux = symbol->param;
+        while(aux != NULL) {
+          number_of_args_required++;
+          aux = aux->next;
         }
       }
     }
+  }
 
-    int number_of_args_provided = 0;
-    node_t *aux = operator_->child->sibling;
-    while (aux != NULL) {
-      number_of_args_provided++;
-      aux = aux->sibling;
-    }
-    if (number_of_args_required != number_of_args_provided) {
-      // Error - Wrong number of arguments
-      printf("Line %d, col %d: Wrong number of arguments to function %s (got %d, required %d)\n", operator_->child->line, operator_->child->col, operator_->child->value, number_of_args_provided, number_of_args_required);
-    }
+  int number_of_args_provided = 0;
+  node_t *aux = operator_->child->sibling;
+
+  while (aux != NULL) {
+    number_of_args_provided++;
+    aux = aux->sibling;
+  }
+
+  if (number_of_args_required != number_of_args_provided) {
+    // Error - Wrong number of arguments
+    printf("Line %d, col %d: Wrong number of arguments to function %s (got %d, required %d)\n", operator_->child->line, operator_->child->col, operator_->child->value, number_of_args_provided, number_of_args_required);
   }
 }
 
@@ -528,19 +528,24 @@ void check_terminal(node_t *terminal) {
 
     if(local_id != NULL && local_id->has_error == 0) {
       terminal->type_e = local_id->type;
-    } else if (global_id != NULL && global_id->has_error == 0) {
+    }
+    else if (global_id != NULL && global_id->has_error == 0) {
       terminal->type_e = global_id->type;
-    } else {
+    }
+    else {
       printf("Line %d, col %d: Unknown symbol %s\n", terminal->line, terminal->col, terminal->value);
       terminal->type_e = strdup("undef");
     }
   }
+
   else if (strcmp(terminal->type, "IntLit") == 0) {
     terminal->type_e = strdup("int");
   }
+
   else if (strcmp(terminal->type, "ChrLit") == 0) {
     terminal->type_e = strdup("int");
   }
+
   else if (strcmp(terminal->type, "RealLit") == 0) {
     terminal->type_e = strdup("double");
   }
