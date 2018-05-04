@@ -361,6 +361,12 @@ int check_void_error(node_t *func_node, node_t *param_list, symbol *func, int is
   int has_void_param = 0;
 
 
+  if (strcmp("Void", param_list_aux->child->type) == 0 && param_list_aux->child->sibling != NULL) {
+    printf("Line %d, col %d: Invalid use of void type in declaration\n", param_list_aux->child->line, param_list_aux->child->col);
+    return 1;
+  }
+
+
   // get types of params
   while(param_list_aux != NULL) {
     char *param_type = param_list_aux->child->type;
