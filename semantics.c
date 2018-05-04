@@ -188,7 +188,8 @@ void check_func_declaration(node_t *func_declaration) {
 
     // function that adds the param types to the symbol
     check_param_list(func_declaration, aux->sibling, func_declaration_sym, 0, 1);
-  } 
+    check_void_error(func_declaration, aux->sibling, func_declaration_sym, 0, 1);
+  }
 
   current = tables;
 }
@@ -208,7 +209,6 @@ void check_func_definition(node_t *func_definition) {
   // if table for function doesn't exist we need to create it
   current = get_table(func_name);
 
-  int void_error = 0;
   if(current == NULL) {
     // function is defined, we need to print
     current = create_table(func_name);
@@ -224,26 +224,36 @@ void check_func_definition(node_t *func_definition) {
 
     // add functions param types to global
     check_param_list(func_definition, aux->sibling, func, 0, 1);
-
+    check_void_error(func_definition, aux->sibling, func, 0, 1);
   }
 
   else {
     func = get_element(tables, func_name);
     int declaration_has_error = func->has_error;
 
-    check_param_names(func_definition);
+    // Error - Void error
+    int void_error = check_void_error(func_definition, aux->sibling, func, 1, 1);
 
-    void_error = check_param_list(func_definition, aux->sibling, func, 1, 1);
     if (declaration_has_error == 0) {
       func->to_print = 1;
     }
 
-    if (void_error == 0) {
+    // Error - symbol already defined
+    if(current->print == 1) {
+      printf("Line %d, col %d: Symbol %s already defined\n", aux->line, aux->col, aux->value);
+      func_definition->has_error = 1;
+    }
+
+    else if (void_error == 0) {
+      check_param_list(func_definition, aux->sibling, func, 1, 1);
+      current->print = 1;
+
       char *func_declaration_type = strdup(func->type);
       func_declaration_type[0] = tolower(func_declaration_type[0]);
       char *func_definition_type = strdup(func_definition->child->type);
       func_definition_type[0] = tolower(func_definition_type[0]);
 
+      // Error - Conflicting types
       if (strcmp(func_declaration_type, func_definition_type) != 0 || conflicting_types_params(func, func_definition) == 1) {
         current->print = 0;
 
@@ -274,27 +284,20 @@ void check_func_definition(node_t *func_definition) {
 
         printf("))\n");
       }
-      else {
-        // if table of function is already supposed to be printed, it means it was already defined
-        if(current->print == 1) {
-          printf("Line %d, col %d: Symbol %s already defined\n", aux->line, aux->col, aux->value);
-          func_definition->has_error = 1;
-        } else {
-          current->print = 1;
-        }
-      }
     }
+    // Error - Symbol alreeady defined (int a, int a)
+    check_param_names(func_definition);
   }
 
-  // add param to table function
-  check_param_list(func_definition, aux->sibling, func, 1, 0);
 
   if (func_definition->has_error == 0) {
+    // add param to table function
+    check_param_list(func_definition, aux->sibling, func, 1, 0);
     check_program(aux->sibling->sibling);
   }
 }
 
-int check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is_func_def, int print_error) {
+int check_void_error(node_t *func_node, node_t *param_list, symbol *func, int is_func_def, int print_error) {
   node_t *param_list_aux = param_list->child;
 
   // vars used to help check foi void error
@@ -313,22 +316,6 @@ int check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is
       param_void_error = param_list_aux->child;
     }
 
-    // go to function id
-    node_t *param_declaration = param_list_aux->child->sibling;
-    if(param_declaration != NULL && strcmp("Id", param_declaration->type) != 0) {
-      param_declaration = param_declaration->sibling;
-    }
-
-    // check if it's a function definition
-    if(is_func_def == 1) {
-      if(param_declaration != NULL && get_element(current, param_declaration->value) == NULL) {
-        symbol *new_symbol = insert_element(current, param_declaration->value, param_type, NULL);
-        new_symbol->is_param = 1;
-      }
-    } else {
-      insert_type(param_type, func);
-    }
-
     param_list_aux = param_list_aux->sibling;
   }
 
@@ -336,7 +323,7 @@ int check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is
     param_void_error = NULL;
   }
 
-  if (print_error == 1 && param_void_error != NULL) {
+  if (param_void_error != NULL) {
     current->print = 0;
     func_node->has_error = 1;
     func->has_error = 1;
@@ -344,7 +331,39 @@ int check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is
     printf("Line %d, col %d: Invalid use of void type in declaration\n", param_void_error->line, param_void_error->col);
     return 1;
   }
+
   return 0;
+}
+
+
+
+void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is_func_def, int print_error) {
+  node_t *param_list_aux = param_list->child;
+
+  // get types of params
+  while(param_list_aux != NULL) {
+    char *param_type = param_list_aux->child->type;
+
+    // go to function id
+    node_t *param_declaration = param_list_aux->child->sibling;
+    if(param_declaration != NULL && strcmp("Id", param_declaration->type) != 0) {
+      param_declaration = param_declaration->sibling;
+    }
+
+    // check if it's a function definition -> nao e bem assim (??)
+    if(is_func_def == 1) {
+      if(param_declaration != NULL && get_element(current, param_declaration->value) == NULL) {
+        symbol *new_symbol = insert_element(current, param_declaration->value, param_type, NULL);
+        new_symbol->is_param = 1;
+      }
+    }
+
+    else {
+      insert_type(param_type, func);
+    }
+
+    param_list_aux = param_list_aux->sibling;
+  }
 }
 
 
