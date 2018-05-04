@@ -254,11 +254,10 @@ void check_func_definition(node_t *func_definition) {
   int void_error = check_void_error(func_definition, aux->sibling, NULL);
 
   if (void_error == 0) {
-
     current = get_table(func_name);
 
+    // If function was not declared or defined
     if(current == NULL) {
-      // function is defined, we need to print
       current = create_table(func_name, 1);
       current->print = 1;
 
@@ -268,11 +267,12 @@ void check_func_definition(node_t *func_definition) {
       // add return statement to table
       insert_element(current, "return", func_type, NULL);
 
-      // add functions param types to global
       check_param_list(func_definition, aux->sibling, func, 0);
+      check_param_list(func_definition, aux->sibling, func, 1);
       check_param_names(func_definition);
     }
 
+    // Function has been declared or defined
     else {
       func = get_element(tables, func_name);
       int declaration_has_error = func->has_error;
@@ -281,6 +281,7 @@ void check_func_definition(node_t *func_definition) {
         func->to_print = 1;
       }
 
+      // Function has been defined
       // Error - symbol already defined
       table *aux_tables = tables;
       while (aux_tables != NULL) {
@@ -294,7 +295,6 @@ void check_func_definition(node_t *func_definition) {
 
 
       if (func_definition->has_error == 0) {
-        check_param_list(func_definition, aux->sibling, func, 1);
         current->print = 1;
 
         char *func_declaration_type = strdup(func->type);
@@ -305,7 +305,7 @@ void check_func_definition(node_t *func_definition) {
         // Error - Conflicting types
         if (strcmp(func_declaration_type, func_definition_type) != 0 || conflicting_types_params(func, func_definition) == 1) {
           current->print = 0;
-
+          func_definition->has_error = 1; 
           printf("Line %d, col %d: Conflicting types (got ", aux->line, aux->col);
           printf("%s(", func_definition_type);
 
@@ -334,6 +334,7 @@ void check_func_definition(node_t *func_definition) {
           printf("))\n");
         }
         else {
+          check_param_list(func_definition, aux->sibling, func, 1);
           current->is_func_definition = 1;
         }
       }
@@ -341,10 +342,7 @@ void check_func_definition(node_t *func_definition) {
       check_param_names(func_definition);
     }
 
-
     if (func_definition->has_error == 0) {
-      // add param to table function
-      check_param_list(func_definition, aux->sibling, func, 1);
       check_program(aux->sibling->sibling);
     }
   }
