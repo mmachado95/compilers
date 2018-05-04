@@ -28,6 +28,7 @@ typedef struct sym {
 } symbol;
 
 typedef struct tab {
+  int is_func_definition;
   // table is supposed to be printed
   int print;
   // name of table
@@ -38,7 +39,7 @@ typedef struct tab {
 } table;
 
 void insert_default_functions(table *to_insert);
-table *create_table(char *name);
+table *create_table(char *name, int is_func_definition);
 table *get_table(char *name);
 symbol *insert_element(table *table, char *name, char *type, param_type *params_types);
 symbol *get_element(table *table, char *name);

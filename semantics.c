@@ -179,7 +179,7 @@ void check_func_declaration(node_t *func_declaration) {
     // if table for function doesn't exist already
     if (get_table(aux->value) == NULL) {
       // create table for function
-      current = create_table(func_name);
+      current = create_table(func_name, 0);
 
       // insert element in global table
       symbol *func_declaration_sym = insert_element(tables, func_name, func_type, NULL);
@@ -259,7 +259,7 @@ void check_func_definition(node_t *func_definition) {
 
     if(current == NULL) {
       // function is defined, we need to print
-      current = create_table(func_name);
+      current = create_table(func_name, 1);
       current->print = 1;
 
       // insert function in global table
@@ -279,18 +279,23 @@ void check_func_definition(node_t *func_definition) {
       func = get_element(tables, func_name);
       int declaration_has_error = func->has_error;
 
-
       if (declaration_has_error == 0) {
         func->to_print = 1;
       }
 
       // Error - symbol already defined
-      if(current->print == 1) {
-        printf("Line %d, col %d: Symbol %s already defined\n", aux->line, aux->col, aux->value);
-        func_definition->has_error = 1;
+      table *aux_tables = tables;
+      while (aux_tables != NULL) {
+        if (strcmp(func_name, aux_tables->name) == 0 && aux_tables->is_func_definition == 1) {
+          printf("Line %d, col %d: Symbol %s already defined\n", aux->line, aux->col, aux->value);
+          func_definition->has_error = 1;
+          break;
+        }
+        aux_tables = aux_tables->next;
       }
 
-      else {
+
+      if (func_definition->has_error == 0) {
         check_param_list(func_definition, aux->sibling, func, 1, 1);
         current->print = 1;
 
@@ -329,6 +334,9 @@ void check_func_definition(node_t *func_definition) {
           free(func_declaration_type);
 
           printf("))\n");
+        }
+        else {
+          current->is_func_definition = 1;
         }
       }
       // Error - Symbol alreeady defined (int a, int a)

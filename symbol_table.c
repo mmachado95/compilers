@@ -12,12 +12,13 @@ void insert_default_functions(table *to_insert) {
   insert_type("Void", get_char);
 }
 
-table *create_table(char *name) {
+table *create_table(char *name, int is_func_definition) {
   // creates the table and respective elements
   table *new_table = (table *)malloc(sizeof(table));
   new_table->print = 0;
   new_table->name = strdup(name);
   new_table->symbol = NULL;
+  new_table->is_func_definition = is_func_definition;
   new_table->next = NULL;
 
   // go to end of tables list
