@@ -187,8 +187,11 @@ void check_func_declaration(node_t *func_declaration) {
     check_param_names(func_declaration);
 
     // function that adds the param types to the symbol
-    check_param_list(func_declaration, aux->sibling, func_declaration_sym, 0, 1);
-    check_void_error(func_declaration, aux->sibling, func_declaration_sym, 0, 1);
+    check_param_list(func_declaration, aux->sibling, func_declaration_sym, 0, 0);
+    check_void_error(func_declaration, aux->sibling, func_declaration_sym, 0, 0);
+  }
+  else {
+    check_void_error(func_declaration, aux->sibling, NULL, 0, 1);
   }
 
   current = tables;
@@ -239,7 +242,7 @@ void check_func_definition(node_t *func_definition) {
     }
 
     // Error - symbol already defined
-    if(current->print == 1) {
+    if(current->print == 1 && void_error == 0) {
       printf("Line %d, col %d: Symbol %s already defined\n", aux->line, aux->col, aux->value);
       func_definition->has_error = 1;
     }
@@ -324,10 +327,12 @@ int check_void_error(node_t *func_node, node_t *param_list, symbol *func, int is
   }
 
   if (param_void_error != NULL) {
-    current->print = 0;
-    func_node->has_error = 1;
-    func->has_error = 1;
-    func->to_print = 0;
+    //current->print = 0;
+    if (func != NULL) {
+      func_node->has_error = 1;
+      func->has_error = 1;
+      func->to_print = 0;
+    }
     printf("Line %d, col %d: Invalid use of void type in declaration\n", param_void_error->line, param_void_error->col);
     return 1;
   }
