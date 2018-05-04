@@ -254,11 +254,7 @@ void check_func_definition(node_t *func_definition) {
   int void_error = check_void_error(func_definition, aux->sibling, NULL, 0, 1);
 
   if (void_error == 0) {
-
-    current = get_table(func_name);
-
-    if(current == NULL) {
-      // function is defined, we need to print
+    if(get_table(func_name) == NULL) {
       current = create_table(func_name, 1);
       current->print = 1;
 
@@ -267,8 +263,6 @@ void check_func_definition(node_t *func_definition) {
 
       // add return statement to table
       insert_element(current, "return", func_type, NULL);
-
-      //check_void_error(func_definition, aux->sibling, func, 0, 1);
 
       // add functions param types to global
       check_param_list(func_definition, aux->sibling, func, 0, 1);
@@ -296,8 +290,6 @@ void check_func_definition(node_t *func_definition) {
 
 
       if (func_definition->has_error == 0) {
-        check_param_list(func_definition, aux->sibling, func, 1, 1);
-        current->print = 1;
 
         char *func_declaration_type = strdup(func->type);
         func_declaration_type[0] = tolower(func_declaration_type[0]);
@@ -336,10 +328,13 @@ void check_func_definition(node_t *func_definition) {
           printf("))\n");
         }
         else {
+          // passou todos os erros "graves", logo é uma definição valida
           current->is_func_definition = 1;
+          check_param_list(func_definition, aux->sibling, func, 1, 1);
+          current->print = 1;
         }
       }
-      // Error - Symbol alreeady defined (int a, int a)
+      // Error - Symbol alreeady defined (int a, int a) - erro pouco serio
       check_param_names(func_definition);
     }
 
