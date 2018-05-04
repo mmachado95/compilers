@@ -15,14 +15,10 @@ void check_program(node_t *program);
 void check_declaration(node_t *declaration);
 void check_func_declaration(node_t *func_declaration);
 void check_func_definition(node_t *func_definition);
-
-void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is_func_def, int print_error);
-int check_void_error(node_t *func_node, node_t *param_list, symbol *func, int is_func_def, int print_error);
-
+void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is_func_def);
+int check_void_error(node_t *func_node, node_t *param_list, symbol *func);
 void check_func_body(node_t *func_body);
 void check_comma(node_t *comma);
-//void check_if(node_t *if_);
-//void check_while(node_t *while_);
 void check_return(node_t *return_);
 void check_arithmetic_operator(node_t *operator_);
 void check_unary_operator(node_t *operator_);

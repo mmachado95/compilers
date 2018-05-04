@@ -173,7 +173,7 @@ void check_func_declaration(node_t *func_declaration) {
   node_t *aux = func_declaration->child->sibling;
   char *func_name = aux->value;
 
-  int void_error = check_void_error(func_declaration, aux->sibling, NULL, 0, 1);
+  int void_error = check_void_error(func_declaration, aux->sibling, NULL);
   if (void_error == 0) {
 
     // if table for function doesn't exist already
@@ -190,8 +190,8 @@ void check_func_declaration(node_t *func_declaration) {
       check_param_names(func_declaration);
 
       // function that adds the param types to the symbol
-      check_param_list(func_declaration, aux->sibling, func_declaration_sym, 0, 0);
-      check_void_error(func_declaration, aux->sibling, func_declaration_sym, 0, 0);
+      check_param_list(func_declaration, aux->sibling, func_declaration_sym, 0);
+      check_void_error(func_declaration, aux->sibling, func_declaration_sym);
     }
     else {
       symbol *prev_func_declaration = get_element(tables, func_name);
@@ -251,10 +251,14 @@ void check_func_definition(node_t *func_definition) {
 
   // if table for function doesn't exist we need to create it
 
-  int void_error = check_void_error(func_definition, aux->sibling, NULL, 0, 1);
+  int void_error = check_void_error(func_definition, aux->sibling, NULL);
 
   if (void_error == 0) {
-    if(get_table(func_name) == NULL) {
+
+    current = get_table(func_name);
+
+    if(current == NULL) {
+      // function is defined, we need to print
       current = create_table(func_name, 1);
       current->print = 1;
 
@@ -265,7 +269,7 @@ void check_func_definition(node_t *func_definition) {
       insert_element(current, "return", func_type, NULL);
 
       // add functions param types to global
-      check_param_list(func_definition, aux->sibling, func, 0, 1);
+      check_param_list(func_definition, aux->sibling, func, 0);
       check_param_names(func_definition);
     }
 
@@ -290,6 +294,8 @@ void check_func_definition(node_t *func_definition) {
 
 
       if (func_definition->has_error == 0) {
+        check_param_list(func_definition, aux->sibling, func, 1);
+        current->print = 1;
 
         char *func_declaration_type = strdup(func->type);
         func_declaration_type[0] = tolower(func_declaration_type[0]);
@@ -328,26 +334,23 @@ void check_func_definition(node_t *func_definition) {
           printf("))\n");
         }
         else {
-          // passou todos os erros "graves", logo é uma definição valida
           current->is_func_definition = 1;
-          check_param_list(func_definition, aux->sibling, func, 1, 1);
-          current->print = 1;
         }
       }
-      // Error - Symbol alreeady defined (int a, int a) - erro pouco serio
+      // Error - Symbol alreeady defined (int a, int a)
       check_param_names(func_definition);
     }
 
 
     if (func_definition->has_error == 0) {
       // add param to table function
-      check_param_list(func_definition, aux->sibling, func, 1, 0);
+      check_param_list(func_definition, aux->sibling, func, 1);
       check_program(aux->sibling->sibling);
     }
   }
 }
 
-int check_void_error(node_t *func_node, node_t *param_list, symbol *func, int is_func_def, int print_error) {
+int check_void_error(node_t *func_node, node_t *param_list, symbol *func) {
   node_t *param_list_aux = param_list->child;
 
   // vars used to help check foi void error
@@ -395,7 +398,7 @@ int check_void_error(node_t *func_node, node_t *param_list, symbol *func, int is
 
 
 
-void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is_func_def, int print_error) {
+void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int is_func_def) {
   node_t *param_list_aux = param_list->child;
 
   // get types of params
