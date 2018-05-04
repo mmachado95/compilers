@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
       yyparse();
 
       if(errors == 0) {
-        current = create_table("Global");
+        current = create_table("Global", 1);
         current->print = 1;
         insert_default_functions(current);
         check_program(ast);
