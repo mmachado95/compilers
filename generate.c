@@ -1,7 +1,7 @@
 #include "generate.h"
 
 
-char *get_type(char *type_name) {
+char *get_llvm_type(char *type_name) {
   if (strcmp(type_name, "Int") == 0)  {
     return "i32";
   }
@@ -24,7 +24,7 @@ void generate_code_declaration(node_t *ast) {
   }
   else {
     // TODO -> check this
-    printf("%%%s = alloca %s\n", ast->child->sibling->value, get_type(ast->child->type)); //%arr = alloca i32
+    printf("%%%s = alloca %s\n", ast->child->sibling->value, get_llvm_type(ast->child->type)); //%arr = alloca i32
   }
 }
 
@@ -33,17 +33,17 @@ void print_param_types(node_t *params) {
   int index = 0;
   while (params != NULL) {
     if (index == 0) {
-      printf("%s %s", get_type(params->child->type), params->child->sibling->value);
+      printf("%s %s", get_llvm_type(params->child->type), params->child->sibling->value);
       index++;
     }
     else
-      printf(", %s %s", get_type(params->child->type), params->child->sibling->value);
+      printf(", %s %s", get_llvm_type(params->child->type), params->child->sibling->value);
     params = params->sibling;
   }
 }
 
-void generate_code_func_declaration(node_t *ast) {
-  printf("declare %s @%s(", get_type(ast->child->type), ast->child->sibling->value);
+void generate_code_func_declaration(node_t *func_declaration) {
+  printf("declare %s @%s(", get_llvm_type(func_declaration->child->type), func_declaration->child->sibling->value);
   print_param_types(ast->child->sibling->sibling->child);
   printf(")\n");
 }
