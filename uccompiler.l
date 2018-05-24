@@ -6,6 +6,7 @@
   #include "ast.h"
   #include "symbol_table.h"
   #include "semantics.h"
+  #include "generate.h"
   int line = 1;
   int col = 1;
   int beginning_line;
@@ -181,6 +182,14 @@ int main(int argc, char *argv[]) {
   else {
     print_tokens = 0;
     yyparse();
+    if(errors == 0) { // TODO -> check if there are semantic errors
+      current = create_table("Global", 1);
+      current->print = 1;
+      insert_default_functions(current);
+      check_program(ast);
+      generate_code(ast);
+      destroy_ast(ast);
+    }
   }
   return 0;
 }
