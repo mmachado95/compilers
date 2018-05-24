@@ -16,6 +16,19 @@ void generate_code_program(node_t *ast) {
   //printf("\n");
 }
 
+void generate_code_declaration(node_t *ast) {
+  symbol *global_var = get_element(tables, ast->child->sibling->value);
+  if (global_var != NULL) {
+    // TODO -> check this
+    printf("@%s = global %%%s\n", ast->child->sibling->value, ast->child->type ); //@a = global %Int
+  }
+  else {
+    // TODO -> check this
+    printf("%%%s = alloca %s\n", ast->child->sibling->value, get_type(ast->child->type)); //%arr = alloca i32
+  }
+}
+
+
 void print_param_types(node_t *params) {
   int index = 0;
   while (params != NULL) {
@@ -35,6 +48,11 @@ void generate_code_func_declaration(node_t *ast) {
   printf(")\n");
 }
 
+void generate_code_func_definition(node_t *ast) {
+  // TODO -> falta fazer tudo
+  generate_code(ast->child->sibling->sibling->sibling);
+}
+
 
 void generate_code(node_t *ast) {
   if (ast == NULL) {
@@ -48,16 +66,16 @@ void generate_code(node_t *ast) {
     generate_code(ast->child);
   }
   else if (strcmp(ast->type, "Declaration") == 0) {
-    //check_declaration(ast);
+    generate_code_declaration(ast);
   }
   else if (strcmp(ast->type, "FuncDeclaration") == 0) {
     generate_code_func_declaration(ast);
   }
   else if (strcmp(ast->type, "FuncDefinition") == 0) {
-    //check_func_declaration(ast);
+    generate_code_func_definition(ast);
   }
   else if (strcmp(ast->type, "FuncBody") == 0) {
-    //check_program(ast->child);
+    generate_code(ast->child);
   }
   else if (strcmp(ast->type, "Comma") == 0) {
     //check_comma(ast);
