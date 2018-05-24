@@ -182,3 +182,54 @@ void show_tables() {
     aux = aux->next;
   }
 }
+
+void destroy_param_types(param_type *current) {
+  if (current == NULL) {
+    return;
+  }
+
+  if (current->name != NULL) {
+    free(current->name);
+  }
+
+  destroy_param_types(current->next);
+
+  free(current);
+}
+
+void destroy_symbols(symbol *current) {
+  if (current == NULL) {
+    return;
+  }
+
+  if (current->name != NULL) {
+    free(current->name);
+  }
+  if (current->type != NULL) {
+    free(current->type);
+  }
+  if (current->param != NULL) {
+    destroy_param_types(current->param);
+  }
+
+  destroy_symbols(current->next);
+
+  free(current);
+}
+
+void destroy_tables(table *current) {
+  if (current == NULL) {
+    return;
+  }
+
+  if (current->name != NULL) {
+    free(current->name);
+  }
+  if(current->symbol != NULL) {
+    destroy_symbols(current->symbol);
+  }
+
+  destroy_tables(current->next);
+
+  free(current);
+}

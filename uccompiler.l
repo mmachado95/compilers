@@ -189,6 +189,7 @@ int main(int argc, char *argv[]) {
       check_program(ast);
       generate_code(ast);
       destroy_ast(ast);
+      destroy_tables(tables);
     }
   }
   return 0;
@@ -203,3 +204,4 @@ void yyerror (char *s) {
   int aux_col = col - strlen(yytext);
   printf("Line %d, col %d: %s: %s\n", line, aux_col, s, yytext);
 }
+

@@ -49,6 +49,10 @@ void show_symbol(symbol *symbol);
 void show_table(table *table);
 void show_tables();
 
+void destroy_param_types(param_type *param);
+void destroy_symbols(symbol *symbols);
+void destroy_tables();
+
 table *tables;
 table *current;
 
