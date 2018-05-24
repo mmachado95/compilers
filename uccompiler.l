@@ -1,9 +1,11 @@
 %{
-  #include <string.h>
-  #include <stdio.h>
+  //Miguel Machado 2014214547
+  //Teresa Salazar 2015234237
   #include "y.tab.h"
-  #include "ast.h"
   #define PRINTF if(print_tokens == 1) printf
+  #include "ast.h"
+  #include "symbol_table.h"
+  #include "semantics.h"
   int line = 1;
   int col = 1;
   int beginning_line;
@@ -130,11 +132,30 @@ int main(int argc, char *argv[]) {
       yyparse();
       yylex();
     }
-    if (strcmp(argv[1], "-t") == 0) {
+    else if (strcmp(argv[1], "-2") == 0) {
+      print_tokens = 0;
+      yyparse();
+      destroy_ast(ast);
+    }
+    else if (strcmp(argv[1], "-t") == 0) {
       print_tokens = 0;
       yyparse();
 
       if(errors == 0) {
+        print_ast(ast, 0);
+        destroy_ast(ast);
+      }
+    }
+    else if (strcmp(argv[1], "-s") == 0) {
+      print_tokens = 0;
+      yyparse();
+
+      if(errors == 0) {
+        current = create_table("Global", 1);
+        current->print = 1;
+        insert_default_functions(current);
+        check_program(ast);
+        show_tables();
         print_ast(ast, 0);
         destroy_ast(ast);
       }
