@@ -1,23 +1,60 @@
 #include "generate.h"
 
 
+char *get_type(char *type_name) {
+  if (strcmp(type_name, "Int") == 0)  {
+    return "i32";
+  }
+  else if (strcmp(type_name, "Void") == 0) {
+    return "void";
+  }
+  return "";
+}
+
+
+void generate_code_program(node_t *ast) {
+  //printf("\n");
+}
+
+void print_param_types(node_t *params) {
+  int index = 0;
+  while (params != NULL) {
+    if (index == 0) {
+      printf("%s %s", get_type(params->child->type), params->child->sibling->value);
+      index++;
+    }
+    else
+      printf(", %s %s", get_type(params->child->type), params->child->sibling->value);
+    params = params->sibling;
+  }
+}
+
+void generate_code_func_declaration(node_t *ast) {
+  printf("declare %s @%s(", get_type(ast->child->type), ast->child->sibling->value);
+  print_param_types(ast->child->sibling->sibling->child);
+  printf(")\n");
+}
+
+
 void generate_code(node_t *ast) {
-  //printf("OII\n\n");
   if (ast == NULL) {
     return;
   }
 
+  //printf("TYPE: %s\n", ast->type );
+
   if (strcmp(ast->type, "Program") == 0) {
-    //check_program(ast->child);
+    generate_code_program(ast);
+    generate_code(ast->child);
   }
   else if (strcmp(ast->type, "Declaration") == 0) {
     //check_declaration(ast);
   }
   else if (strcmp(ast->type, "FuncDeclaration") == 0) {
-    //check_func_declaration(ast);
+    generate_code_func_declaration(ast);
   }
   else if (strcmp(ast->type, "FuncDefinition") == 0) {
-    //check_func_definition(ast);
+    //check_func_declaration(ast);
   }
   else if (strcmp(ast->type, "FuncBody") == 0) {
     //check_program(ast->child);
@@ -70,8 +107,8 @@ void generate_code(node_t *ast) {
     //check_terminal(ast);
   }
   else {
-    //check_program(ast->child);
+    generate_code(ast->child);
   }
 
-  //check_program(ast->sibling);
+  generate_code(ast->sibling);
 }
