@@ -43,7 +43,10 @@ void print_param_types(node_t *params) {
 }
 
 void generate_code_func_declaration(node_t *func_declaration) {
-  printf("declare %s @%s(", get_llvm_type(func_declaration->child->type), func_declaration->child->sibling->value);
+  char *type = func_declaration->child->type;
+  char *id = func_declaration->child->sibling->value;
+
+  printf("declare %s @%s(", get_llvm_type(type), id);
   print_param_types(ast->child->sibling->sibling->child);
   printf(")\n");
 }
