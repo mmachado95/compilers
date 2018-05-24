@@ -127,6 +127,11 @@ CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})*(\\)*{ANYCHAR}*
 %%
 int main(int argc, char *argv[]) {
   if (argc > 1) {
+    if (strcmp(argv[1], "-1") == 0) {
+      print_tokens = 0;
+      yyparse();
+      yylex();
+    }
     if (strcmp(argv[1], "-l") == 0) {
       print_tokens = 1;
       yyparse();
@@ -143,6 +148,18 @@ int main(int argc, char *argv[]) {
 
       if(errors == 0) {
         print_ast(ast, 0);
+        destroy_ast(ast);
+      }
+    }
+    else if (strcmp(argv[1], "-3") == 0) {
+      print_tokens = 0;
+      yyparse();
+
+      if(errors == 0) {
+        current = create_table("Global", 1);
+        current->print = 1;
+        insert_default_functions(current);
+        check_program(ast);
         destroy_ast(ast);
       }
     }
