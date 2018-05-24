@@ -12,6 +12,10 @@ typedef struct pt_ {
 } param_type;
 
 typedef struct sym {
+  // used to know if function has error or not. If function has an error we give the terminal type undef
+  int has_error;
+  // used to know if function is supposed to print in the global table
+  int to_print;
   // if the symbol is a param we need to print param at the end
   int is_param;
   // identifier of variable, function etc
@@ -24,6 +28,7 @@ typedef struct sym {
 } symbol;
 
 typedef struct tab {
+  int is_func_definition;
   // table is supposed to be printed
   int print;
   // name of table
@@ -34,7 +39,7 @@ typedef struct tab {
 } table;
 
 void insert_default_functions(table *to_insert);
-table *create_table(char *name);
+table *create_table(char *name, int is_func_definition);
 table *get_table(char *name);
 symbol *insert_element(table *table, char *name, char *type, param_type *params_types);
 symbol *get_element(table *table, char *name);

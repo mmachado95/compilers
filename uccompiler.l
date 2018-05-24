@@ -1,4 +1,6 @@
 %{
+  //Miguel Machado 2014214547
+  //Teresa Salazar 2015234237
   #include "y.tab.h"
   #define PRINTF if(print_tokens == 1) printf
   #include "ast.h"
@@ -141,10 +143,6 @@ int main(int argc, char *argv[]) {
 
       if(errors == 0) {
         print_ast(ast, 0);
-        /*current = create_table("Global");*/
-        /*insert_default_functions(current);*/
-        /*check_program(ast);*/
-        /*show_tables();*/
         destroy_ast(ast);
       }
     }
@@ -153,7 +151,7 @@ int main(int argc, char *argv[]) {
       yyparse();
 
       if(errors == 0) {
-        current = create_table("Global");
+        current = create_table("Global", 1);
         current->print = 1;
         insert_default_functions(current);
         check_program(ast);

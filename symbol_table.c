@@ -6,20 +6,19 @@
 
 // adds the default functions to the global table
 void insert_default_functions(table *to_insert) {
-  param_type *type_int = (param_type *) malloc(sizeof(param_type));
-  type_int->name = strdup("Int");
-  param_type *type_void = (param_type *) malloc(sizeof(param_type));
-  type_void->name = strdup("Void");
-  insert_element(to_insert, "putchar", "Int", type_int);
-  insert_element(to_insert, "getchar", "Int", type_void);
+  symbol *put_char = insert_element(to_insert, "putchar", "Int", NULL);
+  insert_type("Int", put_char);
+  symbol *get_char = insert_element(to_insert, "getchar", "Int", NULL);
+  insert_type("Void", get_char);
 }
 
-table *create_table(char *name) {
+table *create_table(char *name, int is_func_definition) {
   // creates the table and respective elements
   table *new_table = (table *)malloc(sizeof(table));
   new_table->print = 0;
   new_table->name = strdup(name);
   new_table->symbol = NULL;
+  new_table->is_func_definition = is_func_definition;
   new_table->next = NULL;
 
   // go to end of tables list
@@ -63,6 +62,8 @@ symbol *insert_element(table *to_insert, char *name, char *type, param_type *par
 
   // create the symbol
   symbol *new_symbol=(symbol *) malloc(sizeof(symbol));
+  new_symbol->has_error = 0;
+  new_symbol->to_print = 1;
   new_symbol->is_param = 0;
   new_symbol->name = NULL;
   if (name != NULL) {
@@ -125,7 +126,7 @@ void show_func_param_types(param_type *param) {
   param_type *aux = param;
   aux->name[0] = tolower(aux->name[0]);
   printf("%s", aux->name);
-  
+
   aux = aux->next;
 
   while(aux != NULL) {
@@ -163,7 +164,9 @@ void show_table(table *table) {
   }
 
   while(aux != NULL) {
-    show_symbol(aux);
+    if (aux->to_print == 1) {
+      show_symbol(aux);
+    }
     aux = aux->next;
   }
 }
