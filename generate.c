@@ -1,6 +1,5 @@
 #include "generate.h"
 
-
 char *get_llvm_type(char *type_name) {
   if (strcmp(type_name, "Int") == 0)  {
     return "i32";
@@ -16,14 +15,20 @@ void generate_code_program(node_t *ast) {
   //printf("\n");
 }
 
+// TODO we need to make this more general, this only applies to globals
+//
+// TODO the correct syntax for declarations is:
+// 1) int t; -> @t = common global i32 0, align 4
+// 2) int t = 4; -> @t = global i32 4, align 4
 void generate_code_declaration(node_t *ast) {
   symbol *global_var = get_element(tables, ast->child->sibling->value);
+
   if (global_var != NULL) {
-    // TODO -> check this
-    printf("@%s = global %%%s\n", ast->child->sibling->value, ast->child->type ); //@a = global %Int
+    printf("@%s = global %%%s\n", global_var->name, get_llvm_type(global_var->type)); //@a = global %Int
   }
   else {
     // TODO -> check this
+    // not sure if we need to check arrays since they dont exist in uc
     printf("%%%s = alloca %s\n", ast->child->sibling->value, get_llvm_type(ast->child->type)); //%arr = alloca i32
   }
 }
