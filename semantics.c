@@ -393,7 +393,6 @@ void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int i
         new_symbol->is_param = 1;
       }
     }
-
     else {
       insert_type(param_type, func);
     }

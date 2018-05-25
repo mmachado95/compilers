@@ -28,17 +28,34 @@ void generate_code_declaration(node_t *ast) {
   }
 }
 
+void print_param_types(param_type *params) {
+  param_type *aux = params;
 
-void print_param_types(node_t *params) {
-  int index = 0;
-  while (params != NULL) {
-    if (index == 0) {
-      printf("%s %s", get_llvm_type(params->child->type), params->child->sibling->value);
-      index++;
+  while (aux != NULL) {
+    if (aux->next != NULL) {
+      printf("%s, ", get_llvm_type(aux->name));
+    } else {
+      printf("%s", get_llvm_type(aux->name));
     }
-    else
-      printf(", %s %s", get_llvm_type(params->child->type), params->child->sibling->value);
-    params = params->sibling;
+
+    aux = aux->next;
+  }
+}
+
+void print_param_types_and_ids(node_t *params) {
+  node_t *aux = params;
+
+  while (aux != NULL) {
+    char *type = aux->child->type;
+    char *id = aux->child->sibling->value;
+
+    if (aux->sibling != NULL) {
+      printf("%s %s, ", get_llvm_type(type), id);
+    } else {
+      printf("%s %s", get_llvm_type(type), id);
+    }
+
+    aux = aux->sibling;
   }
 }
 
@@ -46,8 +63,11 @@ void generate_code_func_declaration(node_t *func_declaration) {
   char *type = func_declaration->child->type;
   char *id = func_declaration->child->sibling->value;
 
+  // get function symbol so that we can pass the params types to function
+  symbol *func_symbol = get_element(tables, id);
+
   printf("declare %s @%s(", get_llvm_type(type), id);
-  print_param_types(ast->child->sibling->sibling->child);
+  print_param_types(func_symbol->param);
   printf(")\n");
 }
 
