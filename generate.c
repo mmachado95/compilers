@@ -1,5 +1,7 @@
 #include "generate.h"
 
+int reg_count = 1;
+
 char *get_llvm_type(char *type_name) {
   if (strcmp(type_name, "Int") == 0)  {
     return "i32";
@@ -82,6 +84,37 @@ void generate_code_func_definition(node_t *ast) {
 }
 
 
+void generate_code_arithmetic_operator(node_t *ast) {
+  if (strcmp(ast->type, "Add") == 0) {
+    /* code */
+  }
+  else if (strcmp(ast->type, "Sub") == 0) {
+    /* code */
+  }
+  else if (strcmp(ast->type, "Mul") == 0) {
+    /* code */
+  }
+  else if (strcmp(ast->type, "Div") == 0) {
+    /* code */
+  }
+}
+
+void generate_code_unary_operator(node_t *ast) {
+  generate_code(ast->child);
+  reg_count++;
+  ast->registry = reg_count;
+
+  if (strcmp(ast->type, "Plus") == 0) {
+    printf("%%%d = add i32, 0 %%%d\n", ast->registry, ast->child->registry);
+  }
+
+  else if (strcmp(ast->type, "Minus") == 0) {
+    printf("%%%d = sub i32, 0 %%%d\n", ast->registry, ast->child->registry);
+  }
+}
+
+
+
 void generate_code(node_t *ast) {
   if (ast == NULL) {
     return;
@@ -118,11 +151,11 @@ void generate_code(node_t *ast) {
       || strcmp(ast->type, "Sub") == 0
       || strcmp(ast->type, "Mul") == 0
       || strcmp(ast->type, "Div") == 0) {
-    //check_arithmetic_operator(ast);
+    generate_code_arithmetic_operator(ast);
   }
   else if (strcmp(ast->type, "Plus") == 0
       || strcmp(ast->type, "Minus") == 0) {
-    //check_unary_operator(ast);
+    generate_code_unary_operator(ast);
   }
   else if (strcmp(ast->type, "Eq") == 0
       || strcmp(ast->type, "Ne") == 0
