@@ -6,6 +6,15 @@ char *get_llvm_type(char *type_name) {
   if (strcmp(type_name, "Int") == 0 || strcmp(type_name, "int") == 0)  {
     return "i32";
   }
+  else if (strcmp(type_name, "Short") == 0 || strcmp(type_name, "short") == 0) {
+    return "i16";
+  }
+  else if (strcmp(type_name, "Double") == 0 || strcmp(type_name, "double") == 0) {
+    return "double";
+  }
+  else if (strcmp(type_name, "Char") == 0 || strcmp(type_name, "char") == 0) {
+    return "i8";
+  }
   else if (strcmp(type_name, "Void") == 0 || strcmp(type_name, "void") == 0) {
     return "void";
   }
@@ -18,9 +27,6 @@ void generate_code_program(node_t *ast) {
   printf("declare i32 @putchar(i32)\n");
 }
 
-// TODO the correct syntax for declarations is:
-// 1) int t; -> @t = common global i32 0, align 4
-// 2) int t = 4; -> @t = global i32 4, align 4
 void generate_code_declaration(node_t *ast) {
   node_t *aux = ast->child;
   symbol *global_var = get_element(tables, aux->sibling->value);
@@ -30,9 +36,9 @@ void generate_code_declaration(node_t *ast) {
     aux = aux->sibling;
 
     if (aux->sibling != NULL && aux->sibling->value != NULL) {
-      printf("@%s = global %%%s %s\n", global_var->name, get_llvm_type(global_var->type), aux->sibling->value);
+      printf("@%s = global %s %s\n", global_var->name, get_llvm_type(global_var->type), aux->sibling->value);
     } else {
-      printf("@%s = common global %%%s 0\n", global_var->name, get_llvm_type(global_var->type));
+      printf("@%s = common global %s 0\n", global_var->name, get_llvm_type(global_var->type));
     }
   }
 
