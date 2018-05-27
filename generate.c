@@ -36,8 +36,16 @@ void generate_code_declaration(node_t *ast) {
     aux = aux->sibling;
 
     if (aux->sibling != NULL && aux->sibling->value != NULL) {
-      printf("@%s = global %s %s\n", global_var->name, get_llvm_type(global_var->type), aux->sibling->value);
-    } else {
+      char *llvm_type = get_llvm_type(global_var->type);
+
+      // if it's char print ascii value
+      if(strcmp("i8", llvm_type) == 0) {
+        printf("@%s = global %s %d\n", global_var->name, llvm_type, (int)aux->sibling->value[1]);
+      } else {
+        printf("@%s = global %s %s\n", global_var->name, llvm_type,  aux->sibling->value);
+      }
+    }
+    else {
       printf("@%s = common global %s 0\n", global_var->name, get_llvm_type(global_var->type));
     }
   }
