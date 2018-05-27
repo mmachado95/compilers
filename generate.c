@@ -50,9 +50,8 @@ void generate_code_declaration(node_t *ast) {
     }
   }
 
-  // TODO -> not sure if we need to check arrays since they dont exist in uc
   else {
-    printf("%%%s = alloca %s\n", aux->sibling->value, get_llvm_type(aux->type)); // %arr = alloca i32
+    printf("%%%s = alloca %s\n", aux->sibling->value, get_llvm_type(aux->type));
     if (aux->sibling->sibling != NULL) {
       printf("store %s %s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->sibling->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
     }
@@ -109,8 +108,10 @@ void print_function_llvm_types(char *function_name) {
 }
 
 void generate_code_func_declaration(node_t *func_declaration) {
-  char *type = func_declaration->child->type;
-  char *id = func_declaration->child->sibling->value;
+  node_t *aux = func_declaration;
+
+  char *type = aux->child->type;
+  char *id = aux->child->sibling->value;
 
   // get function symbol so that we can pass the params types to function
   symbol *func_symbol = get_element(tables, id);
@@ -147,16 +148,18 @@ void generate_code_arithmetic_operator(node_t *ast) {
 }
 
 void generate_code_unary_operator(node_t *ast) {
-  generate_code(ast->child);
-  reg_count++;
-  ast->registry = reg_count;
+  node_t *aux = ast;
 
-  if (strcmp(ast->type, "Plus") == 0) {
-    printf("%%%d = add i32, 0 %%%d\n", ast->registry, ast->child->registry);
+  generate_code(aux->child);
+  reg_count++;
+  aux->registry = reg_count;
+
+  if (strcmp(aux->type, "Plus") == 0) {
+    printf("%%%d = add i32, 0 %%%d\n", aux->registry, aux->child->registry);
   }
 
-  else if (strcmp(ast->type, "Minus") == 0) {
-    printf("%%%d = sub i32, 0 %%%d\n", ast->registry, ast->child->registry);
+  else if (strcmp(aux->type, "Minus") == 0) {
+    printf("%%%d = sub i32, 0 %%%d\n", aux->registry, aux->child->registry);
   }
 }
 
@@ -203,8 +206,6 @@ void generate_code(node_t *ast) {
     return;
   }
 
-  //printf("TYPE: %s\n", ast->type );
-
   if (strcmp(ast->type, "Program") == 0) {
     generate_code_program(ast);
     generate_code(ast->child);
@@ -234,7 +235,7 @@ void generate_code(node_t *ast) {
       || strcmp(ast->type, "Sub") == 0
       || strcmp(ast->type, "Mul") == 0
       || strcmp(ast->type, "Div") == 0) {
-    generate_code_arithmetic_operator(ast);
+    //generate_code_arithmetic_operator(ast);
   }
   else if (strcmp(ast->type, "Plus") == 0
       || strcmp(ast->type, "Minus") == 0) {
@@ -260,7 +261,7 @@ void generate_code(node_t *ast) {
     //check_bitwise_operator(ast);
   }
   else if (strcmp(ast->type, "Call") == 0) {
-    generate_code_call(ast);
+    //generate_code_call(ast);
   }
   else if (strcmp(ast->type, "Id") == 0
       || strcmp(ast->type, "IntLit") == 0

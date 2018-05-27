@@ -116,6 +116,14 @@ void check_declaration(node_t *declaration) {
     int score_aux;
     int score_aux2;
 
+    int value = atoi(aux->sibling->sibling->value);
+
+    if (strcmp("Short", aux->type) == 0                     && 
+        strcmp("IntLit", aux->sibling->sibling->type) == 0  &&
+        (value >= -32767 && value <= 32767)) {
+      return;
+    }
+
     if (strcmp(aux_name, "undef") == 0) {
       score_aux = 5;
     }

@@ -175,6 +175,7 @@ int main(int argc, char *argv[]) {
         check_program(ast);
         show_tables();
         print_ast(ast, 0);
+        destroy_tables(tables);
         destroy_ast(ast);
       }
     }
@@ -182,14 +183,14 @@ int main(int argc, char *argv[]) {
   else {
     print_tokens = 0;
     yyparse();
-    if(errors == 0) { // TODO -> check if there are semantic errors
+    if(errors == 0) {
       current = create_table("Global", 1);
       current->print = 1;
       insert_default_functions(current);
       check_program(ast);
       generate_code(ast);
-      destroy_ast(ast);
       destroy_tables(tables);
+      destroy_ast(ast);
     }
   }
   return 0;
