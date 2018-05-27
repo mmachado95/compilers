@@ -38,14 +38,9 @@ void generate_code_declaration(node_t *ast) {
 
   // TODO -> not sure if we need to check arrays since they dont exist in uc
   else {
-    // Search for symbol in one of the tables
-    table *tables_aux = tables;
-    while(tables_aux != NULL) {
-      if (get_element(tables_aux, aux->sibling->value) != NULL) {
-        printf("%%%s = alloca %s\n", aux->sibling->value, get_llvm_type(aux->type)); // %arr = alloca i32
-        break;
-      }
-      tables_aux = tables_aux->next;
+    printf("%%%s = alloca %s\n", aux->sibling->value, get_llvm_type(aux->type)); // %arr = alloca i32
+    if (aux->sibling->sibling != NULL) {
+      printf("store %s %s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->sibling->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
     }
   }
 }
