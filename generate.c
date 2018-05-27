@@ -14,7 +14,8 @@ char *get_llvm_type(char *type_name) {
 
 
 void generate_code_program(node_t *ast) {
-  //printf("\n");
+  printf("declare i32 @getchar()\n");
+  printf("declare i32 @putchar(i32)\n");
 }
 
 // TODO the correct syntax for declarations is:
