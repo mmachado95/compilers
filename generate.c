@@ -17,22 +17,28 @@ void generate_code_program(node_t *ast) {
   //printf("\n");
 }
 
-// TODO we need to make this more general, this only applies to globals
-//
 // TODO the correct syntax for declarations is:
 // 1) int t; -> @t = common global i32 0, align 4
 // 2) int t = 4; -> @t = global i32 4, align 4
 void generate_code_declaration(node_t *ast) {
-  symbol *global_var = get_element(tables, ast->child->sibling->value);
+  node_t *aux = ast->child;
+  symbol *global_var = get_element(tables, aux->sibling->value);
 
+  // check if symbol is global or not
   if (global_var != NULL) {
-    printf("@%s = global %%%s\n", global_var->name, get_llvm_type(global_var->type)); //@a = global %Int
-  }
-  else {
-    // TODO -> check this
-    // not sure if we need to check arrays since they dont exist in uc
-    printf("%%%s = alloca %s\n", ast->child->sibling->value, get_llvm_type(ast->child->type)); //%arr = alloca i32
-  }
+    aux = aux->sibling;
+
+    if (aux->sibling != NULL && aux->sibling->value != NULL) {
+      printf("@%s = global %%%s %s\n", global_var->name, get_llvm_type(global_var->type), aux->sibling->value);
+    } else {
+      printf("@%s = common global %%%s 0\n", global_var->name, get_llvm_type(global_var->type));
+
+    }
+  }/* else {*/
+    /*// TODO search for symbol in one of the tables*/
+    /*// not sure if we need to check arrays since they dont exist in uc*/
+    /*printf("%%%s = alloca %s\n", aux->child->sibling->value, get_llvm_type(aux->child->type)); //%arr = alloca i32*/
+  /*}*/
 }
 
 void print_param_types(param_type *params) {
