@@ -105,7 +105,6 @@ void generate_code_func_declaration(node_t *func_declaration) {
 
   // get function symbol so that we can pass the params types to function
   symbol *func_symbol = get_element(tables, id);
-
   printf("declare %s @%s(", get_llvm_type(type), id);
   print_param_types(func_symbol->param);
   printf(")\n");
@@ -118,7 +117,8 @@ void generate_code_func_definition(node_t *ast) {
 
 void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align 4
   generate_code(ast->child->sibling);
-  printf("store %s %d, %s* %%%d\n", get_llvm_type(ast->child->sibling->type), ast->child->sibling->registry, get_llvm_type(ast->child->sibling->type), ast->child->registry );
+  generate_code(ast->child);
+  printf("store %s %d, %s* %%%d\n", get_llvm_type(ast->child->sibling->type_e), ast->child->sibling->registry, get_llvm_type(ast->child->sibling->type_e), ast->child->registry );
   ast->registry = ast->child->sibling->registry; //TODO -> check this
 }
 
@@ -162,10 +162,10 @@ void generate_code_call(node_t *ast) {
   printf("%%%d = call %s @%s(", ast->registry, get_llvm_type(symbol->type), ast->child->value);   // %1 = call i32 @putchar(i32 10)
   print_function_llvm_types(ast->child->value);
 
-  node_t aux = ast->child->sibling;
+  node_t *aux = ast->child->sibling;
   while (aux != NULL) {
-    printf(" %s", ast->child->sibling->value );
-    aux = aux->next;
+    printf(" %s", aux->value );
+    aux = aux->sibling;
   }
   printf(")\n");
 }
@@ -173,9 +173,12 @@ void generate_code_call(node_t *ast) {
 
 void generate_code_terminal(node_t *ast) {
   if (strcmp(ast->type, "Id") == 0) {
+    reg_count++;
+    ast->registry = reg_count;
   }
 
   else if (strcmp(ast->type, "IntLit") == 0) {
+    ast->registry = atoi(ast->value);
   }
 
   else if (strcmp(ast->type, "ChrLit") == 0) {
