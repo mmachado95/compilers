@@ -32,13 +32,21 @@ void generate_code_declaration(node_t *ast) {
       printf("@%s = global %%%s %s\n", global_var->name, get_llvm_type(global_var->type), aux->sibling->value);
     } else {
       printf("@%s = common global %%%s 0\n", global_var->name, get_llvm_type(global_var->type));
-
     }
-  }/* else {*/
-    /*// TODO search for symbol in one of the tables*/
-    /*// not sure if we need to check arrays since they dont exist in uc*/
-    /*printf("%%%s = alloca %s\n", aux->child->sibling->value, get_llvm_type(aux->child->type)); //%arr = alloca i32*/
-  /*}*/
+  }
+
+  // TODO -> not sure if we need to check arrays since they dont exist in uc
+  else {
+    // Search for symbol in one of the tables
+    table *tables_aux = tables;
+    while(tables_aux != NULL) {
+      if (get_element(tables_aux, aux->sibling->value) != NULL) {
+        printf("%%%s = alloca %s\n", aux->sibling->value, get_llvm_type(aux->type)); // %arr = alloca i32
+        break;
+      }
+      tables_aux = tables_aux->next;
+    }
+  }
 }
 
 void print_param_types(param_type *params) {
