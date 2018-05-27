@@ -89,6 +89,11 @@ void generate_code_func_definition(node_t *ast) {
   generate_code(ast->child->sibling->sibling->sibling);
 }
 
+void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align 4
+  generate_code(ast->child->sibling);
+  printf("store %s %d, %s* %%%d\n", get_llvm_type(ast->child->sibling->type), ast->child->sibling->registry, get_llvm_type(ast->child->sibling->type), ast->child->registry );
+  ast->registry = ast->child->sibling->registry; //TODO -> check this
+}
 
 void generate_code_arithmetic_operator(node_t *ast) {
   if (strcmp(ast->type, "Add") == 0) {
@@ -119,6 +124,19 @@ void generate_code_unary_operator(node_t *ast) {
   }
 }
 
+void generate_code_terminal(node_t *ast) {
+  if (strcmp(ast->type, "Id") == 0) {
+  }
+
+  else if (strcmp(ast->type, "IntLit") == 0) {
+  }
+
+  else if (strcmp(ast->type, "ChrLit") == 0) {
+  }
+
+  else if (strcmp(ast->type, "RealLit") == 0) {
+  }
+}
 
 
 void generate_code(node_t *ast) {
@@ -151,7 +169,7 @@ void generate_code(node_t *ast) {
     //check_return(ast);
   }
   else if (strcmp(ast->type, "Store") == 0) {
-    //check_assign_operator(ast);
+    generate_code_assign_operator(ast);
   }
   else if (strcmp(ast->type, "Add") == 0
       || strcmp(ast->type, "Sub") == 0
@@ -189,7 +207,7 @@ void generate_code(node_t *ast) {
       || strcmp(ast->type, "IntLit") == 0
       || strcmp(ast->type, "ChrLit") == 0
       || strcmp(ast->type, "RealLit") == 0) {
-    //check_terminal(ast);
+    generate_code_terminal(ast);
   }
   else {
     generate_code(ast->child);
