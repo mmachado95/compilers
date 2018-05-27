@@ -11,6 +11,7 @@ void generate_code_func_definition(node_t *ast);
 void generate_code_assign_operator(node_t *ast);
 void generate_code_arithmetic_operator(node_t *ast);
 void generate_code_unary_operator(node_t *ast);
+void generate_code_call(node_t *ast);
 void generate_code_terminal(node_t *ast);
 
 void print_param_types(param_type *params);

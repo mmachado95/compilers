@@ -1,12 +1,12 @@
 #include "generate.h"
 
-int reg_count = 1;
+int reg_count = 0;
 
 char *get_llvm_type(char *type_name) {
-  if (strcmp(type_name, "Int") == 0)  {
+  if (strcmp(type_name, "Int") == 0 || strcmp(type_name, "int") == 0)  {
     return "i32";
   }
-  else if (strcmp(type_name, "Void") == 0) {
+  else if (strcmp(type_name, "Void") == 0 || strcmp(type_name, "void") == 0) {
     return "void";
   }
   return "";
@@ -81,6 +81,24 @@ void print_param_types_and_ids(node_t *params) {
   }
 }
 
+void print_function_llvm_types(char *function_name) {
+  table *global_table = get_table("Global");
+  symbol *symbol = get_element(global_table, function_name);
+  param_type *aux = symbol->param;
+
+  int index = 0;
+  while(aux != NULL) {
+    if (!index) {
+      printf("%s", get_llvm_type(aux->name));
+      index++;
+    }
+    else {
+      printf(" %s", get_llvm_type(aux->name));
+    }
+    aux = aux->next;
+  }
+}
+
 void generate_code_func_declaration(node_t *func_declaration) {
   char *type = func_declaration->child->type;
   char *id = func_declaration->child->sibling->value;
@@ -132,6 +150,26 @@ void generate_code_unary_operator(node_t *ast) {
     printf("%%%d = sub i32, 0 %%%d\n", ast->registry, ast->child->registry);
   }
 }
+
+void generate_code_call(node_t *ast) {
+  generate_code(ast->child);
+  reg_count++;
+  ast->registry = reg_count;
+
+  table *global_table = get_table("Global");
+  symbol *symbol = get_element(global_table, ast->child->value);
+
+  printf("%%%d = call %s @%s(", ast->registry, get_llvm_type(symbol->type), ast->child->value);   // %1 = call i32 @putchar(i32 10)
+  print_function_llvm_types(ast->child->value);
+
+  node_t aux = ast->child->sibling;
+  while (aux != NULL) {
+    printf(" %s", ast->child->sibling->value );
+    aux = aux->next;
+  }
+  printf(")\n");
+}
+
 
 void generate_code_terminal(node_t *ast) {
   if (strcmp(ast->type, "Id") == 0) {
@@ -210,7 +248,7 @@ void generate_code(node_t *ast) {
     //check_bitwise_operator(ast);
   }
   else if (strcmp(ast->type, "Call") == 0) {
-    //check_call(ast);
+    generate_code_call(ast);
   }
   else if (strcmp(ast->type, "Id") == 0
       || strcmp(ast->type, "IntLit") == 0
