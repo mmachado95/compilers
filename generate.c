@@ -1,6 +1,6 @@
 #include "generate.h"
 
-int reg_count = 0;
+int reg_count = -1;
 
 char *get_llvm_type(char *type_name) {
   if (strcmp(type_name, "Int") == 0 || strcmp(type_name, "int") == 0)  {
@@ -28,6 +28,7 @@ void generate_code_program(node_t *ast) {
 }
 
 void generate_code_declaration(node_t *ast) {
+  // generate_code(ast->child->sibling); TODO-> e suposto ter isto?
   node_t *aux = ast->child;
   symbol *global_var = get_element(tables, aux->sibling->value);
 
@@ -125,6 +126,11 @@ void generate_code_func_definition(node_t *ast) {
   generate_code(ast->child->sibling->sibling->sibling);
 }
 
+void generate_code_return(node_t *ast) {
+  generate_code(ast->child);
+  printf("ret %s %%%d\n", get_llvm_type(ast->child->type_e), ast->child->registry);
+}
+
 void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align 4
   generate_code(ast->child->sibling);
   generate_code(ast->child);
@@ -206,6 +212,8 @@ void generate_code(node_t *ast) {
     return;
   }
 
+  //printf("TYPE: %s\n", ast->type );
+
   if (strcmp(ast->type, "Program") == 0) {
     generate_code_program(ast);
     generate_code(ast->child);
@@ -226,7 +234,7 @@ void generate_code(node_t *ast) {
     //check_comma(ast);
   }
   else if (strcmp(ast->type, "Return") == 0) {
-    //check_return(ast);
+    generate_code_return(ast);
   }
   else if (strcmp(ast->type, "Store") == 0) {
     generate_code_assign_operator(ast);
@@ -272,6 +280,5 @@ void generate_code(node_t *ast) {
   else {
     generate_code(ast->child);
   }
-
   generate_code(ast->sibling);
 }
