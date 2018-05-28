@@ -206,9 +206,11 @@ void generate_code_terminal(node_t *ast) {
   }
 
   else if (strcmp(ast->type, "ChrLit") == 0) {
+    ast->registry = atoi(ast->value);
   }
 
   else if (strcmp(ast->type, "RealLit") == 0) {
+    ast->registry = atoi(ast->value);
   }
 }
 
