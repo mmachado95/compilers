@@ -122,13 +122,19 @@ void generate_code_func_declaration(node_t *func_declaration) {
 }
 
 void generate_code_func_definition(node_t *ast) {
-  // TODO -> falta fazer tudo
-  generate_code(ast->child->sibling->sibling->sibling);
+  node_t *aux = ast->child;
+
+  reg_count++;
+  ast->registry = reg_count;
+
+  printf("define %s @%s() {\n", get_llvm_type(aux->type), aux->sibling->value);
+  generate_code(aux->sibling->sibling->sibling);
+  printf("}\n");
 }
 
 void generate_code_return(node_t *ast) {
   generate_code(ast->child);
-  printf("ret %s %%%d\n", get_llvm_type(ast->child->type_e), ast->child->registry);
+  printf("ret %s %d\n", get_llvm_type(ast->child->type_e), ast->child->registry);
 }
 
 void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align 4
