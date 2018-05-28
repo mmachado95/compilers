@@ -54,7 +54,24 @@ void generate_code_declaration(node_t *ast) {
   else {
     printf("%%%s = alloca %s\n", aux->sibling->value, get_llvm_type(aux->type));
     if (aux->sibling->sibling != NULL) {
-      printf("store %s %s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->sibling->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+      //generate_code(aux->sibling->sibling);
+      node_t *aux2 = aux->sibling->sibling;
+      node_t *prev = aux->sibling->sibling;
+
+      int minus = 0;
+      while (aux2 != NULL) {
+        if (strcmp(aux2->type, "Minus") == 0) {
+          minus = !minus;
+        }
+        prev = aux2;
+        aux2 = aux2->child;
+      }
+      if (minus) {
+        printf("store %s -%s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+      }
+      else {
+        printf("store %s %s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+      }
     }
   }
 }
@@ -138,9 +155,23 @@ void generate_code_return(node_t *ast) {
 }
 
 void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align 4
-  generate_code(ast->child->sibling);
   generate_code(ast->child);
-  printf("store %s %d, %s* %%%d\n", get_llvm_type(ast->child->sibling->type_e), ast->child->sibling->registry, get_llvm_type(ast->child->sibling->type_e), ast->child->registry );
+  node_t *aux = ast->child->sibling;
+  node_t *prev = ast->child->sibling;;
+  int minus = 0;
+  while(aux != NULL) {
+    if (strcmp(aux->type, "Minus") == 0) {
+      minus = !minus;
+    }
+    prev = aux;
+    aux = aux->child;
+  }
+  if (minus) {
+    printf("store %s -%s, %s* %%%d\n", get_llvm_type(ast->child->sibling->type_e), prev->value, get_llvm_type(ast->child->sibling->type_e), ast->child->registry );
+  }
+  else {
+    printf("store %s %s, %s* %%%d\n", get_llvm_type(ast->child->sibling->type_e), prev->value, get_llvm_type(ast->child->sibling->type_e), ast->child->registry );
+  }
   ast->registry = ast->child->sibling->registry; //TODO -> check this
 }
 
@@ -160,6 +191,7 @@ void generate_code_arithmetic_operator(node_t *ast) {
 }
 
 void generate_code_unary_operator(node_t *ast) {
+  /*
   node_t *aux = ast;
 
   generate_code(aux->child);
@@ -172,7 +204,7 @@ void generate_code_unary_operator(node_t *ast) {
 
   else if (strcmp(aux->type, "Minus") == 0) {
     printf("%%%d = sub i32, 0 %%%d\n", aux->registry, aux->child->registry);
-  }
+  }*/
 }
 
 void generate_code_call(node_t *ast) {
