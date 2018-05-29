@@ -54,7 +54,7 @@ void generate_code_declaration(node_t *ast) {
   else {
     printf("%%%s = alloca %s\n", aux->sibling->value, get_llvm_type(aux->type));
     if (aux->sibling->sibling != NULL) {
-      //generate_code(aux->sibling->sibling);
+      generate_code(aux->sibling->sibling);
       node_t *aux2 = aux->sibling->sibling;
       node_t *prev = aux->sibling->sibling;
 
@@ -67,10 +67,20 @@ void generate_code_declaration(node_t *ast) {
         aux2 = aux2->child;
       }
       if (minus) {
-        printf("store %s -%s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+        if (strcmp(aux->sibling->sibling->type, "ChrLit") == 0) {
+          printf("store %s -%d, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), (int) prev->value[1], get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+        }
+        else {
+          printf("store %s -%s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+        }
       }
       else {
-        printf("store %s %s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+        if (strcmp(aux->sibling->sibling->type, "ChrLit") == 0) {
+          printf("store %s %d, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), (int) prev->value[1], get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+        }
+        else {
+          printf("store %s %s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+        }
       }
     }
   }
