@@ -105,12 +105,20 @@ void print_param_types_and_ids(node_t *param_list) {
 
   while (aux != NULL && strcmp(aux->child->type, "Void") != 0 && strcmp(aux->child->type, "void") != 0 ) {
     char *type = aux->child->type;
-    char *id = aux->child->sibling->value;
 
     if (aux->sibling != NULL) {
-      printf("%s %%%s, ", get_llvm_type(type), id);
+      printf("%s", get_llvm_type(type));
     } else {
-      printf("%s %%%s", get_llvm_type(type), id);
+      printf("%s", get_llvm_type(type));
+    }
+    if (aux->child->sibling != NULL) {
+      char *id = aux->child->sibling->value;
+
+      if (aux->sibling != NULL) {
+        printf(" %%%s, ", id);
+      } else {
+        printf(" %%%s", id);
+      }
     }
 
     aux = aux->sibling;
@@ -138,7 +146,8 @@ void print_function_llvm_types(char *function_name) {
 void declare_param_declaration(node_t *param_list) {
   node_t *aux = param_list->child;
   while (aux != NULL && strcmp(aux->child->type, "Void") != 0 && strcmp(aux->child->type, "void") != 0) {
-    generate_code_declaration(aux);
+    if (aux->sibling != NULL)
+      generate_code_declaration(aux);
     aux = aux->sibling;
   }
 }
