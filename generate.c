@@ -167,10 +167,20 @@ void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align
     aux = aux->child;
   }
   if (minus) {
-    printf("store %s -%s, %s* %%%d\n", get_llvm_type(ast->child->sibling->type_e), prev->value, get_llvm_type(ast->child->sibling->type_e), ast->child->registry );
+    if (strcmp(ast->child->sibling->type, "ChrLit") == 0) {
+      printf("store %s -%d, %s* %%%d\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->registry );
+    }
+    else {
+      printf("store %s -%s, %s* %%%d\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->registry );
+    }
   }
   else {
-    printf("store %s %s, %s* %%%d\n", get_llvm_type(ast->child->sibling->type_e), prev->value, get_llvm_type(ast->child->sibling->type_e), ast->child->registry );
+    if (strcmp(ast->child->sibling->type, "ChrLit") == 0) {
+      printf("store %s %d, %s* %%%d\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->registry );
+    }
+    else {
+      printf("store %s %s, %s* %%%d\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->registry );
+    }
   }
   ast->registry = ast->child->sibling->registry; //TODO -> check this
 }
