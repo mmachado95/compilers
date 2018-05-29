@@ -146,7 +146,7 @@ void print_function_llvm_types(char *function_name) {
 void declare_param_declaration(node_t *param_list) {
   node_t *aux = param_list->child;
   while (aux != NULL && strcmp(aux->child->type, "Void") != 0 && strcmp(aux->child->type, "void") != 0) {
-    if (aux->sibling != NULL)
+    if (aux->child->sibling != NULL)
       generate_code_declaration(aux);
     aux = aux->sibling;
   }
