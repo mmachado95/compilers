@@ -100,17 +100,17 @@ void print_param_types(param_type *params) {
   }
 }
 
-void print_param_types_and_ids(node_t *params) {
-  node_t *aux = params;
+void print_param_types_and_ids(node_t *param_list) {
+  node_t *aux = param_list->child;
 
-  while (aux != NULL) {
+  while (aux != NULL && strcmp(aux->child->type, "Void") != 0 && strcmp(aux->child->type, "void") != 0 ) {
     char *type = aux->child->type;
     char *id = aux->child->sibling->value;
 
     if (aux->sibling != NULL) {
-      printf("%s %s, ", get_llvm_type(type), id);
+      printf("%s %%%s, ", get_llvm_type(type), id);
     } else {
-      printf("%s %s", get_llvm_type(type), id);
+      printf("%s %%%s", get_llvm_type(type), id);
     }
 
     aux = aux->sibling;
@@ -135,6 +135,14 @@ void print_function_llvm_types(char *function_name) {
   }
 }
 
+void declare_param_declaration(node_t *param_list) {
+  node_t *aux = param_list->child;
+  while (aux != NULL && strcmp(aux->child->type, "Void") != 0 && strcmp(aux->child->type, "void") != 0) {
+    generate_code_declaration(aux);
+    aux = aux->sibling;
+  }
+}
+
 void generate_code_func_declaration(node_t *func_declaration) {
   node_t *aux = func_declaration;
 
@@ -145,6 +153,7 @@ void generate_code_func_declaration(node_t *func_declaration) {
   symbol *func_symbol = get_element(tables, id);
   printf("declare %s @%s(", get_llvm_type(type), id);
   print_param_types(func_symbol->param);
+  declare_param_declaration(ast->child->sibling->sibling);
   printf(")\n");
 }
 
@@ -154,7 +163,10 @@ void generate_code_func_definition(node_t *ast) {
   reg_count++;
   ast->registry = reg_count;
 
-  printf("define %s @%s() {\n", get_llvm_type(aux->type), aux->sibling->value);
+  printf("define %s @%s(", get_llvm_type(aux->type), aux->sibling->value);
+  print_param_types_and_ids(ast->child->sibling->sibling);
+  printf(") {\n");
+  declare_param_declaration(ast->child->sibling->sibling);
   generate_code(aux->sibling->sibling->sibling);
   printf("}\n");
 }

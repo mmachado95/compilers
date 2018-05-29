@@ -16,6 +16,7 @@ void generate_code_call(node_t *ast);
 void generate_code_terminal(node_t *ast);
 
 void print_param_types(param_type *params);
-void print_param_types_and_ids(node_t *params);
+void print_param_types_and_ids(node_t *param_list);
+void declare_param_declaration(node_t *param_list);
 
 char *get_llvm_type(char *type_name);
