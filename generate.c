@@ -178,18 +178,18 @@ void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align
   }
   if (minus) {
     if (strcmp(ast->child->sibling->type, "ChrLit") == 0) {
-      printf("store %s -%d, %s* %%%d\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->registry );
+      printf("store %s -%d, %s* %%%s\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->value );
     }
     else {
-      printf("store %s -%s, %s* %%%d\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->registry );
+      printf("store %s -%s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
     }
   }
   else {
     if (strcmp(ast->child->sibling->type, "ChrLit") == 0) {
-      printf("store %s %d, %s* %%%d\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->registry );
+      printf("store %s %d, %s* %%%s\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->value );
     }
     else {
-      printf("store %s %s, %s* %%%d\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->registry );
+      printf("store %s %s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
     }
   }
   ast->registry = ast->child->sibling->registry; //TODO -> check this
@@ -249,7 +249,6 @@ void generate_code_call(node_t *ast) {
 
 void generate_code_terminal(node_t *ast) {
   if (strcmp(ast->type, "Id") == 0) {
-    reg_count++;
     ast->registry = reg_count;
   }
 
