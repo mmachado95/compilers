@@ -66,28 +66,93 @@ void generate_code_declaration(node_t *ast) {
         prev = aux2;
         aux2 = aux2->child;
       }
+
       if (minus) {
-        if (strcmp(aux->sibling->sibling->type, "ChrLit") == 0) {
+        if (strcmp(prev->type, "ChrLit") == 0) {
           printf("store %s -%d, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), (int) prev->value[1], get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
         }
-        else if (strcmp(aux->sibling->sibling->type, "Id") == 0) {
-          printf("store %s -%%%s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+
+        else if (strcmp(prev->type, "Id") == 0) {
+          reg_count++;
+          if (get_element(tables, prev->value) != NULL) // TODO -> check if it is both global and local
+            printf("%%%d = sub i32, 0 @%s\n", reg_count, prev->value);
+          else
+            printf("%%%d = sub i32, 0 %%%s\n", reg_count, prev->value);
+
+          printf("store %s %%%d, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), reg_count, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
         }
         else {
           printf("store %s -%s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
         }
       }
+
       else {
-        if (strcmp(aux->sibling->sibling->type, "ChrLit") == 0) {
+        if (strcmp(prev->type, "ChrLit") == 0) {
           printf("store %s %d, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), (int) prev->value[1], get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
         }
-        else if (strcmp(aux->sibling->sibling->type, "Id") == 0) {
-          printf("store %s %%%s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+
+        else if (strcmp(prev->type, "Id") == 0) {
+          if (get_element(tables, prev->value) != NULL) // TODO -> check if it is both global and local
+            printf("store %s @%s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
+          else
+            printf("store %s %%%s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
         }
+
         else {
           printf("store %s %s, %s* %%%s\n", get_llvm_type(aux->sibling->sibling->type_e), prev->value, get_llvm_type(aux->sibling->sibling->type_e), aux->sibling->value );
         }
       }
+    }
+  }
+}
+
+void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align 4
+  generate_code(ast->child);
+  node_t *aux = ast->child->sibling;
+  node_t *prev = ast->child->sibling;
+  int minus = 0;
+  while(aux != NULL) {
+    if (strcmp(aux->type, "Minus") == 0) {
+      minus = !minus;
+    }
+    prev = aux;
+    aux = aux->child;
+  }
+
+  if (minus) {
+    if (strcmp(prev->type, "ChrLit") == 0) {
+      printf("store %s -%d, %s* %%%s\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->value );
+    }
+
+    else if (strcmp(prev->type, "Id") == 0) {
+      reg_count++;
+      if (get_element(tables, prev->value) != NULL) // TODO -> check if it is both global and local
+        printf("%%%d = sub i32, 0 @%s\n", reg_count, prev->value);
+      else
+        printf("%%%d = sub i32, 0 %%%s\n", reg_count, prev->value);
+
+      printf("store %s %%%d, %s* %%%s\n", get_llvm_type(ast->child->type_e), reg_count, get_llvm_type(ast->child->type_e), ast->child->value );
+    }
+
+    else {
+      printf("store %s -%s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
+    }
+  }
+
+  else {
+    if (strcmp(prev->type, "ChrLit") == 0) {
+      printf("store %s %d, %s* %%%s\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->value );
+    }
+
+    else if (strcmp(prev->type, "Id") == 0) {
+      if (get_element(tables, prev->value) != NULL) // TODO -> check if it is both global and local
+        printf("store %s @%s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
+      else
+        printf("store %s %%%s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
+    }
+
+    else {
+      printf("store %s %s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
     }
   }
 }
@@ -189,43 +254,6 @@ void generate_code_func_definition(node_t *ast) {
 void generate_code_return(node_t *ast) {
   generate_code(ast->child);
   printf("ret %s %d\n", get_llvm_type(ast->child->type_e), ast->child->registry);
-}
-
-void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align 4
-  generate_code(ast->child);
-  node_t *aux = ast->child->sibling;
-  node_t *prev = ast->child->sibling;;
-  int minus = 0;
-  while(aux != NULL) {
-    if (strcmp(aux->type, "Minus") == 0) {
-      minus = !minus;
-    }
-    prev = aux;
-    aux = aux->child;
-  }
-  if (minus) {
-    if (strcmp(ast->child->sibling->type, "ChrLit") == 0) {
-      printf("store %s -%d, %s* %%%s\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->value );
-    }
-    else if (strcmp(ast->child->sibling->type, "Id") == 0) {
-      printf("store %s -%%%s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
-    }
-    else {
-      printf("store %s -%s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
-    }
-  }
-  else {
-    if (strcmp(ast->child->sibling->type, "ChrLit") == 0) {
-      printf("store %s %d, %s* %%%s\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->value );
-    }
-    else if (strcmp(ast->child->sibling->type, "Id") == 0) {
-      printf("store %s %%%s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
-    }
-    else {
-      printf("store %s %s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
-    }
-  }
-  ast->registry = ast->child->sibling->registry; //TODO -> check this
 }
 
 void generate_code_arithmetic_operator(node_t *ast) {
