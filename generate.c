@@ -229,6 +229,7 @@ void print_function_llvm_types(char *function_name) {
 
 void declare_param_declaration(node_t *param_list) {
   node_t *aux = param_list->child;
+
   while (aux != NULL && strcmp(aux->child->type, "Void") != 0 && strcmp(aux->child->type, "void") != 0) {
     if (aux->child->sibling != NULL)
       generate_code_declaration(aux);
@@ -252,6 +253,7 @@ void generate_code_func_declaration(node_t *func_declaration) {
 
 void generate_code_func_definition(node_t *ast) {
   node_t *aux = ast->child;
+
   printf("define %s @%s(", get_llvm_type(aux->type), aux->sibling->value);
   print_param_types_and_ids(ast->child->sibling->sibling);
   printf(") {\n");
@@ -262,7 +264,14 @@ void generate_code_func_definition(node_t *ast) {
 
 void generate_code_return(node_t *ast) {
   generate_code(ast->child);
-  printf("ret %s %d\n", get_llvm_type(ast->child->type_e), ast->child->registry);
+
+  char *llvm_type = get_llvm_type(ast->child->type_e);
+  if (strcmp("Id", ast->child->type) == 0) {
+    printf("%%%d = load %s, %s* %%%s\n",  reg_count++, llvm_type, llvm_type, ast->child->value);
+    printf("ret %s %%%s\n", llvm_type, ast->child->value);
+  } else {
+    printf("ret %s %d\n", llvm_type, ast->child->registry);
+  }
 }
 
 void generate_code_arithmetic_operator(node_t *ast) {
@@ -353,6 +362,7 @@ void generate_code(node_t *ast) {
     generate_code_func_definition(ast);
   }
   else if (strcmp(ast->type, "FuncBody") == 0) {
+    reg_count = 0;
     generate_code(ast->child);
   }
   else if (strcmp(ast->type, "Comma") == 0) {
