@@ -135,10 +135,10 @@ void check_declaration(node_t *declaration) {
       score_aux2 = 3;
     }
     if (strcmp(aux_name, "short") == 0) {
-      score_aux = 2;
+      score_aux = 3;
     }
     if (strcmp(aux2_name, "short") == 0) {
-      score_aux2 = 2;
+      score_aux2 = 3;
     }
     if (strcmp(aux_name, "char") == 0) {
       score_aux = 3;
