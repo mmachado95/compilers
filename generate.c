@@ -290,17 +290,26 @@ void generate_code_arithmetic_operator(node_t *ast) {
   }
 }
 
-void load_param_ids(node_t *params, symbol *func) {
+void load_param_ids(node_t *params, symbol *func, int minus) {
   node_t *aux = params;
   param_type *param = func->param;
 
   while(aux != NULL) {
     if (strcmp("Id", aux->type) == 0) {
-      printf("%%%d = load %s, %s* %%%s\n", reg_count, get_llvm_type(aux->type_e), get_llvm_type(aux->type_e), aux->value);
+      if (get_element(tables, params->value) != NULL) // TODO -> check if it is both global and local
+        printf("%%%d = load %s, %s* @%s\n", reg_count, get_llvm_type(aux->type_e), get_llvm_type(aux->type_e), aux->value);
+
+      else
+        printf("%%%d = load %s, %s* %%%s\n", reg_count, get_llvm_type(aux->type_e), get_llvm_type(aux->type_e), aux->value);
       reg_count++;
 
       if (strcmp(get_llvm_type(param->name), get_llvm_type(aux->type_e)) != 0) {
         printf("%%%d = sext %s %%%d to %s\n", reg_count, get_llvm_type(aux->type_e), reg_count - 1, get_llvm_type(param->name));
+        reg_count++;
+      }
+
+      if (minus) {
+        printf("%%%d = sub nsw i32 0, %%%d\n", reg_count, reg_count - 1);
         reg_count++;
       }
     }
@@ -325,32 +334,46 @@ void generate_code_call(node_t *ast) {
   table *global_table = get_table("Global");
   symbol *symbol = get_element(global_table, ast->child->value);
 
+  node_t *aux = ast->child->sibling;
+  node_t *prev = ast->child->sibling;
+  int minus = 0;
+  while(aux != NULL) {
+    if (strcmp(aux->type, "Minus") == 0) {
+      minus = !minus;
+    }
+    prev = aux;
+    aux = aux->child;
+  }
+
   reg_count++;
 
   if (strcmp("putchar", ast->child->value) == 0) {
-    load_param_ids(ast->child->sibling, symbol);
+    load_param_ids(prev, symbol, minus);
 
     printf("%%%d = call %s @%s(", reg_count, get_llvm_type(symbol->type), ast->child->value);
 
-    if (strcmp(ast->child->sibling->type, "Id") == 0) {
-      printf("%s %%%d)\n", get_llvm_type(symbol->param->name), reg_count - 1);
-    }
-    else if (strcmp(ast->child->sibling->type, "ChrLit") == 0) {
-      if (strlen(ast->child->sibling->value) == 1) {
-        printf("%s %d)\n", get_llvm_type(symbol->param->name), (int) ast->child->sibling->value[1]);
+    if (!minus) {
+      if (strcmp(prev->type, "Id") == 0) {
+        printf("%s %%%d)\n", get_llvm_type(symbol->param->name), reg_count - 1);
+      }
+      else if (strcmp(prev->type, "ChrLit") == 0) {
+        printf("%s %d)\n", get_llvm_type(symbol->param->name), (int) prev->value[1]);
       }
       else {
-        /*
-        char dest[strlen(ast->child->sibling->value) - 2];
-        strncpy(dest, ast->child->sibling->value + 1, sizeof(dest));
-        dest[strlen(ast->child->sibling->value) - 2] = '\0';
-        printf("%s %d %c)\n", get_llvm_type(symbol->param->name), octalToDecimal('\116'), ast->child->sibling->value[1]);
-        //printf("%s\n", dest);*/
-        printf("%s %s)\n", get_llvm_type(symbol->param->name), ast->child->sibling->value);
+        printf("%s %s)\n", get_llvm_type(symbol->param->name), prev->value);
       }
     }
+
     else {
-      printf("%s %s)\n", get_llvm_type(symbol->param->name), ast->child->sibling->value);
+      if (strcmp(prev->type, "Id") == 0) {
+        printf("%s %%%d)\n", get_llvm_type(symbol->param->name), reg_count - 1);
+      }
+      else if (strcmp(prev->type, "ChrLit") == 0) {
+        printf("%s -%d)\n", get_llvm_type(symbol->param->name), (int) prev->value[1]);
+      }
+      else {
+        printf("%s -%s)\n", get_llvm_type(symbol->param->name), prev->value);
+      }
     }
   }
 
