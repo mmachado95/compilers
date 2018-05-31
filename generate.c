@@ -214,15 +214,13 @@ void print_function_llvm_types(char *function_name) {
   symbol *symbol = get_element(global_table, function_name);
   param_type *aux = symbol->param;
 
-  int index = 0;
   while(aux != NULL) {
-    if (!index) {
+    if(aux->next != NULL) {
+      printf("%s ", get_llvm_type(aux->name));
+    } else {
       printf("%s", get_llvm_type(aux->name));
-      index++;
     }
-    else {
-      printf(" %s", get_llvm_type(aux->name));
-    }
+
     aux = aux->next;
   }
 }
@@ -308,21 +306,43 @@ void generate_code_unary_operator(node_t *ast) {
   }*/
 }
 
+void load_param_ids(node_t *params, symbol *func) {
+  node_t *aux = params;
+  char *function_type = get_llvm_type(func->type);
+
+  while(aux != NULL) {
+    if (strcmp("Id", aux->type) == 0) {
+      printf("%%%d = load %s, %s* %%%s\n",  reg_count, function_type, function_type, aux->value);
+      reg_count++;
+    }
+
+    aux = aux->sibling;
+  }
+}
+
 void generate_code_call(node_t *ast) {
   table *global_table = get_table("Global");
   symbol *symbol = get_element(global_table, ast->child->value);
 
   reg_count++;
 
-  printf("%%%d = call %s @%s(", reg_count, get_llvm_type(symbol->type), ast->child->value);   // %1 = call i32 @putchar(i32 10)
-  print_function_llvm_types(ast->child->value);
+  if (strcmp("putchar", ast->child->value) == 0) {
+    load_param_ids(ast->child->sibling, symbol);
 
-  node_t *aux = ast->child->sibling;
-  while (aux != NULL) {
-    printf(" %s", aux->value );
-    aux = aux->sibling;
+    printf("%%%d = call %s @%s(", reg_count, get_llvm_type(symbol->type), ast->child->value);
+    printf("%s %s)\n", get_llvm_type(symbol->param->name), ast->child->sibling->value);
+  } else {
+    printf("%%%d = call %s @%s(", reg_count, get_llvm_type(symbol->type), ast->child->value);
+    print_function_llvm_types(ast->child->value);
+
+    node_t *aux = ast->child->sibling;
+    while (aux != NULL) {
+      printf(" %s", aux->value );
+      aux = aux->sibling;
+    }
+
+    printf(")\n");
   }
-  printf(")\n");
 }
 
 
