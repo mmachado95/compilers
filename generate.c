@@ -1,4 +1,5 @@
 #include "generate.h"
+//#include "math.h"
 
 int reg_count = 0;
 
@@ -325,6 +326,18 @@ void load_param_ids(node_t *params, symbol *func) {
   }
 }
 
+/*
+int octalToDecimal(int octalNumber) {
+  int decimalNumber = 0, i = 0, rem;
+  while (octalNumber != 0){
+    rem = octalNumber % 10;
+    octalNumber /= 10;
+    decimalNumber += rem * pow(8, i);
+    ++i;
+  }
+  return decimalNumber;
+}*/
+
 void generate_code_call(node_t *ast) {
   table *global_table = get_table("Global");
   symbol *symbol = get_element(global_table, ast->child->value);
@@ -340,7 +353,18 @@ void generate_code_call(node_t *ast) {
       printf("%s %%%d)\n", get_llvm_type(symbol->param->name), reg_count - 1);
     }
     else if (strcmp(ast->child->sibling->type, "ChrLit") == 0) {
-      printf("%s %d)\n", get_llvm_type(symbol->param->name), (int) ast->child->sibling->value[1]);
+      if (strlen(ast->child->sibling->value) == 1) {
+        printf("%s %d)\n", get_llvm_type(symbol->param->name), (int) ast->child->sibling->value[1]);
+      }
+      else {
+        /*
+        char dest[strlen(ast->child->sibling->value) - 2];
+        strncpy(dest, ast->child->sibling->value + 1, sizeof(dest));
+        dest[strlen(ast->child->sibling->value) - 2] = '\0';
+        printf("%s %d %c)\n", get_llvm_type(symbol->param->name), octalToDecimal('\116'), ast->child->sibling->value[1]);
+        //printf("%s\n", dest);*/
+        printf("%s %s)\n", get_llvm_type(symbol->param->name), ast->child->sibling->value);
+      }
     }
     else {
       printf("%s %s)\n", get_llvm_type(symbol->param->name), ast->child->sibling->value);
@@ -360,7 +384,6 @@ void generate_code_call(node_t *ast) {
     printf(")\n");
   }
 }
-
 
 void generate_code_terminal(node_t *ast) {
   if (strcmp(ast->type, "Id") == 0) {
