@@ -267,8 +267,10 @@ void generate_code_return(node_t *ast) {
 
   char *llvm_type = get_llvm_type(ast->child->type_e);
   if (strcmp("Id", ast->child->type) == 0) {
-    printf("%%%d = load %s, %s* %%%s\n",  reg_count++, llvm_type, llvm_type, ast->child->value);
-    printf("ret %s %%%s\n", llvm_type, ast->child->value);
+    reg_count++;
+
+    printf("%%%d = load %s, %s* %%%s\n",  reg_count, llvm_type, llvm_type, ast->child->value);
+    printf("ret %s %%%d\n", llvm_type, reg_count);
   } else {
     printf("ret %s %d\n", llvm_type, ast->child->registry);
   }
@@ -310,7 +312,9 @@ void generate_code_call(node_t *ast) {
   table *global_table = get_table("Global");
   symbol *symbol = get_element(global_table, ast->child->value);
 
-  printf("call %s @%s(", get_llvm_type(symbol->type), ast->child->value);   // %1 = call i32 @putchar(i32 10)
+  reg_count++;
+
+  printf("%%%d = call %s @%s(", reg_count, get_llvm_type(symbol->type), ast->child->value);   // %1 = call i32 @putchar(i32 10)
   print_function_llvm_types(ast->child->value);
 
   node_t *aux = ast->child->sibling;
