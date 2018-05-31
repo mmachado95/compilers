@@ -308,15 +308,20 @@ void generate_code_unary_operator(node_t *ast) {
 
 void load_param_ids(node_t *params, symbol *func) {
   node_t *aux = params;
-  char *function_type = get_llvm_type(func->type);
+  param_type *param = func->param;
 
   while(aux != NULL) {
     if (strcmp("Id", aux->type) == 0) {
-      printf("%%%d = load %s, %s* %%%s\n",  reg_count, function_type, function_type, aux->value);
+      printf("%%%d = load %s, %s* %%%s\n", reg_count, get_llvm_type(aux->type_e), get_llvm_type(aux->type_e), aux->value);
       reg_count++;
-    }
 
+      if (strcmp(get_llvm_type(param->name), get_llvm_type(aux->type_e)) != 0) {
+        printf("%%%d = sext %s %%%d to %s\n", reg_count, get_llvm_type(aux->type_e), reg_count - 1, get_llvm_type(param->name));
+        reg_count++;
+      }
+    }
     aux = aux->sibling;
+    func = func->next;
   }
 }
 
@@ -330,8 +335,19 @@ void generate_code_call(node_t *ast) {
     load_param_ids(ast->child->sibling, symbol);
 
     printf("%%%d = call %s @%s(", reg_count, get_llvm_type(symbol->type), ast->child->value);
-    printf("%s %s)\n", get_llvm_type(symbol->param->name), ast->child->sibling->value);
-  } else {
+
+    if (strcmp(ast->child->sibling->type, "Id") == 0) {
+      printf("%s %%%d)\n", get_llvm_type(symbol->param->name), reg_count - 1);
+    }
+    else if (strcmp(ast->child->sibling->type, "ChrLit") == 0) {
+      printf("%s %d)\n", get_llvm_type(symbol->param->name), (int) ast->child->sibling->value[1]);
+    }
+    else {
+      printf("%s %s)\n", get_llvm_type(symbol->param->name), ast->child->sibling->value);
+    }
+  }
+
+  else {
     printf("%%%d = call %s @%s(", reg_count, get_llvm_type(symbol->type), ast->child->value);
     print_function_llvm_types(ast->child->value);
 
