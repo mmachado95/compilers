@@ -262,16 +262,16 @@ void generate_code_func_definition(node_t *ast) {
 }
 
 void generate_code_return(node_t *ast) {
-  generate_code(ast->child);
-
   char *llvm_type = get_llvm_type(ast->child->type_e);
   if (strcmp("Id", ast->child->type) == 0) {
     reg_count++;
 
     printf("%%%d = load %s, %s* %%%s\n",  reg_count, llvm_type, llvm_type, ast->child->value);
     printf("ret %s %%%d\n", llvm_type, reg_count);
-  } else {
-    printf("ret %s %d\n", llvm_type, ast->child->registry);
+  }
+
+  else {
+    printf("ret %s %s\n", llvm_type, ast->child->value);
   }
 }
 
@@ -288,23 +288,6 @@ void generate_code_arithmetic_operator(node_t *ast) {
   else if (strcmp(ast->type, "Div") == 0) {
     /* code */
   }
-}
-
-void generate_code_unary_operator(node_t *ast) {
-  /*
-  node_t *aux = ast;
-
-  generate_code(aux->child);
-  reg_count++;
-  aux->registry = reg_count;
-
-  if (strcmp(aux->type, "Plus") == 0) {
-    printf("%%%d = add i32, 0 %%%d\n", aux->registry, aux->child->registry);
-  }
-
-  else if (strcmp(aux->type, "Minus") == 0) {
-    printf("%%%d = sub nsw i32 0, %%%d\n", aux->registry, aux->child->registry);
-  }*/
 }
 
 void load_param_ids(node_t *params, symbol *func) {
@@ -385,25 +368,6 @@ void generate_code_call(node_t *ast) {
   }
 }
 
-void generate_code_terminal(node_t *ast) {
-  if (strcmp(ast->type, "Id") == 0) {
-    ast->registry = reg_count;
-  }
-
-  else if (strcmp(ast->type, "IntLit") == 0) {
-    ast->registry = atoi(ast->value);
-  }
-
-  else if (strcmp(ast->type, "ChrLit") == 0) {
-    ast->registry = atoi(ast->value);
-  }
-
-  else if (strcmp(ast->type, "RealLit") == 0) {
-    ast->registry = atoi(ast->value);
-  }
-}
-
-
 void generate_code(node_t *ast) {
   if (ast == NULL) {
     return;
@@ -445,7 +409,7 @@ void generate_code(node_t *ast) {
   }
   else if (strcmp(ast->type, "Plus") == 0
       || strcmp(ast->type, "Minus") == 0) {
-    generate_code_unary_operator(ast);
+    //generate_code_unary_operator(ast);
   }
   else if (strcmp(ast->type, "Eq") == 0
       || strcmp(ast->type, "Ne") == 0
@@ -473,7 +437,7 @@ void generate_code(node_t *ast) {
       || strcmp(ast->type, "IntLit") == 0
       || strcmp(ast->type, "ChrLit") == 0
       || strcmp(ast->type, "RealLit") == 0) {
-    generate_code_terminal(ast);
+    //generate_code_terminal(ast);
   }
   else {
     generate_code(ast->child);
