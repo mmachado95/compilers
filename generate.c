@@ -19,30 +19,27 @@ int poww(int b, int e){
 
 int escape_to_decimal(char *escape) {
   // get octal value without '' and without '\'
-  char string_octal[3];
+  char string_octal[4];
   int index = 0;
   for (int i = 2; i < strlen(escape) - 1; i++) {
     string_octal[index] = escape[i];
     index++;
   }
-  char * pEnd = NULL;
 
-  long octal = strtol(string_octal, &pEnd, 8);
-  return octal;
-  /*   int octal = atoi(string_octal);
+  long octal = atoi(string_octal);
 
+  // convert octal to decimal
+  int decimal = 0;
+  int i = 0;
+  int rem;
+  while (octal != 0){
+    rem = octal % 10;
+    octal /= 10;
+    decimal += rem * poww(8, i);
+    ++i;
+  }
 
-    // convert octal to decimal
-    int decimal = 0;
-    int i = 0;
-    int rem;
-    while (octal != 0){
-      rem = octal % 10;
-      octal /= 10;
-      decimal += rem * poww(8, i);
-      ++i;
-    }
-    return decimal; */
+  return decimal;
 }
 
 int escape_to_number(char *escape) {
