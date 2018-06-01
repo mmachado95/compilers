@@ -1,7 +1,60 @@
 #include "generate.h"
-//#include "math.h"
 
 int reg_count = 0;
+
+int poww(int b, int e){
+  if(e < 0) {
+    return -1;
+  }
+  int res = 1;
+  while (e) {
+    if (e & 1) {
+      res *= b;
+    }
+    e >>= 1;
+    b *= b;
+  }
+  return res;
+}
+
+int escape_to_decimal(char *escape) {
+  // get octal value without '' and without '\'
+  char string_octal[3];
+  int index = 0;
+  for (int i = 2; i < strlen(escape) - 1; i++) {
+    string_octal[index] = escape[i];
+    index++;
+  }
+  char * pEnd = NULL;
+
+  long octal = strtol(string_octal, &pEnd, 8);
+  return octal;
+  /*   int octal = atoi(string_octal);
+
+
+    // convert octal to decimal
+    int decimal = 0;
+    int i = 0;
+    int rem;
+    while (octal != 0){
+      rem = octal % 10;
+      octal /= 10;
+      decimal += rem * poww(8, i);
+      ++i;
+    }
+    return decimal; */
+}
+
+int escape_to_number(char *escape) {
+  char odd_characters[6][2] = {"n", "t", "r", "'", {'"'}, "\\"};
+  int odd_charactess_values[6] = {10, 9, 13, 39, 34, 92};
+  for (int i = 0; i < 6; i++) {
+    if (escape[2] == odd_characters[i][0]) {
+      return odd_charactess_values[i];
+    }
+  }
+  return escape_to_decimal(escape);
+}
 
 char *get_llvm_type(char *type_name) {
   if (strcmp(type_name, "Int") == 0 || strcmp(type_name, "int") == 0)  {
@@ -73,7 +126,7 @@ void generate_code_declaration(node_t *ast) {
 
         else if (strcmp(prev->type, "Id") == 0) {
           reg_count++;
-          if (get_element(tables, prev->value) != NULL) {// TODO -> check if it is both global and local
+          if (get_element(tables, prev->value) != NULL) {
             printf("%%%d = load %s, %s* @%s\n",  reg_count, get_llvm_type(aux->type), get_llvm_type(aux->type), prev->value);
           }
           else {
@@ -112,7 +165,15 @@ void generate_code_declaration(node_t *ast) {
   }
 }
 
-void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align 4
+void generate_code_assign_operator(node_t *ast) {
+  char end;
+  if (get_element(tables, ast->child->value) != NULL) {
+    end = '@';
+  }
+  else {
+    end = '%';
+  }
+
   node_t *aux = ast->child->sibling;
   node_t *prev = ast->child->sibling;
   int minus = 0;
@@ -126,7 +187,7 @@ void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align
 
   if (minus) {
     if (strcmp(prev->type, "ChrLit") == 0) {
-      printf("store %s -%d, %s* %%%s\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->value );
+      printf("store %s -%d, %s* %c%s\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), end, ast->child->value );
     }
 
     else if (strcmp(prev->type, "Id") == 0) {
@@ -139,17 +200,16 @@ void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align
       }
       reg_count++;
       printf("%%%d = sub nsw i32 0, %%%d\n", reg_count, reg_count - 1);
-      printf("store %s %%%d, %s* %%%s\n", get_llvm_type(ast->child->type_e), reg_count, get_llvm_type(ast->child->type_e), ast->child->value );
+      printf("store %s %%%d, %s* %c%s\n", get_llvm_type(ast->child->type_e), reg_count, get_llvm_type(ast->child->type_e), end, ast->child->value );
     }
-
     else {
-      printf("store %s -%s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
+      printf("store %s -%s, %s* %c%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), end, ast->child->value );
     }
   }
 
   else {
     if (strcmp(prev->type, "ChrLit") == 0) {
-      printf("store %s %d, %s* %%%s\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), ast->child->value );
+      printf("store %s %d, %s* %c%s\n", get_llvm_type(ast->child->type_e), (int) prev->value[1], get_llvm_type(ast->child->type_e), end, ast->child->value );
     }
 
     else if (strcmp(prev->type, "Id") == 0) {
@@ -161,12 +221,11 @@ void generate_code_assign_operator(node_t *ast) { // store i32 1, i32* %a, align
       else {
         printf("%%%d = load %s, %s* %%%s\n",  reg_count,  get_llvm_type(ast->child->type_e),  get_llvm_type(ast->child->type_e), prev->value);
       }
-
-      printf("store %s %%%d, %s* %%%s\n", get_llvm_type(ast->child->type_e), reg_count, get_llvm_type(ast->child->type_e), ast->child->value );
+      printf("store %s %%%d, %s* %c%s\n", get_llvm_type(ast->child->type_e), reg_count, get_llvm_type(ast->child->type_e), end, ast->child->value );
     }
 
     else {
-      printf("store %s %s, %s* %%%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), ast->child->value );
+      printf("store %s %s, %s* %c%s\n", get_llvm_type(ast->child->type_e), prev->value, get_llvm_type(ast->child->type_e), end, ast->child->value );
     }
   }
 }
@@ -318,18 +377,6 @@ void load_param_ids(node_t *params, symbol *func, int minus) {
   }
 }
 
-/*
-int octalToDecimal(int octalNumber) {
-  int decimalNumber = 0, i = 0, rem;
-  while (octalNumber != 0){
-    rem = octalNumber % 10;
-    octalNumber /= 10;
-    decimalNumber += rem * pow(8, i);
-    ++i;
-  }
-  return decimalNumber;
-}*/
-
 void generate_code_call(node_t *ast) {
   table *global_table = get_table("Global");
   symbol *symbol = get_element(global_table, ast->child->value);
@@ -357,7 +404,12 @@ void generate_code_call(node_t *ast) {
         printf("%s %%%d)\n", get_llvm_type(symbol->param->name), reg_count - 1);
       }
       else if (strcmp(prev->type, "ChrLit") == 0) {
-        printf("%s %d)\n", get_llvm_type(symbol->param->name), (int) prev->value[1]);
+        if (strlen(prev->value) > 3) {
+          printf("%s %d)\n", get_llvm_type(symbol->param->name), escape_to_number(prev->value));
+        }
+        else {
+          printf("%s %d)\n", get_llvm_type(symbol->param->name), (int) prev->value[1]);
+        }
       }
       else {
         printf("%s %s)\n", get_llvm_type(symbol->param->name), prev->value);
@@ -395,8 +447,6 @@ void generate_code(node_t *ast) {
   if (ast == NULL) {
     return;
   }
-
-  //printf("TYPE: %s\n", ast->type );
 
   if (strcmp(ast->type, "Program") == 0) {
     generate_code_program(ast);
