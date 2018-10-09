@@ -6,6 +6,7 @@
   #include "ast.h"
   #include "symbol_table.h"
   #include "semantics.h"
+  #include "generate.h"
   int line = 1;
   int col = 1;
   int beginning_line;
@@ -127,6 +128,11 @@ CHRLIT_UNT \'({ANYCHAR}|{ESCAPE})*(\\)*{ANYCHAR}*
 %%
 int main(int argc, char *argv[]) {
   if (argc > 1) {
+    if (strcmp(argv[1], "-1") == 0) {
+      print_tokens = 0;
+      yyparse();
+      yylex();
+    }
     if (strcmp(argv[1], "-l") == 0) {
       print_tokens = 1;
       yyparse();
@@ -146,6 +152,18 @@ int main(int argc, char *argv[]) {
         destroy_ast(ast);
       }
     }
+    else if (strcmp(argv[1], "-3") == 0) {
+      print_tokens = 0;
+      yyparse();
+
+      if(errors == 0) {
+        current = create_table("Global", 1);
+        current->print = 1;
+        insert_default_functions(current);
+        check_program(ast);
+        destroy_ast(ast);
+      }
+    }
     else if (strcmp(argv[1], "-s") == 0) {
       print_tokens = 0;
       yyparse();
@@ -157,6 +175,7 @@ int main(int argc, char *argv[]) {
         check_program(ast);
         show_tables();
         print_ast(ast, 0);
+        destroy_tables(tables);
         destroy_ast(ast);
       }
     }
@@ -164,6 +183,15 @@ int main(int argc, char *argv[]) {
   else {
     print_tokens = 0;
     yyparse();
+    if(errors == 0) {
+      current = create_table("Global", 1);
+      current->print = 1;
+      insert_default_functions(current);
+      check_program(ast);
+      generate_code(ast);
+      destroy_tables(tables);
+      destroy_ast(ast);
+    }
   }
   return 0;
 }
@@ -177,3 +205,4 @@ void yyerror (char *s) {
   int aux_col = col - strlen(yytext);
   printf("Line %d, col %d: %s: %s\n", line, aux_col, s, yytext);
 }
+

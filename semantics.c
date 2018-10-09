@@ -135,10 +135,10 @@ void check_declaration(node_t *declaration) {
       score_aux2 = 3;
     }
     if (strcmp(aux_name, "short") == 0) {
-      score_aux = 2;
+      score_aux = 3;
     }
     if (strcmp(aux2_name, "short") == 0) {
-      score_aux2 = 2;
+      score_aux2 = 3;
     }
     if (strcmp(aux_name, "char") == 0) {
       score_aux = 3;
@@ -393,7 +393,6 @@ void check_param_list(node_t *func_node, node_t *param_list, symbol *func, int i
         new_symbol->is_param = 1;
       }
     }
-
     else {
       insert_type(param_type, func);
     }
